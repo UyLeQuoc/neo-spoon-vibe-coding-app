@@ -1,0 +1,32 @@
+{
+  "name": "api",
+  "private": true,
+  "exports": {
+    "types": "./dist/app.d.mts"
+  },
+  "scripts": {
+    "dev": "wrangler dev --var 'IS_LOCAL:true'",
+    "deploy": "wrangler deploy",
+    "migrate": "wrangler d1 migrations apply DB",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.4",
+    "@openrouter/ai-sdk-provider": "^1.2.0",
+    "drizzle-orm": "^0.44.7",
+    "hono": "catalog:",
+    "shared": "workspace:^",
+    "tsdown": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@types/node": "catalog:",
+    "@vitest/ui": "^3.2.4",
+    "vitest": "^3.2.4",
+    "wrangler": "catalog:"
+  }
+}

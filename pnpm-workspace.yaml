@@ -1,0 +1,18 @@
+packages:
+  - packages/*
+  - apps/*
+
+catalog:
+  '@types/node': 22.18.6
+  hono: 4.10.5
+  tsdown: 0.16.1
+  typescript: 5.9.3
+  wrangler: ^4.46.0
+  zod: 3.25.76
+  "@cloudflare/workers-types": 4.20251111.0
+
+onlyBuiltDependencies:
+  - esbuild
+  - lefthook
+  - sharp
+  - workerd

@@ -1,0 +1,21 @@
+{
+  "name": "shared",
+  "type": "module",
+  "private": true,
+  "exports": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "scripts": {
+    "dev": "tsdown --watch --no-clean",
+    "test": "node --test",
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "zod": "catalog:",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsdown": "catalog:"
+  }
+}
