@@ -1,0 +1,25 @@
+defaults:
+    contract-source-network: testnet
+    contract-destination: ""
+    contract-generate-sdk: true
+    off-chain:
+        languages:
+            - ts
+        destinations:
+            ts: app/contracts
+contracts:
+    - label: NEO Token
+      script-hash: 0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5
+      source-network: testnet
+      generate-sdk: true
+      download: false
+tools:
+    neo-express:
+        canGenerateSDK: false
+        canDownloadContract: false
+        config-path: ""
+networks:
+    - label: testnet
+      hosts:
+        - https://testnet1.neo.coz.io:443
+        - http://seed1.neo.org:20332
