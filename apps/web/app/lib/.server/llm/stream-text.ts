@@ -19,11 +19,11 @@ export async function streamText(
 ) {
   if (!provider) provider = DEFAULT_PROVIDER
   if (!currentModel) currentModel = DEFAULT_MODEL
-  const model: any = getModel(provider, currentModel, env, apiKey)
+  const model = getModel(provider, currentModel, env, apiKey)
 
   const systemPrompt = getPromptById(systemPromptId || 'system-default')
 
-  return await _streamText({
+  return _streamText({
     model,
     system: systemPrompt,
     maxTokens: MAX_TOKENS,

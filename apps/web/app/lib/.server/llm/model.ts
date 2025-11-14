@@ -4,10 +4,11 @@ import { createGroq } from '@ai-sdk/groq'
 import { createMistral } from '@ai-sdk/mistral'
 import { createOpenAI } from '@ai-sdk/openai'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import type { LanguageModel } from 'ai'
 import { createOllama } from 'ollama-ai-provider'
 import { getAPIKey, getBaseURL } from '~/lib/.server/llm/api-key'
 
-export function getAnthropicModel(apiKey: string, model: string) {
+export function getAnthropicModel(apiKey: string, model: string): LanguageModel {
   const anthropic = createAnthropic({
     apiKey
   })
@@ -15,7 +16,7 @@ export function getAnthropicModel(apiKey: string, model: string) {
   return anthropic(model)
 }
 
-export function getOpenAIModel(apiKey: string, model: string) {
+export function getOpenAIModel(apiKey: string, model: string): LanguageModel {
   const openai = createOpenAI({
     apiKey
   })
@@ -23,7 +24,7 @@ export function getOpenAIModel(apiKey: string, model: string) {
   return openai(model)
 }
 
-export function getGoogleModel(apiKey: string, model: string) {
+export function getGoogleModel(apiKey: string, model: string): LanguageModel {
   const google = createGoogleGenerativeAI({
     apiKey
   })
@@ -31,7 +32,7 @@ export function getGoogleModel(apiKey: string, model: string) {
   return google(model)
 }
 
-export function getMistralModel(apiKey: string, model: string) {
+export function getMistralModel(apiKey: string, model: string): LanguageModel {
   const mistral = createMistral({
     apiKey
   })
@@ -39,7 +40,7 @@ export function getMistralModel(apiKey: string, model: string) {
   return mistral(model)
 }
 
-export function getGroqModel(apiKey: string, model: string) {
+export function getGroqModel(apiKey: string, model: string): LanguageModel {
   const groq = createGroq({
     apiKey
   })
@@ -47,15 +48,15 @@ export function getGroqModel(apiKey: string, model: string) {
   return groq(model)
 }
 
-export function getOpenRouterModel(apiKey: string, model: string) {
+export function getOpenRouterModel(apiKey: string, model: string): LanguageModel {
   const openRouter = createOpenRouter({
     apiKey
   })
 
-  return openRouter.chat(model)
+  return openRouter.chat(model) as unknown as LanguageModel
 }
 
-export function getDeepseekModel(apiKey: string, model: string) {
+export function getDeepseekModel(apiKey: string, model: string): LanguageModel {
   const deepseek = createOpenAI({
     baseURL: 'https://api.deepseek.com/beta',
     apiKey
@@ -64,7 +65,7 @@ export function getDeepseekModel(apiKey: string, model: string) {
   return deepseek(model)
 }
 
-export function getTogetherAIModel(apiKey: string, model: string) {
+export function getTogetherAIModel(apiKey: string, model: string): LanguageModel {
   const togetherAI = createOpenAI({
     baseURL: 'https://api.together.xyz/v1',
     apiKey
@@ -73,7 +74,7 @@ export function getTogetherAIModel(apiKey: string, model: string) {
   return togetherAI(model)
 }
 
-export function getOllamaModel(baseURL: string, model: string) {
+export function getOllamaModel(baseURL: string, model: string): LanguageModel {
   const ollama = createOllama({
     baseURL
   })
@@ -81,7 +82,7 @@ export function getOllamaModel(baseURL: string, model: string) {
   return ollama(model)
 }
 
-export function getLMStudioModel(baseURL: string, model: string) {
+export function getLMStudioModel(baseURL: string, model: string): LanguageModel {
   const lmStudio = createOpenAI({
     baseURL: baseURL
   })
@@ -89,7 +90,7 @@ export function getLMStudioModel(baseURL: string, model: string) {
   return lmStudio(model)
 }
 
-export function getModel(provider: string, model: string, env: Env, apiKey?: string) {
+export function getModel(provider: string, model: string, env: Env, apiKey?: string): LanguageModel {
   if (!apiKey) apiKey = getAPIKey(env, provider)
   const baseURL = getBaseURL(env, provider)
 
