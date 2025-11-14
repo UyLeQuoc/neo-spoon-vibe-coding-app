@@ -11,7 +11,7 @@
     "dev": { "persistent": true, "cache": false, "with": ["build:watch"] },
     "test": { "cache": false },
     "deploy": { "dependsOn": ["build"] },
-    "typecheck": { "dependsOn": ["^typecheck"] },
+    "check:types": { "dependsOn": ["^check:types"] },
     "gen": {},
     "migrate": { "cache": false },
     "//#check": {},

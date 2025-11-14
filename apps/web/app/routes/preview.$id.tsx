@@ -11,14 +11,17 @@ export async function loader(args: LoaderFunctionArgs) {
 }
 
 export default function Preview() {
-  const { previewId } = useLoaderData<typeof loader>()
   const iframeRef = useRef<HTMLIFrameElement>(null)
-
+  const data = useLoaderData<typeof loader>()
   useEffect(() => {
-    if (iframeRef.current) {
-      iframeRef.current.src = `https://${previewId}.local-corp.webcontainer-api.io`
+    if (iframeRef.current && 'previewId' in data) {
+      iframeRef.current.src = `https://${data.previewId}.local-corp.webcontainer-api.io`
     }
-  }, [previewId])
+  }, [data])
+
+  if ('error' in data) {
+    return <div className="text-red-500">Error: {data.error}</div>
+  }
   return (
     <div className="w-full h-full">
       <iframe ref={iframeRef} />

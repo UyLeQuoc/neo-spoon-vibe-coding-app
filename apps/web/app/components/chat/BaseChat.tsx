@@ -34,8 +34,8 @@ interface BaseChatProps {
   model?: string
   provider?: string
   setProviderModel?: (provider: string, model: string) => void
-  modelConfig: ModelConfig
-  setModelConfig: (config: ModelConfig) => void
+  modelConfig?: ModelConfig
+  setModelConfig?: (config: ModelConfig) => void
 
   messageRef?: RefCallback<HTMLDivElement> | undefined
   scrollRef?: RefCallback<HTMLDivElement> | undefined

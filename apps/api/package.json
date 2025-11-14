@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "build": "tsdown",
-    "build:watch": "tsdown --watch --no-clean --ignore-watch '.turbo/**'"
+    "build:watch": "tsdown --watch --no-clean --ignore-watch '.turbo/**'",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
     "@cityofzion/neon-dappkit": "^1.0.0",

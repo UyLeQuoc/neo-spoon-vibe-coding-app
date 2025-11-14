@@ -9,7 +9,7 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "start": "bindings=$(./bindings.sh) && wrangler pages dev ./build/client $bindings",
-    "typecheck": "tsc",
+    "check:types": "tsc --noEmit",
     "typegen": "wrangler types",
     "preview": "pnpm run build && pnpm run start"
   },
@@ -93,6 +93,7 @@
     "usehooks-ts": "^3.1.0"
   },
   "devDependencies": {
+    "@cityofzion/neon-dappkit-types": "^1.0.0",
     "@cloudflare/workers-types": "catalog:",
     "@remix-run/dev": "^2.10.0",
     "@types/diff": "^5.2.1",

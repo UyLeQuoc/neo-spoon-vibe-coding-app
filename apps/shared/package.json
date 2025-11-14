@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsdown --watch --no-clean --ignore-watch '.turbo/**'",
     "test": "node --test",
-    "typecheck": "tsc --noEmit",
+    "check:types": "tsc --noEmit",
     "build": "tsdown"
   },
   "dependencies": {

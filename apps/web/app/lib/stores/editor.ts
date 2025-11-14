@@ -18,9 +18,7 @@ export class EditorStore {
     return documents[selectedFile]
   })
 
-  constructor(filesStore: FilesStore) {
-    this.#filesStore = filesStore
-
+  constructor(_filesStore: FilesStore) {
     if (import.meta.hot) {
       import.meta.hot.data.documents = this.documents
       import.meta.hot.data.selectedFile = this.selectedFile
