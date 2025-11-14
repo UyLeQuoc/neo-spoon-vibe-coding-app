@@ -44,7 +44,7 @@ _worker.bundle
 .dev.vars
 
 ###############################################
-# Frontend (apps/web): Next.js application ignores
+# Frontend (apps/web): Remix application ignores
 ###############################################
 
 # Dependencies
@@ -60,6 +60,7 @@ apps/web/playwright/.cache/
 # Next.js build outputs
 apps/web/.next/
 apps/web/out/
+apps/web/build/
 
 # Misc
 apps/web/*.pem

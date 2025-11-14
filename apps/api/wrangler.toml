@@ -2,7 +2,7 @@
 ###############################################################################
 # General Configuration
 ###############################################################################
-name = "neo-0"
+name = "neo-0-api"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-08-15"
 main = "./src/index.ts"

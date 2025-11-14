@@ -7,35 +7,29 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 import devtoolsJson from 'vite-plugin-devtools-json'
 
-export default defineConfig(config => {
-  return {
-    build: {
-      target: 'esnext'
-    },
-    define: {
-      __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
-    },
-    plugins: [
-      nodePolyfills({
-        include: ['path', 'buffer']
-      }),
-      config.mode !== 'test' && remixCloudflareDevProxy(),
-      remixVitePlugin({
-        future: {
-          v3_fetcherPersist: true,
-          v3_relativeSplatPath: true,
-          v3_throwAbortReason: true
-        }
-      }),
-      UnoCSS(),
-      tsconfigPaths(),
-      chrome129IssuePlugin(),
-      config.mode === 'production' && optimizeCssModules({ apply: 'build' }),
-      config.mode !== 'production' && devtoolsJson()
-    ],
-    envPrefix: ['VITE_', 'TOGETHER_AI_API_KEY', 'OLLAMA_API_BASE_URL', 'LM_STUDIO_API_BASE_URL']
-  }
-})
+export default defineConfig(config => ({
+  build: { target: 'esnext' },
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
+  },
+  plugins: [
+    nodePolyfills({ include: ['path', 'buffer'] }),
+    config.mode !== 'test' && remixCloudflareDevProxy(),
+    remixVitePlugin({
+      future: {
+        v3_fetcherPersist: true,
+        v3_relativeSplatPath: true,
+        v3_throwAbortReason: true
+      }
+    }),
+    UnoCSS(),
+    tsconfigPaths(),
+    chrome129IssuePlugin(),
+    config.mode === 'production' && optimizeCssModules({ apply: 'build' }),
+    config.mode !== 'production' && devtoolsJson()
+  ],
+  envPrefix: ['VITE_', 'TOGETHER_AI_API_KEY', 'OLLAMA_API_BASE_URL', 'LM_STUDIO_API_BASE_URL']
+}))
 
 function chrome129IssuePlugin() {
   return {
