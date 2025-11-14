@@ -19,8 +19,8 @@ export function Header() {
       )}
     >
       <div className="flex items-center grow-1 basis-60 gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
-        <a href="/" className="text-2xl font-semibold text-accent flex items-center">
-          <span className="i-bolt:logo-text?mask w-[46px] inline-block" />
+        <a href="/" className="text-2xl font-black text-accent flex items-center font-oswald">
+          NeoZero
         </a>
       </div>
       <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
@@ -35,6 +35,8 @@ export function Header() {
           )}
         </ClientOnly>
       )}
+      {/* connect wallet button */}
+      <button className="px-2 py-1 rounded-md font-oswald">Connect Wallet</button>
     </header>
   )
 }

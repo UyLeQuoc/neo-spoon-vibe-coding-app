@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises'
 import { basename } from 'node:path'
 import { globSync } from 'fast-glob'
-import { defineConfig, presetIcons, presetUno, transformerDirectives } from 'unocss'
+import { defineConfig, presetIcons, presetUno, presetWebFonts, transformerDirectives } from 'unocss'
 
 const iconPaths = globSync('./icons/*.svg')
 
@@ -35,17 +35,17 @@ const BASE_COLORS = {
     950: '#0A0A0A'
   },
   accent: {
-    50: '#EEF9FF',
-    100: '#D8F1FF',
-    200: '#BAE7FF',
-    300: '#8ADAFF',
-    400: '#53C4FF',
-    500: '#2BA6FF',
-    600: '#1488FC',
-    700: '#0D6FE8',
-    800: '#1259BB',
-    900: '#154E93',
-    950: '#122F59'
+    50: '#E6FDF7',
+    100: '#CCFCEF',
+    200: '#99F9DF',
+    300: '#66F6CF',
+    400: '#33F3BF',
+    500: '#01E698',
+    600: '#01B87A',
+    700: '#018A5C',
+    800: '#015C3D',
+    900: '#012E1F',
+    950: '#001710'
   },
   green: {
     50: '#F0FDF4',
@@ -241,6 +241,12 @@ export default defineConfig({
       collections: {
         ...customIconCollection
       }
+    }),
+    presetWebFonts({
+      fonts: {
+        'open-sans': 'Open Sans',
+        'oswald': 'Oswald',
+      },
     })
   ]
 })
