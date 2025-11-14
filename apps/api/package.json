@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "wrangler dev --var 'IS_LOCAL:true'",
     "deploy": "wrangler deploy",
+    "gen": "drizzle-kit generate",
     "migrate": "wrangler d1 migrations apply DB",
     "test": "vitest run",
     "test:watch": "vitest",
