@@ -2,171 +2,151 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-import asyncio
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="websockets")
+
 import logging
-from pathlib import Path
-from spoon_ai.agents.spoon_react_mcp import SpoonReactMCP
+import json
+from typing import Optional
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from spoon_ai.chat import ChatBot
-from spoon_ai.tools import ToolManager
-from spoon_ai.tools.base import BaseTool
+
+from agents import Neo0Agent
+from tools.site_generator import SiteGeneratorTool
 
 logging.basicConfig(level=logging.INFO)
 
+# FastAPI app
+app = FastAPI(title="Neo0 Site Generator SSE Server")
 
-# Site Generator Tool
-class SiteGeneratorTool(BaseTool):
-    name: str = "generate_site"
-    description: str = (
-        "Generate a complete, production-ready single-page website as a standalone index.html file with all resources inlined. Use this to create landing pages, portfolios, games, dashboards, or web apps."
-    )
-    parameters: dict = {
-        "type": "object",
-        "properties": {
-            "site_type": {
-                "type": "string",
-                "description": "Optional: Type of site to generate (e.g., 'landing page', 'portfolio', 'game', 'dashboard', 'web app'). If not specified, will be inferred from requirements.",
-            },
-            "requirements": {
-                "type": "string",
-                "description": "Detailed requirements and specifications for the website including features, design preferences, and functionality",
-            },
-            "style_preferences": {
-                "type": "string",
-                "description": "Optional styling preferences like color scheme, modern/minimal design, animations, etc.",
-            },
-        },
-        "required": ["requirements"],
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# Request/Response Models
+class GenerateSiteRequest(BaseModel):
+    requirements: str
+    site_type: Optional[str] = ""
+    style_preferences: Optional[str] = ""
+
+
+class ToolListResponse(BaseModel):
+    tools: list[dict]
+
+
+# Global agent instance
+agent_instance = None
+
+
+async def get_agent():
+    """Get or create the global agent instance."""
+    global agent_instance
+    if agent_instance is None:
+        agent_instance = Neo0Agent(
+            llm=ChatBot(
+                llm_provider="openrouter",
+                model_name="anthropic/claude-haiku-4.5",
+            )
+        )
+        await agent_instance.initialize()
+    return agent_instance
+
+
+# SSE event generator
+async def generate_sse_events(
+    requirements: str,
+    site_type: Optional[str] = "",
+    style_preferences: Optional[str] = "",
+):
+    """Generate SSE events for site generation progress."""
+    try:
+        # Send start event
+        yield f"event: start\ndata: {json.dumps({'status': 'started', 'message': 'Starting site generation...'})}\n\n"
+
+        agent = await get_agent()
+
+        # Construct query for the agent
+        query = f"Requirements: {requirements}"
+        if site_type:
+            query = f"Site Type: {site_type}\n\n" + query
+        if style_preferences:
+            query += f"\n\nStyle Preferences: {style_preferences}"
+
+        # Send processing event
+        yield f"event: processing\ndata: {json.dumps({'status': 'processing', 'message': 'Generating website...'})}\n\n"
+
+        # Run the agent
+        response = await agent.run(query)
+
+        # Send completion event with the result
+        yield f"event: complete\ndata: {json.dumps({'status': 'complete', 'result': response})}\n\n"
+
+    except Exception as e:
+        logging.error(f"Error in generate_sse_events: {e}")
+        yield f"event: error\ndata: {json.dumps({'status': 'error', 'message': str(e)})}\n\n"
+
+
+# API Routes
+@app.get("/")
+async def root():
+    """Health check endpoint."""
+    return {
+        "name": "Neo0 Site Generator SSE Server",
+        "version": "1.0.0",
+        "status": "running",
     }
 
-    def _load_system_prompt(self) -> str:
-        """Load the system prompt from generate-site.md"""
-        prompt_path = Path(__file__).parent / "generate-site.md"
-        with open(prompt_path, "r") as f:
-            return f.read()
 
-    async def execute(
-        self, requirements: str, site_type: str = "", style_preferences: str = ""
-    ) -> str:
-        """
-        Generate a complete HTML website based on the requirements.
-        Uses an LLM with the loaded system prompt to create the site.
-        """
-        # Create a ChatBot instance for site generation
-        llm = ChatBot(
-            llm_provider="openrouter",
-            model_name="anthropic/claude-sonnet-4",  # Use more powerful model for generation
-            max_tokens=64000,  # Need larger output for complete HTML files
-        )
-
-        # Construct the user message
-        user_message = "Requirements:\n" + requirements
-
-        if site_type:
-            user_message = f"Site Type: {site_type}\n\n" + user_message
-
-        if style_preferences:
-            user_message += f"\n\nStyle Preferences:\n{style_preferences}"
-
-        user_message += """
-
-Please generate a complete, production-ready index.html file following all the guidelines in the system prompt.
-Output ONLY the HTML code without any explanations or markdown formatting.
-"""
-
-        # Generate the site using the agent's run method with system prompt
-        try:
-            # Load the system prompt
-            system_prompt = self._load_system_prompt()
-
-            # Create a temporary agent with the site generator system prompt
-            site_agent = SpoonReactMCP(
-                llm=llm,
-                name="site_generator",
-                system_prompt=system_prompt,
-            )
-
-            # Initialize with empty tools
-            site_agent.avaliable_tools = ToolManager([])
-
-            response = await site_agent.run(user_message)
-            return response
-        except Exception as e:
-            return f"Error generating site: {str(e)}"
-
-
-# Create your agent
-class Neo0Agent(SpoonReactMCP):
-    name: str = "neo-0"
-    system_prompt: str = """You are a specialized website generation AI assistant built with SpoonOS framework.
-Your primary expertise is creating complete, production-ready single-page websites.
-
-**Your Capabilities:**
-- Generate landing pages, portfolios, games, dashboards, and web applications
-- Create modern, responsive designs with inline CSS and JavaScript
-- Implement animations, gradients, and interactive features
-- Build functional web games and interactive experiences
-
-**How to Handle Requests:**
-1. When a user describes what they want, analyze their requirements carefully
-2. Extract key details: site type, features, design preferences, color schemes, functionality
-3. Use the `generate_site` tool with comprehensive requirements
-4. Always provide the complete HTML file ready for deployment
-
-**Best Practices:**
-- Ask clarifying questions if requirements are vague
-- Suggest improvements or additional features that would enhance the site
-- Ensure all generated sites are responsive and modern
-- Include appropriate meta tags, accessibility features, and SEO basics
-
-You are the expert in translating ideas into beautiful, functional websites.
-"""
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.avaliable_tools = ToolManager([])
-
-    async def initialize(self, __context=None):
-        """Initialize agent and load tools"""
-        print("Initializing Neo0Agent and loading tools...")
-        logging.info("Initializing Neo0Agent and loading tools...")
-
-        # Initialize site generator tool
-        site_tool = SiteGeneratorTool()
-        self.avaliable_tools = ToolManager([site_tool])
-        logging.info(f"Available tools: {list(self.avaliable_tools.tool_map.keys())}")
-
-
-async def main():
-    print("--- Neo0 Site Generator Agent Demo ---")
-    logging.info("--- Neo0 Site Generator Agent Demo ---")
-
-    # Initialize agent with LLM
-    agent = Neo0Agent(
-        llm=ChatBot(
-            llm_provider="openrouter",
-            model_name="anthropic/claude-haiku-4.5",
-        )
+@app.get("/tools")
+async def list_tools() -> ToolListResponse:
+    """List available tools."""
+    tool = SiteGeneratorTool()
+    return ToolListResponse(
+        tools=[
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "parameters": tool.parameters,
+            }
+        ]
     )
 
-    logging.info("Agent instance created.")
 
-    # Initialize the agent (load tools)
-    await agent.initialize()
-
-    logging.info("Agent ready for site generation tasks!")
-
-    # Example usage - uncomment to test
-    query = (
-        "Create a landing page for a tech startup called 'NeoVibe' that builds AI agents. "
-        "Include a hero section with a gradient background (purple to blue), "
-        "a features section highlighting 3 key benefits, and a call-to-action button. "
-        "Make it modern and animated."
+@app.post("/generate")
+async def generate_site_stream(request: GenerateSiteRequest):
+    """Generate a website using SSE for real-time progress updates."""
+    return StreamingResponse(
+        generate_sse_events(
+            requirements=request.requirements,
+            site_type=request.site_type,
+            style_preferences=request.style_preferences,
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )
-    logging.info(f"\nRunning query: {query}")
-    response = await agent.run(query)
-    logging.info(f"\n--- Site Generated ---\n{response}")
-    return response
+
+
+def main():
+    """Main entry point for the SSE server."""
+    import uvicorn
+
+    logging.info("Starting Neo-0 Site Generator SSE Server...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
 if __name__ == "__main__":
-    result = asyncio.run(main())
+    main()
