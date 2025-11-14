@@ -1,26 +1,10 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../configs/tsconfig.react.json",
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "types": ["@remix-run/cloudflare", "vite/client", "@cloudflare/workers-types/experimental"],
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "target": "ESNext",
-    "strict": true,
-    "allowJs": true,
-    "skipLibCheck": true,
-    "verbatimModuleSyntax": true,
-    "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "paths": {
-      "~/*": ["./app/*"]
-    },
-
-    // vite takes care of building everything, not tsc
-    "noEmit": true
+    "paths": { "~/*": ["./app/*"] }
   },
   "include": [
     "**/*.ts",

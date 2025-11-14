@@ -5,7 +5,7 @@
   "exports": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "scripts": {
-    "dev": "tsdown --watch --no-clean",
+    "dev": "tsdown --watch --no-clean --ignore-watch '.turbo/**'",
     "test": "node --test",
     "typecheck": "tsc --noEmit",
     "build": "tsdown"

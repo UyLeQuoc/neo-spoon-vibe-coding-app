@@ -1,9 +1,7 @@
 {
   "name": "api",
   "private": true,
-  "exports": {
-    "types": "./dist/app.d.mts"
-  },
+  "types": "./dist/index.d.mts",
   "scripts": {
     "dev": "wrangler dev --var 'IS_LOCAL:true'",
     "deploy": "wrangler deploy",
@@ -12,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "build": "tsdown"
+    "build": "tsdown",
+    "build:watch": "tsdown --watch --no-clean --ignore-watch '.turbo/**'"
   },
   "dependencies": {
     "@cityofzion/neon-dappkit": "^1.0.0",

@@ -5,17 +5,10 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", "dist/**", "out/**"],
-      "env": [
-        "BASE_API_URL",
-        "NEXT_PUBLIC_DEPOSIT_VAULT_OBJECT_ID",
-        "NEXT_PUBLIC_ENOKI_API_KEY",
-        "NEXT_PUBLIC_GOOGLE_CLIENT_ID",
-        "NEXT_PUBLIC_PACKAGE_ID",
-        "NEXT_PUBLIC_SUI_NETWORK"
-      ]
+      "outputs": ["build/**", "dist/**", "out/**"]
     },
-    "dev": { "persistent": true, "cache": false },
+    "build:watch": { "persistent": true, "cache": false },
+    "dev": { "persistent": true, "cache": false, "with": ["build:watch"] },
     "test": { "cache": false },
     "deploy": { "dependsOn": ["build"] },
     "typecheck": { "dependsOn": ["^typecheck"] },

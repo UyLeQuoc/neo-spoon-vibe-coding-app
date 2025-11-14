@@ -14,4 +14,3 @@ const app = factory
   .route('/api', routes)
 
 export default app
-export type AppType = typeof app // for hono-client

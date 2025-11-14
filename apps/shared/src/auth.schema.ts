@@ -10,12 +10,11 @@ export const ApiAuthVerifyInput = z.object({
   walletAddress: z.string().min(1, 'Wallet address is required'),
   signedMessage: z.object({
     data: z.string().min(1, 'Signed message data is required'),
-    message: z.string().min(1, 'Original message is required'),
-    messageHex: z.string().min(1, 'Message hex is required'),
+    message: z.string().describe('Original message that was signed'),
+    messageHex: z.string().optional().describe('Original message in hex format'),
     publicKey: z.string().min(1, 'Public key is required'),
-    salt: z.string().min(1, 'Salt is required')
-  }),
-  captchaToken: z.string().min(1, 'Captcha token is required')
+    salt: z.string().optional().describe('Optional salt used in signing')
+  })
 })
 export type ApiAuthVerifyInput = z.infer<typeof ApiAuthVerifyInput>
 export type ApiAuthVerifyOutput = { token: string; refreshToken: string }

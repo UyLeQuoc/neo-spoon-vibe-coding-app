@@ -139,6 +139,9 @@ importers:
       '@cityofzion/neon-dappkit':
         specifier: ^1.0.0
         version: 1.0.0
+      '@cityofzion/neon-js':
+        specifier: ^5.8.0
+        version: 5.8.0
       '@cityofzion/wallet-connect-sdk-core':
         specifier: ^3.3.4
         version: 3.3.4
@@ -199,6 +202,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.0
         version: 1.2.0
+      '@nanostores/persistent':
+        specifier: ^1.2.0
+        version: 1.2.0(nanostores@0.10.3)
       '@nanostores/react':
         specifier: ^0.7.2
         version: 0.7.2(nanostores@0.10.3)(react@18.3.1)
@@ -259,6 +265,9 @@ importers:
       ai:
         specifier: ^4.1.2
         version: 4.1.2(react@18.3.1)(zod@3.24.1)
+      api:
+        specifier: 'workspace:'
+        version: link:../api
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
@@ -268,6 +277,9 @@ importers:
       framer-motion:
         specifier: ^11.2.12
         version: 11.2.12(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      hono:
+        specifier: 'catalog:'
+        version: 4.10.5
       isbot:
         specifier: ^4.4.0
         version: 4.4.0
@@ -319,6 +331,9 @@ importers:
       remix-utils:
         specifier: ^7.6.0
         version: 7.6.0(@remix-run/cloudflare@2.10.2(@cloudflare/workers-types@4.20251111.0)(typescript@5.5.2))(@remix-run/node@2.10.2(typescript@5.5.2))(@remix-run/react@2.10.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.5.2))(@remix-run/router@1.17.1)(crypto-js@4.2.0)(react@18.3.1)(zod@3.24.1)
+      shared:
+        specifier: 'workspace:'
+        version: link:../shared
       shiki:
         specifier: ^1.9.1
         version: 1.9.1
@@ -792,6 +807,9 @@ packages:
 
   '@cityofzion/neon-js@5.7.0':
     resolution: {integrity: sha512-jYl2Y6raBP/HAbM5ukcPXSjbrrpCkJiknjQCUenuJqC8HjRcLjkH4yIhxcKmKBgqdWca0doFLxsHnfZs2IqngQ==}
+
+  '@cityofzion/neon-js@5.8.0':
+    resolution: {integrity: sha512-psgEi9sy3zAGiWUaxmnJYDWYG8IV3+DI36ExAtu8zvrmQFW4m5dmwaBMQYF9LoVXw6mM2Ddd2Z3GOZFLE6cAAg==}
 
   '@cityofzion/wallet-connect-sdk-core@3.3.4':
     resolution: {integrity: sha512-+jRTJg4m5SmO+q7R1aih67e8GyMdaD6xiBCorpBqaFNtBi2bPaPy6dMAOXRBVF6LU/4lCdqCAwbDg5o9/MtqJw==}
@@ -1883,6 +1901,12 @@ packages:
 
   '@mdx-js/mdx@2.3.0':
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
+
+  '@nanostores/persistent@1.2.0':
+    resolution: {integrity: sha512-kf5WOLpVI9Pk+AwXHIax4in3pesNe8299BEGQ2H8kgI05SZw7KKWCDv7bt2FOlND8E5y7rO5PRW34q0UCAl/DA==}
+    engines: {node: ^20.0.0 || >=22.0.0}
+    peerDependencies:
+      nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0 || ^1.0.0
 
   '@nanostores/react@0.7.2':
     resolution: {integrity: sha512-e3OhHJFv3NMSFYDgREdlAQqkyBTHJM91s31kOZ4OvZwJKdFk5BLk0MLbh51EOGUz9QGX2aCHfy1RvweSi7fgwA==}
@@ -7582,6 +7606,13 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@cityofzion/neon-js@5.8.0':
+    dependencies:
+      '@cityofzion/neon-api': 5.8.0(@cityofzion/neon-core@5.8.0)
+      '@cityofzion/neon-core': 5.8.0
+    transitivePeerDependencies:
+      - encoding
+
   '@cityofzion/wallet-connect-sdk-core@3.3.4':
     dependencies:
       '@cityofzion/neon-core': 5.5.1
@@ -8429,6 +8460,10 @@ snapshots:
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
+
+  '@nanostores/persistent@1.2.0(nanostores@0.10.3)':
+    dependencies:
+      nanostores: 0.10.3
 
   '@nanostores/react@0.7.2(nanostores@0.10.3)(react@18.3.1)':
     dependencies:
