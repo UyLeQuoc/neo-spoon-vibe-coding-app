@@ -5,7 +5,7 @@
  * @link http://jedwatson.github.io/classnames
  */
 
-type ClassNamesArg = undefined | string | Record<string, boolean> | ClassNamesArg[];
+type ClassNamesArg = undefined | string | Record<string, boolean> | ClassNamesArg[]
 
 /**
  * A simple JavaScript utility for conditionally joining classNames together.
@@ -15,47 +15,47 @@ type ClassNamesArg = undefined | string | Record<string, boolean> | ClassNamesAr
  * should be included in the final class.
  */
 export function classNames(...args: ClassNamesArg[]): string {
-  let classes = '';
+  let classes = ''
 
   for (const arg of args) {
-    classes = appendClass(classes, parseValue(arg));
+    classes = appendClass(classes, parseValue(arg))
   }
 
-  return classes;
+  return classes
 }
 
 function parseValue(arg: ClassNamesArg) {
   if (typeof arg === 'string' || typeof arg === 'number') {
-    return arg;
+    return arg
   }
 
   if (typeof arg !== 'object') {
-    return '';
+    return ''
   }
 
   if (Array.isArray(arg)) {
-    return classNames(...arg);
+    return classNames(...arg)
   }
 
-  let classes = '';
+  let classes = ''
 
   for (const key in arg) {
     if (arg[key]) {
-      classes = appendClass(classes, key);
+      classes = appendClass(classes, key)
     }
   }
 
-  return classes;
+  return classes
 }
 
 function appendClass(value: string, newClass: string | undefined) {
   if (!newClass) {
-    return value;
+    return value
   }
 
   if (value) {
-    return value + ' ' + newClass;
+    return `${value} ${newClass}`
   }
 
-  return value + newClass;
+  return value + newClass
 }

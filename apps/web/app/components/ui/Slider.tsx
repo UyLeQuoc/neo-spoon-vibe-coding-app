@@ -1,27 +1,27 @@
-import { motion } from 'framer-motion';
-import { memo } from 'react';
-import { classNames } from '~/utils/classNames';
-import { cubicEasingFn } from '~/utils/easings';
-import { genericMemo } from '~/utils/react';
+import { motion } from 'framer-motion'
+import { memo } from 'react'
+import { classNames } from '~/utils/classNames'
+import { cubicEasingFn } from '~/utils/easings'
+import { genericMemo } from '~/utils/react'
 
 interface SliderOption<T> {
-  value: T;
-  text: string;
+  value: T
+  text: string
 }
 
 export interface SliderOptions<T> {
-  left: SliderOption<T>;
-  right: SliderOption<T>;
+  left: SliderOption<T>
+  right: SliderOption<T>
 }
 
 interface SliderProps<T> {
-  selected: T;
-  options: SliderOptions<T>;
-  setSelected?: (selected: T) => void;
+  selected: T
+  options: SliderOptions<T>
+  setSelected?: (selected: T) => void
 }
 
 export const Slider = genericMemo(<T,>({ selected, options, setSelected }: SliderProps<T>) => {
-  const isLeftSelected = selected === options.left.value;
+  const isLeftSelected = selected === options.left.value
 
   return (
     <div className="flex items-center flex-wrap shrink-0 gap-1 bg-bolt-elements-background-depth-1 overflow-hidden rounded-full p-1">
@@ -32,13 +32,13 @@ export const Slider = genericMemo(<T,>({ selected, options, setSelected }: Slide
         {options.right.text}
       </SliderButton>
     </div>
-  );
-});
+  )
+})
 
 interface SliderButtonProps {
-  selected: boolean;
-  children: string | JSX.Element | Array<JSX.Element | string>;
-  setSelected: () => void;
+  selected: boolean
+  children: string | JSX.Element | Array<JSX.Element | string>
+  setSelected: () => void
 }
 
 const SliderButton = memo(({ selected, children, setSelected }: SliderButtonProps) => {
@@ -49,7 +49,7 @@ const SliderButton = memo(({ selected, children, setSelected }: SliderButtonProp
         'bg-transparent text-sm px-2.5 py-0.5 rounded-full relative',
         selected
           ? 'text-bolt-elements-item-contentAccent'
-          : 'text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive',
+          : 'text-bolt-elements-item-contentDefault hover:text-bolt-elements-item-contentActive'
       )}
     >
       <span className="relative z-10">{children}</span>
@@ -61,5 +61,5 @@ const SliderButton = memo(({ selected, children, setSelected }: SliderButtonProp
         ></motion.span>
       )}
     </button>
-  );
-});
+  )
+})

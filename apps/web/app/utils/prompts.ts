@@ -1,12 +1,12 @@
-import { getSystemPrompt } from "~/lib/.server/llm/prompts/prompts";
-import "~/lib/.server/llm/prompts/extended-prompt-v1"
-import { getExtendedPrompt } from '~/lib/.server/llm/prompts/extended-prompt-v1';
+import { getSystemPrompt } from '~/lib/.server/llm/prompts/prompts'
+import '~/lib/.server/llm/prompts/extended-prompt-v1'
+import { getExtendedPrompt } from '~/lib/.server/llm/prompts/extended-prompt-v1'
 
 export interface Prompt {
-  id: string;
-  name: string;
-  description: string;
-  getPrompt: (cwd?: string) => string;
+  id: string
+  name: string
+  description: string
+  getPrompt: (cwd?: string) => string
 }
 
 export const defaultPrompts: Prompt[] = [
@@ -29,14 +29,14 @@ export const defaultPrompts: Prompt[] = [
     description: 'Basic system prompt',
     getPrompt: (cwd?: string) => getSystemPrompt(cwd)
   }
-];
+]
 
 export const getPromptById = (id: string, cwd?: string) => {
-  const prompt = defaultPrompts.find((p) => p.id === id);
+  const prompt = defaultPrompts.find(p => p.id === id)
 
   if (!prompt) {
-    return getSystemPrompt(cwd);
+    return getSystemPrompt(cwd)
   }
 
-  return prompt.getPrompt(cwd);
+  return prompt.getPrompt(cwd)
 }

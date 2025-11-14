@@ -1,189 +1,185 @@
-import { WebContainer } from '@webcontainer/api';
-import { atom, map, type MapStore } from 'nanostores';
-import * as nodePath from 'node:path';
-import type { BoltAction } from '~/types/actions';
-import { createScopedLogger } from '~/utils/logger';
-import { unreachable } from '~/utils/unreachable';
-import type { ActionCallbackData } from './message-parser';
-import { BoltTerminal } from '~/utils/shell';
+import * as nodePath from 'node:path'
+import type { WebContainer } from '@webcontainer/api'
+import { atom, type MapStore, map } from 'nanostores'
+import type { BoltAction } from '~/types/actions'
+import { createScopedLogger } from '~/utils/logger'
+import type { BoltTerminal } from '~/utils/shell'
+import { unreachable } from '~/utils/unreachable'
+import type { ActionCallbackData } from './message-parser'
 
-const logger = createScopedLogger('ActionRunner');
+const logger = createScopedLogger('ActionRunner')
 
-export type ActionStatus = 'pending' | 'running' | 'complete' | 'aborted' | 'failed';
+export type ActionStatus = 'pending' | 'running' | 'complete' | 'aborted' | 'failed'
 
 export type BaseActionState = BoltAction & {
-  status: Exclude<ActionStatus, 'failed'>;
-  abort: () => void;
-  executed: boolean;
-  abortSignal: AbortSignal;
-};
+  status: Exclude<ActionStatus, 'failed'>
+  abort: () => void
+  executed: boolean
+  abortSignal: AbortSignal
+}
 
 export type FailedActionState = BoltAction &
   Omit<BaseActionState, 'status'> & {
-    status: Extract<ActionStatus, 'failed'>;
-    error: string;
-  };
+    status: Extract<ActionStatus, 'failed'>
+    error: string
+  }
 
-export type ActionState = BaseActionState | FailedActionState;
+export type ActionState = BaseActionState | FailedActionState
 
-type BaseActionUpdate = Partial<Pick<BaseActionState, 'status' | 'abort' | 'executed'>>;
+type BaseActionUpdate = Partial<Pick<BaseActionState, 'status' | 'abort' | 'executed'>>
 
 export type ActionStateUpdate =
   | BaseActionUpdate
-  | (Omit<BaseActionUpdate, 'status'> & { status: 'failed'; error: string });
+  | (Omit<BaseActionUpdate, 'status'> & { status: 'failed'; error: string })
 
-type ActionsMap = MapStore<Record<string, ActionState>>;
+type ActionsMap = MapStore<Record<string, ActionState>>
 
 export class ActionRunner {
-  #webcontainer: Promise<WebContainer>;
-  #boltTerminal: BoltTerminal;
-  runnerId = atom<string>(`${Date.now()}`);
-  #currentExecutionPromise: Promise<void> = Promise.resolve();
+  #webcontainer: Promise<WebContainer>
+  #boltTerminal: BoltTerminal
+  runnerId = atom<string>(`${Date.now()}`)
+  #currentExecutionPromise: Promise<void> = Promise.resolve()
 
-  actions: ActionsMap = map({});
+  actions: ActionsMap = map({})
 
   constructor(webcontainerPromise: Promise<WebContainer>, boltTerminal: BoltTerminal) {
-    this.#webcontainer = webcontainerPromise;
-    this.#boltTerminal = boltTerminal;
+    this.#webcontainer = webcontainerPromise
+    this.#boltTerminal = boltTerminal
   }
 
   addAction(data: ActionCallbackData) {
-    const { actionId } = data;
+    const { actionId } = data
 
-    const actions = this.actions.get();
-    const action = actions[actionId];
+    const actions = this.actions.get()
+    const action = actions[actionId]
 
     if (action) {
       // action already added
-      return;
+      return
     }
 
-    const abortController = new AbortController();
+    const abortController = new AbortController()
 
     this.actions.setKey(actionId, {
       ...data.action,
       status: 'pending',
       executed: false,
       abort: () => {
-        abortController.abort();
-        this.#updateAction(actionId, { status: 'aborted' });
+        abortController.abort()
+        this.#updateAction(actionId, { status: 'aborted' })
       },
-      abortSignal: abortController.signal,
-    });
+      abortSignal: abortController.signal
+    })
 
     this.#currentExecutionPromise.then(() => {
-      this.#updateAction(actionId, { status: 'running' });
-    });
+      this.#updateAction(actionId, { status: 'running' })
+    })
   }
 
   async runAction(data: ActionCallbackData) {
-    const { actionId } = data;
-    const action = this.actions.get()[actionId];
+    const { actionId } = data
+    const action = this.actions.get()[actionId]
 
     if (!action) {
-      unreachable(`Action ${actionId} not found`);
+      unreachable(`Action ${actionId} not found`)
     }
 
     if (action.executed) {
-      return;
+      return
     }
 
-    this.#updateAction(actionId, { ...action, ...data.action, executed: true });
+    this.#updateAction(actionId, { ...action, ...data.action, executed: true })
 
     this.#currentExecutionPromise = this.#currentExecutionPromise
       .then(() => {
-        return this.#executeAction(actionId);
+        return this.#executeAction(actionId)
       })
-      .catch((error) => {
-        console.error('Action failed:', error);
-      });
+      .catch(error => {
+        console.error('Action failed:', error)
+      })
   }
 
   async #executeAction(actionId: string) {
-    const action = this.actions.get()[actionId];
+    const action = this.actions.get()[actionId]
 
-    this.#updateAction(actionId, { status: 'running' });
+    this.#updateAction(actionId, { status: 'running' })
 
     try {
       switch (action.type) {
         case 'shell': {
-          await this.#runShellAction(action);
-          break;
+          await this.#runShellAction(action)
+          break
         }
         case 'file': {
-          await this.#runFileAction(action);
-          break;
+          await this.#runFileAction(action)
+          break
         }
       }
 
-      this.#updateAction(actionId, { status: action.abortSignal.aborted ? 'aborted' : 'complete' });
+      this.#updateAction(actionId, { status: action.abortSignal.aborted ? 'aborted' : 'complete' })
     } catch (error) {
-      this.#updateAction(actionId, { status: 'failed', error: 'Action failed' });
+      this.#updateAction(actionId, { status: 'failed', error: 'Action failed' })
 
       // re-throw the error to be caught in the promise chain
-      throw error;
+      throw error
     }
   }
 
   async #runShellAction(action: ActionState) {
     if (action.type !== 'shell') {
-      unreachable('Expected shell action');
+      unreachable('Expected shell action')
     }
 
-    const boltTerminal = this.#boltTerminal;
-    await boltTerminal.ready();
+    const boltTerminal = this.#boltTerminal
+    await boltTerminal.ready()
 
     if (!boltTerminal || !boltTerminal.getTerminal() || !boltTerminal.getProcess()) {
-      unreachable('Bolt terminal not found');
+      unreachable('Bolt terminal not found')
     }
 
-    const response = await boltTerminal.runCommand(
-      this.runnerId.get(),
-      action.content,
-      () => {
-        logger.debug(`[${action.type}]: Aborting Action`, action);
-        action.abort();
-      }
-    );
-    logger.debug(`${action.type} Shell Response: [exit code:${response?.exitCode}]`);
+    const response = await boltTerminal.runCommand(this.runnerId.get(), action.content, () => {
+      logger.debug(`[${action.type}]: Aborting Action`, action)
+      action.abort()
+    })
+    logger.debug(`${action.type} Shell Response: [exit code:${response?.exitCode}]`)
 
     if (response?.exitCode !== 0) {
-      throw new Error(`Failed to run command: ${response?.exitCode}`);
+      throw new Error(`Failed to run command: ${response?.exitCode}`)
     }
   }
 
   async #runFileAction(action: ActionState) {
     if (action.type !== 'file') {
-      unreachable('Expected file action');
+      unreachable('Expected file action')
     }
 
-    const webcontainer = await this.#webcontainer;
+    const webcontainer = await this.#webcontainer
 
-    let folder = nodePath.dirname(action.filePath);
+    let folder = nodePath.dirname(action.filePath)
 
     // remove trailing slashes
-    folder = folder.replace(/\/+$/g, '');
+    folder = folder.replace(/\/+$/g, '')
 
     if (folder !== '.') {
       try {
-        await webcontainer.fs.mkdir(folder, { recursive: true });
-        logger.debug('Created folder', folder);
+        await webcontainer.fs.mkdir(folder, { recursive: true })
+        logger.debug('Created folder', folder)
       } catch (error) {
-        logger.error('Failed to create folder\n\n', error);
+        logger.error('Failed to create folder\n\n', error)
       }
     }
 
     try {
-      await webcontainer.fs.writeFile(action.filePath, action.content);
-      logger.debug(`File written ${action.filePath}`);
+      await webcontainer.fs.writeFile(action.filePath, action.content)
+      logger.debug(`File written ${action.filePath}`)
     } catch (error) {
-      logger.error('Failed to write file\n\n', error);
+      logger.error('Failed to write file\n\n', error)
     }
   }
 
   #updateAction(id: string, newState: ActionStateUpdate) {
-    const actions = this.actions.get();
+    const actions = this.actions.get()
 
-    this.actions.setKey(id, { ...actions[id], ...newState });
+    this.actions.setKey(id, { ...actions[id], ...newState })
   }
 }

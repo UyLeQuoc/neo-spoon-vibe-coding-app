@@ -1,29 +1,27 @@
-import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare';
-import { useLoaderData } from '@remix-run/react';
-import { useEffect, useRef } from 'react';
+import { json, type LoaderFunctionArgs } from '@remix-run/cloudflare'
+import { useLoaderData } from '@remix-run/react'
+import { useEffect, useRef } from 'react'
 
 export async function loader(args: LoaderFunctionArgs) {
   if (!args.params.id) {
-    return json({ error: 'Invalid preview ID' }, { status: 400 });
+    return json({ error: 'Invalid preview ID' }, { status: 400 })
   }
 
-  return { previewId: args.params.id };
+  return { previewId: args.params.id }
 }
 
 export default function Preview() {
-  const { previewId } = useLoaderData<typeof loader>();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { previewId } = useLoaderData<typeof loader>()
+  const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
     if (iframeRef.current) {
-      iframeRef.current.src = `https://${previewId}.local-corp.webcontainer-api.io`;
+      iframeRef.current.src = `https://${previewId}.local-corp.webcontainer-api.io`
     }
-  }, []);
+  }, [previewId])
   return (
     <div className="w-full h-full">
-      <iframe
-        ref={iframeRef}
-      />
+      <iframe ref={iframeRef} />
     </div>
-  );
+  )
 }

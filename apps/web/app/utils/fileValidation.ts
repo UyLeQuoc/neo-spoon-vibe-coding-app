@@ -6,27 +6,32 @@ export const isValidFileType = (file: File) => {
     'application/json',
     'application/xml',
     'application/csv'
-  ];
+  ]
 
   const validExtensions = [
-    '.js', '.jsx', '.ts', '.tsx',
+    '.js',
+    '.jsx',
+    '.ts',
+    '.tsx',
     '.py',
-    '.php', 
+    '.php',
     '.java',
     '.rb',
     '.cs',
-    '.cpp', '.c', '.h',
+    '.cpp',
+    '.c',
+    '.h',
     '.go',
     '.rs',
     '.swift',
     '.kt',
     '.r',
     '.sql'
-  ];
+  ]
 
-  const hasSupportedMimeType = validMimeTypes.some(type => file.type.startsWith(type));
-  const fileName = file.name.toLowerCase();
-  const hasSupportedExtension = validExtensions.some(ext => fileName.endsWith(ext));
+  const hasSupportedMimeType = validMimeTypes.some(type => file.type.startsWith(type))
+  const fileName = file.name.toLowerCase()
+  const hasSupportedExtension = validExtensions.some(ext => fileName.endsWith(ext))
 
-  return hasSupportedMimeType || hasSupportedExtension;
-};
+  return hasSupportedMimeType || hasSupportedExtension
+}

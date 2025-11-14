@@ -14,12 +14,8 @@ export const pendingPaymentsTable = sqliteTable('PendingPayments', {
     .notNull()
     .default('pending'),
   txDigest: text('tx_digest'),
-  createdAt: int('created_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`
-  ),
-  updatedAt: int('updated_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`
-  )
+  createdAt: int('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  updatedAt: int('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`)
 })
 
 export type IPendingPayment = typeof pendingPaymentsTable.$inferSelect

@@ -1,6 +1,6 @@
-import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants';
-import { allowedHTMLElements } from '~/utils/markdown';
-import { stripIndents } from '~/utils/stripIndent';
+import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants'
+import { allowedHTMLElements } from '~/utils/markdown'
+import { stripIndents } from '~/utils/stripIndent'
 
 export const getSystemPrompt = (cwd: string = WORK_DIR) => `
 You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
@@ -37,7 +37,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
 </code_formatting_info>
 
 <message_formatting_info>
-  You can make the output pretty by using only the following available HTML elements: ${allowedHTMLElements.map((tagName) => `<${tagName}>`).join(', ')}
+  You can make the output pretty by using only the following available HTML elements: ${allowedHTMLElements.map(tagName => `<${tagName}>`).join(', ')}
 </message_formatting_info>
 
 <diff_spec>
@@ -276,9 +276,9 @@ Here are some examples of correct usage of artifacts:
     </assistant_response>
   </example>
 </examples>
-`;
+`
 
 export const CONTINUE_PROMPT = stripIndents`
   Continue your prior response. IMPORTANT: Immediately begin from where you left off without any interruptions.
   Do not repeat any content, including artifact and action tags.
-`;
+`

@@ -1,19 +1,19 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react'
 
 interface LoadingDotsProps {
-  text: string;
+  text: string
 }
 
 export const LoadingDots = memo(({ text }: LoadingDotsProps) => {
-  const [dotCount, setDotCount] = useState(0);
+  const [dotCount, setDotCount] = useState(0)
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDotCount((prevDotCount) => (prevDotCount + 1) % 4);
-    }, 500);
+      setDotCount(prevDotCount => (prevDotCount + 1) % 4)
+    }, 500)
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="flex justify-center items-center h-full">
@@ -23,5 +23,5 @@ export const LoadingDots = memo(({ text }: LoadingDotsProps) => {
         <span className="invisible">...</span>
       </div>
     </div>
-  );
-});
+  )
+})

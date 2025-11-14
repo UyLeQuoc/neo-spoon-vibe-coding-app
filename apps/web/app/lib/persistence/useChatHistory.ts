@@ -1,122 +1,122 @@
-import { useLoaderData, useNavigate } from '@remix-run/react';
-import { useState, useEffect } from 'react';
-import { atom } from 'nanostores';
-import type { Message } from 'ai';
-import { toast } from 'react-toastify';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { getMessages, getNextId, getUrlId, openDatabase, setMessages } from './db';
+import { useLoaderData, useNavigate } from '@remix-run/react'
+import type { Message } from 'ai'
+import { atom } from 'nanostores'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import { workbenchStore } from '~/lib/stores/workbench'
+import { getMessages, getNextId, getUrlId, openDatabase, setMessages } from './db'
 
 export interface ChatHistoryItem {
-  id: string;
-  urlId?: string;
-  description?: string;
-  messages: Message[];
-  timestamp: string;
+  id: string
+  urlId?: string
+  description?: string
+  messages: Message[]
+  timestamp: string
 }
 
-const persistenceEnabled = !import.meta.env.VITE_DISABLE_PERSISTENCE;
+const persistenceEnabled = !import.meta.env.VITE_DISABLE_PERSISTENCE
 
-export const db = persistenceEnabled ? await openDatabase() : undefined;
+export const db = persistenceEnabled ? await openDatabase() : undefined
 
-export const chatId = atom<string | undefined>(undefined);
-export const description = atom<string | undefined>(undefined);
+export const chatId = atom<string | undefined>(undefined)
+export const description = atom<string | undefined>(undefined)
 
 export function useChatHistory() {
-  const navigate = useNavigate();
-  const { id: mixedId } = useLoaderData<{ id?: string }>();
+  const navigate = useNavigate()
+  const { id: mixedId } = useLoaderData<{ id?: string }>()
 
-  const [initialMessages, setInitialMessages] = useState<Message[]>([]);
-  const [ready, setReady] = useState<boolean>(false);
-  const [urlId, setUrlId] = useState<string | undefined>();
+  const [initialMessages, setInitialMessages] = useState<Message[]>([])
+  const [ready, setReady] = useState<boolean>(false)
+  const [urlId, setUrlId] = useState<string | undefined>()
 
   useEffect(() => {
     if (!db) {
-      setReady(true);
+      setReady(true)
 
       if (persistenceEnabled) {
-        toast.error(`Chat persistence is unavailable`);
+        toast.error(`Chat persistence is unavailable`)
       }
 
-      return;
+      return
     }
 
     if (mixedId) {
       //if mixedid starts with github.com, get project and add workbench artifacts
       if (mixedId.startsWith('github.com')) {
-        console.log('mixedId', mixedId);
-        const url = new URL("https://"+mixedId);
-        const path = url.pathname.split('/');
-        const owner = path[1];
-        const repo = path[2];
+        console.log('mixedId', mixedId)
+        const url = new URL(`https://${mixedId}`)
+        const path = url.pathname.split('/')
+        const owner = path[1]
+        const repo = path[2]
 
         workbenchStore.importFromGitHub(owner, repo).then(() => {
           setInitialMessages([
             {
               id: '1',
               content: 'I see you have a project from GitHub. How can I help you?',
-              role: 'assistant',
-            },
+              role: 'assistant'
+            }
           ])
-          setUrlId(repo);
-          description.set(repo);
-          chatId.set(repo);
-          setReady(true);
-        });
+          setUrlId(repo)
+          description.set(repo)
+          chatId.set(repo)
+          setReady(true)
+        })
       } else {
         getMessages(db, mixedId)
-          .then((storedMessages) => {
+          .then(storedMessages => {
             if (storedMessages && storedMessages.messages.length > 0) {
-              setInitialMessages(storedMessages.messages);
-              setUrlId(storedMessages.urlId);
-              description.set(storedMessages.description);
-              chatId.set(storedMessages.id);
+              setInitialMessages(storedMessages.messages)
+              setUrlId(storedMessages.urlId)
+              description.set(storedMessages.description)
+              chatId.set(storedMessages.id)
             } else {
-              navigate(`/`, { replace: true });
+              navigate(`/`, { replace: true })
             }
 
-            setReady(true);
+            setReady(true)
           })
-          .catch((error) => {
-            toast.error(error.message);
-          });
+          .catch(error => {
+            toast.error(error.message)
+          })
       }
     }
-  }, []);
+  }, [mixedId, navigate])
 
   return {
     ready: !mixedId || ready,
     initialMessages,
     storeMessageHistory: async (messages: Message[]) => {
       if (!db || messages.length === 0) {
-        return;
+        return
       }
 
-      const { firstArtifact } = workbenchStore;
+      const { firstArtifact } = workbenchStore
 
       if (!urlId && firstArtifact?.id) {
-        const urlId = await getUrlId(db, firstArtifact.id);
+        const urlId = await getUrlId(db, firstArtifact.id)
 
-        navigateChat(urlId);
-        setUrlId(urlId);
+        navigateChat(urlId)
+        setUrlId(urlId)
       }
 
       if (!description.get() && firstArtifact?.title) {
-        description.set(firstArtifact?.title);
+        description.set(firstArtifact?.title)
       }
 
       if (initialMessages.length === 0 && !chatId.get()) {
-        const nextId = await getNextId(db);
+        const nextId = await getNextId(db)
 
-        chatId.set(nextId);
+        chatId.set(nextId)
 
         if (!urlId) {
-          navigateChat(nextId);
+          navigateChat(nextId)
         }
       }
 
-      await setMessages(db, chatId.get() as string, messages, urlId, description.get());
-    },
-  };
+      await setMessages(db, chatId.get() as string, messages, urlId, description.get())
+    }
+  }
 }
 
 function navigateChat(nextId: string) {
@@ -125,8 +125,8 @@ function navigateChat(nextId: string) {
    *
    * `navigate(`/chat/${nextId}`, { replace: true });`
    */
-  const url = new URL(window.location.href);
-  url.pathname = `/chat/${nextId}`;
+  const url = new URL(window.location.href)
+  url.pathname = `/chat/${nextId}`
 
-  window.history.replaceState({}, '', url);
+  window.history.replaceState({}, '', url)
 }

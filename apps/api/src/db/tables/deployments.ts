@@ -6,9 +6,7 @@ export const deploymentsTable = sqliteTable('Deployments', {
   buildKey: text('build_key').notNull(),
   uploadId: text('upload_id').notNull(),
   objectId: text('object_id'),
-  timestamp: int('timestamp', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`(unixepoch())`),
+  timestamp: int('timestamp', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`),
   status: text('status').notNull().default('pending'),
   output: text('output').notNull().default(''),
   stderr: text('stderr').default('')

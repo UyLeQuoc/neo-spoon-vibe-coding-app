@@ -1,5 +1,5 @@
-import type { SettingsPage } from '~/types/settings';
-import { PromptsLibrary } from '~/components/settings/pages/PromptsLibrary';
+import { PromptsLibrary } from '~/components/settings/pages/PromptsLibrary'
+import type { SettingsPage } from '~/types/settings'
 
 export const settingsPages: SettingsPage[] = [
   /*{
@@ -16,4 +16,4 @@ export const settingsPages: SettingsPage[] = [
     component: PromptsLibrary,
     description: 'Manage system prompts'
   }
-];
+]

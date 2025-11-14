@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { IconButton } from '~/components/ui/IconButton';
-import { motion } from 'framer-motion';
-import { dialogBackdropVariants, dialogVariants } from '~/components/ui/Dialog';
-import { settingsPages } from '~/config/settings';
-import type { SettingsPage } from '~/types/settings';
+import * as Dialog from '@radix-ui/react-dialog'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { dialogBackdropVariants, dialogVariants } from '~/components/ui/Dialog'
+import { IconButton } from '~/components/ui/IconButton'
+import { settingsPages } from '~/config/settings'
+import type { SettingsPage } from '~/types/settings'
 
 interface SettingsDialogProps {
-  open: boolean;
-  setOpen: (value: boolean) => void;
+  open: boolean
+  setOpen: (value: boolean) => void
 }
 
 export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
-  const [activePage, setActivePage] = useState<SettingsPage | null>(null);
+  const [activePage, setActivePage] = useState<SettingsPage | null>(null)
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -47,24 +47,14 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
                       {activePage.name}
                     </span>
                     <Dialog.Close asChild>
-                      <IconButton
-                        icon="i-ph:x"
-                        className="absolute right-0"
-                        onClick={() => setOpen(false)}
-                      />
+                      <IconButton icon="i-ph:x" className="absolute right-0" onClick={() => setOpen(false)} />
                     </Dialog.Close>
                   </div>
                 ) : (
                   <>
-                    <span className="text-lg font-semibold text-bolt-elements-textPrimary">
-                      Settings
-                    </span>
+                    <span className="text-lg font-semibold text-bolt-elements-textPrimary">Settings</span>
                     <Dialog.Close asChild>
-                      <IconButton
-                        icon="i-ph:x"
-                        className="ml-auto -mr-2"
-                        onClick={() => setOpen(false)}
-                      />
+                      <IconButton icon="i-ph:x" className="ml-auto -mr-2" onClick={() => setOpen(false)} />
                     </Dialog.Close>
                   </>
                 )}
@@ -77,24 +67,16 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 gap-4 p-6">
-                    {settingsPages.map((page) => (
+                    {settingsPages.map(page => (
                       <IconButton
                         key={page.id}
                         onClick={() => setActivePage(page)}
                         className="group flex flex-col items-center p-8 rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColorHover bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 transition-colors text-center min-h-[240px]"
                       >
-                        <IconButton
-                          icon={page.icon}
-                          size="xxl"
-                          className="mb-6 scale-150"
-                        />
+                        <IconButton icon={page.icon} size="xxl" className="mb-6 scale-150" />
                         <div className="space-y-3">
-                          <div className="font-medium text-lg text-bolt-elements-textPrimary">
-                            {page.name}
-                          </div>
-                          <div className="text-sm text-bolt-elements-textSecondary">
-                            {page.description}
-                          </div>
+                          <div className="font-medium text-lg text-bolt-elements-textPrimary">{page.name}</div>
+                          <div className="text-sm text-bolt-elements-textSecondary">{page.description}</div>
                         </div>
                       </IconButton>
                     ))}
@@ -106,5 +88,5 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
-  );
-};
+  )
+}

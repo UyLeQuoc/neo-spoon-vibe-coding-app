@@ -1,20 +1,20 @@
-import React, { useState, type ReactNode } from 'react';
-import * as Popover from "@radix-ui/react-popover";
+import * as Popover from '@radix-ui/react-popover'
+import React, { type ReactNode, useState } from 'react'
 
 interface PopoverHoverProps {
-  children: ReactNode;
+  children: ReactNode
 }
 
 interface PopoverTriggerProps {
-  children: ReactNode;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  children: ReactNode
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }
 
 interface PopoverContentProps {
-  children: ReactNode;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  children: ReactNode
+  onMouseEnter?: () => void
+  onMouseLeave?: () => void
 }
 
 const PopoverTrigger: React.FC<PopoverTriggerProps> = ({ children, onMouseEnter, onMouseLeave }) => {
@@ -22,8 +22,8 @@ const PopoverTrigger: React.FC<PopoverTriggerProps> = ({ children, onMouseEnter,
     <Popover.Trigger asChild onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {children}
     </Popover.Trigger>
-  );
-};
+  )
+}
 
 const PopoverContent: React.FC<PopoverContentProps> = ({ children, onMouseEnter, onMouseLeave }) => {
   return (
@@ -38,39 +38,39 @@ const PopoverContent: React.FC<PopoverContentProps> = ({ children, onMouseEnter,
         <Popover.Arrow />
       </Popover.Content>
     </Popover.Portal>
-  );
-};
+  )
+}
 
 export const PopoverHover: React.FC<PopoverHoverProps> & {
-  Trigger: React.FC<PopoverTriggerProps>;
-  Content: React.FC<PopoverContentProps>;
+  Trigger: React.FC<PopoverTriggerProps>
+  Content: React.FC<PopoverContentProps>
 } = ({ children }) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
 
   const handleMouseEnter = () => {
-    setOpen(true);
-  };
+    setOpen(true)
+  }
 
   const handleMouseLeave = () => {
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
-  const childrenWithProps = React.Children.map(children, (child) => {
+  const childrenWithProps = React.Children.map(children, child => {
     if (React.isValidElement(child)) {
       return React.cloneElement(child as React.ReactElement<any>, {
         onMouseEnter: handleMouseEnter,
-        onMouseLeave: handleMouseLeave,
-      });
+        onMouseLeave: handleMouseLeave
+      })
     }
-    return child;
-  });
+    return child
+  })
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       {childrenWithProps}
     </Popover.Root>
-  );
-};
+  )
+}
 
-PopoverHover.Trigger = PopoverTrigger;
-PopoverHover.Content = PopoverContent;
+PopoverHover.Trigger = PopoverTrigger
+PopoverHover.Content = PopoverContent

@@ -1,5 +1,5 @@
-import { APP_NAME, apiFailed } from 'shared'
 import { jwt } from 'hono/jwt'
+import { APP_NAME, apiFailed } from 'shared'
 import { factory } from '~/factory'
 
 export const authMiddware = factory.createMiddleware(async (c, next) => {

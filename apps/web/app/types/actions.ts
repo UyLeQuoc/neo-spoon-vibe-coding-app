@@ -1,18 +1,18 @@
-export type ActionType = 'file' | 'shell';
+export type ActionType = 'file' | 'shell'
 
 export interface BaseAction {
-  content: string;
+  content: string
 }
 
 export interface FileAction extends BaseAction {
-  type: 'file';
-  filePath: string;
+  type: 'file'
+  filePath: string
 }
 
 export interface ShellAction extends BaseAction {
-  type: 'shell';
+  type: 'shell'
 }
 
-export type BoltAction = FileAction | ShellAction;
+export type BoltAction = FileAction | ShellAction
 
-export type BoltActionData = BoltAction | BaseAction;
+export type BoltActionData = BoltAction | BaseAction

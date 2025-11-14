@@ -1,6 +1,6 @@
-import type { AppJwtPayload } from 'shared'
 import { createFactory } from 'hono/factory'
 import type { JwtVariables } from 'hono/jwt'
+import type { AppJwtPayload } from 'shared'
 
 export type AppEnv = {
   Bindings: Cloudflare.Env

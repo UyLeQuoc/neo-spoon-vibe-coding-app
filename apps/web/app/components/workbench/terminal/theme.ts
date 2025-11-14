@@ -1,7 +1,7 @@
-import type { ITheme } from '@xterm/xterm';
+import type { ITheme } from '@xterm/xterm'
 
-const style = getComputedStyle(document.documentElement);
-const cssVar = (token: string) => style.getPropertyValue(token) || undefined;
+const style = getComputedStyle(document.documentElement)
+const cssVar = (token: string) => style.getPropertyValue(token) || undefined
 
 export function getTerminalTheme(overrides?: ITheme): ITheme {
   return {
@@ -31,6 +31,6 @@ export function getTerminalTheme(overrides?: ITheme): ITheme {
     brightCyan: cssVar('--bolt-elements-terminal-color-brightCyan'),
     brightWhite: cssVar('--bolt-elements-terminal-color-brightWhite'),
 
-    ...overrides,
-  };
+    ...overrides
+  }
 }

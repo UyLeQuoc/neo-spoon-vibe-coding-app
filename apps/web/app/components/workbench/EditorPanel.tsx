@@ -1,49 +1,48 @@
-import { useStore } from '@nanostores/react';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Panel, PanelGroup, PanelResizeHandle, type ImperativePanelHandle } from 'react-resizable-panels';
-import * as ScrollArea from "@radix-ui/react-scroll-area";
+import { useStore } from '@nanostores/react'
+import * as ScrollArea from '@radix-ui/react-scroll-area'
+import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import { type ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import {
   CodeMirrorEditor,
   type EditorDocument,
   type EditorSettings,
   type OnChangeCallback as OnEditorChange,
   type OnSaveCallback as OnEditorSave,
-  type OnScrollCallback as OnEditorScroll,
-} from '~/components/editor/codemirror/CodeMirrorEditor';
-import { IconButton } from '~/components/ui/IconButton';
-import { PanelHeader } from '~/components/ui/PanelHeader';
-import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton';
-import { shortcutEventEmitter } from '~/lib/hooks';
-import type { FileMap } from '~/lib/stores/files';
-import { themeStore } from '~/lib/stores/theme';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { classNames } from '~/utils/classNames';
-import { WORK_DIR } from '~/utils/constants';
-import { renderLogger } from '~/utils/logger';
-import { isMobile } from '~/utils/mobile';
-import { FileBreadcrumb } from './FileBreadcrumb';
-import { FileTree } from './FileTree';
-import { Terminal, type TerminalRef } from './terminal/Terminal';
-import React from 'react';
+  type OnScrollCallback as OnEditorScroll
+} from '~/components/editor/codemirror/CodeMirrorEditor'
+import { IconButton } from '~/components/ui/IconButton'
+import { PanelHeader } from '~/components/ui/PanelHeader'
+import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton'
+import { shortcutEventEmitter } from '~/lib/hooks'
+import type { FileMap } from '~/lib/stores/files'
+import { themeStore } from '~/lib/stores/theme'
+import { workbenchStore } from '~/lib/stores/workbench'
+import { classNames } from '~/utils/classNames'
+import { WORK_DIR } from '~/utils/constants'
+import { renderLogger } from '~/utils/logger'
+import { isMobile } from '~/utils/mobile'
+import { FileBreadcrumb } from './FileBreadcrumb'
+import { FileTree } from './FileTree'
+import { Terminal, type TerminalRef } from './terminal/Terminal'
 
 interface EditorPanelProps {
-  files?: FileMap;
-  unsavedFiles?: Set<string>;
-  editorDocument?: EditorDocument;
-  selectedFile?: string | undefined;
-  isStreaming?: boolean;
-  onEditorChange?: OnEditorChange;
-  onEditorScroll?: OnEditorScroll;
-  onFileSelect?: (value?: string) => void;
-  onFileSave?: OnEditorSave;
-  onFileReset?: () => void;
+  files?: FileMap
+  unsavedFiles?: Set<string>
+  editorDocument?: EditorDocument
+  selectedFile?: string | undefined
+  isStreaming?: boolean
+  onEditorChange?: OnEditorChange
+  onEditorScroll?: OnEditorScroll
+  onFileSelect?: (value?: string) => void
+  onFileSave?: OnEditorSave
+  onFileReset?: () => void
 }
 
-const MAX_TERMINALS = 3;
-const DEFAULT_TERMINAL_SIZE = 25;
-const DEFAULT_EDITOR_SIZE = 100 - DEFAULT_TERMINAL_SIZE;
+const MAX_TERMINALS = 3
+const DEFAULT_TERMINAL_SIZE = 25
+const DEFAULT_EDITOR_SIZE = 100 - DEFAULT_TERMINAL_SIZE
 
-const editorSettings: EditorSettings = { tabSize: 2 };
+const editorSettings: EditorSettings = { tabSize: 2 }
 
 export const EditorPanel = memo(
   ({
@@ -56,73 +55,73 @@ export const EditorPanel = memo(
     onEditorChange,
     onEditorScroll,
     onFileSave,
-    onFileReset,
+    onFileReset
   }: EditorPanelProps) => {
-    renderLogger.trace('EditorPanel');
+    renderLogger.trace('EditorPanel')
 
-    const theme = useStore(themeStore);
-    const showTerminal = useStore(workbenchStore.showTerminal);
+    const theme = useStore(themeStore)
+    const showTerminal = useStore(workbenchStore.showTerminal)
 
-    const terminalRefs = useRef<Array<TerminalRef | null>>([]);
-    const terminalPanelRef = useRef<ImperativePanelHandle>(null);
-    const terminalToggledByShortcut = useRef(false);
+    const terminalRefs = useRef<Array<TerminalRef | null>>([])
+    const terminalPanelRef = useRef<ImperativePanelHandle>(null)
+    const terminalToggledByShortcut = useRef(false)
 
-    const [activeTerminal, setActiveTerminal] = useState(0);
-    const [terminalCount, setTerminalCount] = useState(1);
+    const [activeTerminal, setActiveTerminal] = useState(0)
+    const [terminalCount, setTerminalCount] = useState(1)
 
     const activeFileSegments = useMemo(() => {
       if (!editorDocument) {
-        return undefined;
+        return undefined
       }
 
-      return editorDocument.filePath.split('/');
-    }, [editorDocument]);
+      return editorDocument.filePath.split('/')
+    }, [editorDocument])
 
     const activeFileUnsaved = useMemo(() => {
-      return editorDocument !== undefined && unsavedFiles?.has(editorDocument.filePath);
-    }, [editorDocument, unsavedFiles]);
+      return editorDocument !== undefined && unsavedFiles?.has(editorDocument.filePath)
+    }, [editorDocument, unsavedFiles])
 
     useEffect(() => {
       const unsubscribeFromEventEmitter = shortcutEventEmitter.on('toggleTerminal', () => {
-        terminalToggledByShortcut.current = true;
-      });
+        terminalToggledByShortcut.current = true
+      })
 
       const unsubscribeFromThemeStore = themeStore.subscribe(() => {
         for (const ref of Object.values(terminalRefs.current)) {
-          ref?.reloadStyles();
+          ref?.reloadStyles()
         }
-      });
+      })
 
       return () => {
-        unsubscribeFromEventEmitter();
-        unsubscribeFromThemeStore();
-      };
-    }, []);
+        unsubscribeFromEventEmitter()
+        unsubscribeFromThemeStore()
+      }
+    }, [])
 
     useEffect(() => {
-      const { current: terminal } = terminalPanelRef;
+      const { current: terminal } = terminalPanelRef
 
       if (!terminal) {
-        return;
+        return
       }
 
-      const isCollapsed = terminal.isCollapsed();
+      const isCollapsed = terminal.isCollapsed()
 
       if (!showTerminal && !isCollapsed) {
-        terminal.collapse();
+        terminal.collapse()
       } else if (showTerminal && isCollapsed) {
-        terminal.resize(DEFAULT_TERMINAL_SIZE);
+        terminal.resize(DEFAULT_TERMINAL_SIZE)
       }
 
-      terminalToggledByShortcut.current = false;
-    }, [showTerminal]);
+      terminalToggledByShortcut.current = false
+    }, [showTerminal])
 
     const addTerminal = () => {
       if (terminalCount < MAX_TERMINALS) {
-        setTerminalCount(terminalCount + 1);
-        setActiveTerminal(terminalCount);
+        setTerminalCount(terminalCount + 1)
+        setActiveTerminal(terminalCount)
       }
-    };
+    }
 
     return (
       <PanelGroup direction="vertical">
@@ -146,10 +145,16 @@ export const EditorPanel = memo(
                       onFileSelect={onFileSelect}
                     />
                   </ScrollArea.Viewport>
-                  <ScrollArea.Scrollbar className="flex select-none touch-none p-0.5 w-2 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3" orientation="vertical">
+                  <ScrollArea.Scrollbar
+                    className="flex select-none touch-none p-0.5 w-2 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3"
+                    orientation="vertical"
+                  >
                     <ScrollArea.Thumb className="flex-1 bg-bolt-elements-background-depth-2 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
                   </ScrollArea.Scrollbar>
-                  <ScrollArea.Scrollbar className="flex select-none touch-none p-0.5 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3" orientation="horizontal">
+                  <ScrollArea.Scrollbar
+                    className="flex select-none touch-none p-0.5 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3"
+                    orientation="horizontal"
+                  >
                     <ScrollArea.Thumb className="flex-1 bg-bolt-elements-background-depth-1 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
                   </ScrollArea.Scrollbar>
                   <ScrollArea.Corner className="bg-bolt-elements-background-depth-3" />
@@ -200,12 +205,12 @@ export const EditorPanel = memo(
           collapsible
           onExpand={() => {
             if (!terminalToggledByShortcut.current) {
-              workbenchStore.toggleTerminal(true);
+              workbenchStore.toggleTerminal(true)
             }
           }}
           onCollapse={() => {
             if (!terminalToggledByShortcut.current) {
-              workbenchStore.toggleTerminal(false);
+              workbenchStore.toggleTerminal(false)
             }
           }}
         >
@@ -213,21 +218,22 @@ export const EditorPanel = memo(
             <div className="bg-bolt-elements-terminals-background h-full flex flex-col">
               <div className="flex items-center bg-bolt-elements-background-depth-2 border-y border-bolt-elements-borderColor gap-1.5 min-h-[34px] p-2">
                 {Array.from({ length: terminalCount }, (_, index) => {
-                  const isActive = activeTerminal === index;
+                  const isActive = activeTerminal === index
 
                   return (
                     <React.Fragment key={index}>
-                      {index == 0 ? (
-                        <button key={index}
-                                className={classNames(
-                                  'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
-                                  {
-                                    'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textPrimary': isActive,
-                                    'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
-                                      !isActive
-                                  },
-                                )}
-                                onClick={() => setActiveTerminal(index)}
+                      {index === 0 ? (
+                        <button
+                          key={index}
+                          className={classNames(
+                            'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
+                            {
+                              'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textPrimary': isActive,
+                              'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
+                                !isActive
+                            }
+                          )}
+                          onClick={() => setActiveTerminal(index)}
                         >
                           <div className="i-bolt:logo-text?mask text-lg" />
                           Bolt Terminal
@@ -266,28 +272,28 @@ export const EditorPanel = memo(
                 className={classNames('h-full overflow-hidden', {
                   hidden: activeTerminal !== -1
                 })}
-                ref={(ref) => {
-                  terminalRefs.current[-1] = ref;
+                ref={ref => {
+                  terminalRefs.current[-1] = ref
                 }}
                 readonly={true}
-                onTerminalReady={(terminal) => true}
-                onTerminalResize={(cols, rows) => true}
+                onTerminalReady={_terminal => true}
+                onTerminalResize={(_cols, _rows) => true}
                 theme={theme}
               />
               {Array.from({ length: terminalCount }, (_, index) => {
-                const isActive = activeTerminal === index;
+                const isActive = activeTerminal === index
 
                 if (index === 0) {
                   return (
                     <Terminal
                       key={index}
                       className={classNames('h-full overflow-hidden', {
-                        hidden: !isActive,
+                        hidden: !isActive
                       })}
-                      ref={(ref) => {
-                        terminalRefs.current.push(ref);
+                      ref={ref => {
+                        terminalRefs.current.push(ref)
                       }}
-                      onTerminalReady={(terminal) => workbenchStore.attachBoltTerminal(terminal)}
+                      onTerminalReady={terminal => workbenchStore.attachBoltTerminal(terminal)}
                       onTerminalResize={(cols, rows) => workbenchStore.onTerminalResize(cols, rows)}
                       theme={theme}
                     />
@@ -297,22 +303,22 @@ export const EditorPanel = memo(
                     <Terminal
                       key={index}
                       className={classNames('h-full overflow-hidden', {
-                        hidden: !isActive,
+                        hidden: !isActive
                       })}
-                      ref={(ref) => {
-                        terminalRefs.current.push(ref);
+                      ref={ref => {
+                        terminalRefs.current.push(ref)
                       }}
-                      onTerminalReady={(terminal) => workbenchStore.attachTerminal(terminal)}
+                      onTerminalReady={terminal => workbenchStore.attachTerminal(terminal)}
                       onTerminalResize={(cols, rows) => workbenchStore.onTerminalResize(cols, rows)}
                       theme={theme}
                     />
-                  );
+                  )
                 }
               })}
             </div>
           </div>
         </Panel>
       </PanelGroup>
-    );
-  },
-);
+    )
+  }
+)

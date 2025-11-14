@@ -1,39 +1,39 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { useEffect, useRef, useState } from 'react';
-import { type ChatHistoryItem } from '~/lib/persistence';
+import * as Dialog from '@radix-ui/react-dialog'
+import { useEffect, useRef, useState } from 'react'
+import type { ChatHistoryItem } from '~/lib/persistence'
 
 interface HistoryItemProps {
-  item: ChatHistoryItem;
-  onDelete?: (event: React.UIEvent) => void;
+  item: ChatHistoryItem
+  onDelete?: (event: React.UIEvent) => void
 }
 
 export function HistoryItem({ item, onDelete }: HistoryItemProps) {
-  const [hovering, setHovering] = useState(false);
-  const hoverRef = useRef<HTMLDivElement>(null);
+  const [hovering, setHovering] = useState(false)
+  const hoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout | undefined;
+    let timeout: NodeJS.Timeout | undefined
 
     function mouseEnter() {
-      setHovering(true);
+      setHovering(true)
 
       if (timeout) {
-        clearTimeout(timeout);
+        clearTimeout(timeout)
       }
     }
 
     function mouseLeave() {
-      setHovering(false);
+      setHovering(false)
     }
 
-    hoverRef.current?.addEventListener('mouseenter', mouseEnter);
-    hoverRef.current?.addEventListener('mouseleave', mouseLeave);
+    hoverRef.current?.addEventListener('mouseenter', mouseEnter)
+    hoverRef.current?.addEventListener('mouseleave', mouseLeave)
 
     return () => {
-      hoverRef.current?.removeEventListener('mouseenter', mouseEnter);
-      hoverRef.current?.removeEventListener('mouseleave', mouseLeave);
-    };
-  }, []);
+      hoverRef.current?.removeEventListener('mouseenter', mouseEnter)
+      hoverRef.current?.removeEventListener('mouseleave', mouseLeave)
+    }
+  }, [])
 
   return (
     <div
@@ -48,10 +48,10 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
               <Dialog.Trigger asChild>
                 <button
                   className="i-ph:trash scale-110"
-                  onClick={(event) => {
+                  onClick={event => {
                     // we prevent the default so we don't trigger the anchor above
-                    event.preventDefault();
-                    onDelete?.(event);
+                    event.preventDefault()
+                    onDelete?.(event)
                   }}
                 />
               </Dialog.Trigger>
@@ -60,5 +60,5 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
         </div>
       </a>
     </div>
-  );
+  )
 }

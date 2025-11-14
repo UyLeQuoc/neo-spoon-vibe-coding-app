@@ -1,6 +1,6 @@
-import { APP_NAME, REFRESH_TOKEN_TTL } from 'shared'
 import { sign, verify } from 'hono/jwt'
 import type { JWTPayload } from 'hono/utils/jwt/types'
+import { APP_NAME, REFRESH_TOKEN_TTL } from 'shared'
 
 interface RefreshTokenPayload extends JWTPayload {
   sub: string

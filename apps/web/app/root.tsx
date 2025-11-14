@@ -1,23 +1,22 @@
-import { useStore } from '@nanostores/react';
-import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
-import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
-import { themeStore } from './lib/stores/theme';
-import { stripIndents } from './utils/stripIndent';
-import { createHead } from 'remix-island';
-import { useEffect } from 'react';
+import { useStore } from '@nanostores/react'
+import type { LinksFunction } from '@remix-run/cloudflare'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
+import tailwindReset from '@unocss/reset/tailwind-compat.css?url'
+import xtermStyles from '@xterm/xterm/css/xterm.css?url'
+import { useEffect } from 'react'
+import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url'
+import { createHead } from 'remix-island'
+import { themeStore } from './lib/stores/theme'
+import globalStyles from './styles/index.scss?url'
+import { stripIndents } from './utils/stripIndent'
 
-import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
-import globalStyles from './styles/index.scss?url';
-import xtermStyles from '@xterm/xterm/css/xterm.css?url';
-
-import 'virtual:uno.css';
+import 'virtual:uno.css'
 
 export const links: LinksFunction = () => [
   {
     rel: 'icon',
     href: '/favicon.svg',
-    type: 'image/svg+xml',
+    type: 'image/svg+xml'
   },
   { rel: 'stylesheet', href: reactToastifyStyles },
   { rel: 'stylesheet', href: tailwindReset },
@@ -25,18 +24,18 @@ export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: xtermStyles },
   {
     rel: 'preconnect',
-    href: 'https://fonts.googleapis.com',
+    href: 'https://fonts.googleapis.com'
   },
   {
     rel: 'preconnect',
     href: 'https://fonts.gstatic.com',
-    crossOrigin: 'anonymous',
+    crossOrigin: 'anonymous'
   },
   {
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
-  },
-];
+    href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
+  }
+]
 
 const inlineThemeCode = stripIndents`
   setTutorialKitTheme();
@@ -50,7 +49,7 @@ const inlineThemeCode = stripIndents`
 
     document.querySelector('html')?.setAttribute('data-theme', theme);
   }
-`;
+`
 
 export const Head = createHead(() => (
   <>
@@ -58,16 +57,17 @@ export const Head = createHead(() => (
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <Meta />
     <Links />
+    {/** biome-ignore lint/security/noDangerouslySetInnerHtml: trusted content */}
     <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
   </>
-));
+))
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const theme = useStore(themeStore);
+  const theme = useStore(themeStore)
 
   useEffect(() => {
-    document.querySelector('html')?.setAttribute('data-theme', theme);
-  }, [theme]);
+    document.querySelector('html')?.setAttribute('data-theme', theme)
+  }, [theme])
 
   return (
     <>
@@ -75,9 +75,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <ScrollRestoration />
       <Scripts />
     </>
-  );
+  )
 }
 
 export default function App() {
-  return <Outlet />;
+  return <Outlet />
 }

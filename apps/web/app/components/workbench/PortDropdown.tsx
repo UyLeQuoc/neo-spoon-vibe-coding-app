@@ -1,14 +1,14 @@
-import { memo, useEffect, useRef } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
-import type { PreviewInfo } from '~/lib/stores/previews';
+import { memo, useEffect, useRef } from 'react'
+import { IconButton } from '~/components/ui/IconButton'
+import type { PreviewInfo } from '~/lib/stores/previews'
 
 interface PortDropdownProps {
-  activePreviewIndex: number;
-  setActivePreviewIndex: (index: number) => void;
-  isDropdownOpen: boolean;
-  setIsDropdownOpen: (value: boolean) => void;
-  setHasSelectedPreview: (value: boolean) => void;
-  previews: PreviewInfo[];
+  activePreviewIndex: number
+  setActivePreviewIndex: (index: number) => void
+  isDropdownOpen: boolean
+  setIsDropdownOpen: (value: boolean) => void
+  setHasSelectedPreview: (value: boolean) => void
+  previews: PreviewInfo[]
 }
 
 export const PortDropdown = memo(
@@ -18,33 +18,33 @@ export const PortDropdown = memo(
     isDropdownOpen,
     setIsDropdownOpen,
     setHasSelectedPreview,
-    previews,
+    previews
   }: PortDropdownProps) => {
-    const dropdownRef = useRef<HTMLDivElement>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null)
 
     // sort previews, preserving original index
     const sortedPreviews = previews
       .map((previewInfo, index) => ({ ...previewInfo, index }))
-      .sort((a, b) => a.port - b.port);
+      .sort((a, b) => a.port - b.port)
 
     // close dropdown if user clicks outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-          setIsDropdownOpen(false);
+          setIsDropdownOpen(false)
         }
-      };
+      }
 
       if (isDropdownOpen) {
-        window.addEventListener('mousedown', handleClickOutside);
+        window.addEventListener('mousedown', handleClickOutside)
       } else {
-        window.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('mousedown', handleClickOutside)
       }
 
       return () => {
-        window.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, [isDropdownOpen]);
+        window.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [isDropdownOpen, setIsDropdownOpen])
 
     return (
       <div className="relative z-port-dropdown" ref={dropdownRef}>
@@ -54,14 +54,14 @@ export const PortDropdown = memo(
             <div className="px-4 py-2 border-b border-bolt-elements-borderColor text-sm font-semibold text-bolt-elements-textPrimary">
               Ports
             </div>
-            {sortedPreviews.map((preview) => (
+            {sortedPreviews.map(preview => (
               <div
                 key={preview.port}
                 className="flex items-center px-4 py-2 cursor-pointer hover:bg-bolt-elements-item-backgroundActive"
                 onClick={() => {
-                  setActivePreviewIndex(preview.index);
-                  setIsDropdownOpen(false);
-                  setHasSelectedPreview(true);
+                  setActivePreviewIndex(preview.index)
+                  setIsDropdownOpen(false)
+                  setHasSelectedPreview(true)
                 }}
               >
                 <span
@@ -78,6 +78,6 @@ export const PortDropdown = memo(
           </div>
         )}
       </div>
-    );
-  },
-);
+    )
+  }
+)

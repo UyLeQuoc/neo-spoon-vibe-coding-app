@@ -1,5 +1,3 @@
-import React from 'react';
-
 export function SubMenu() {
   //const version = __APP_VERSION__;
   return (
@@ -7,5 +5,5 @@ export function SubMenu() {
       {/* <div className="text-xs text-center text-bolt-elements-textTertiary">Bolt-extended <br /> v{version}</div> */}
       <div className="i-ph:sidebar-simple-duotone text-xl text-bolt-elements-textSecondary" />
     </div>
-  );
+  )
 }

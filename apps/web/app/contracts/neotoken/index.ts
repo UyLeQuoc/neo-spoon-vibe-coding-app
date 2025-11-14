@@ -1,2 +1,2 @@
-export * from './NeoToken'
 export * from './api'
+export * from './NeoToken'

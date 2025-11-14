@@ -1,19 +1,19 @@
-import { useStore } from '@nanostores/react';
-import { memo, useEffect, useState } from 'react';
-import { themeStore, toggleTheme } from '~/lib/stores/theme';
-import { IconButton } from './IconButton';
+import { useStore } from '@nanostores/react'
+import { memo, useEffect, useState } from 'react'
+import { themeStore, toggleTheme } from '~/lib/stores/theme'
+import { IconButton } from './IconButton'
 
 interface ThemeSwitchProps {
-  className?: string;
+  className?: string
 }
 
 export const ThemeSwitch = memo(({ className }: ThemeSwitchProps) => {
-  const theme = useStore(themeStore);
-  const [domLoaded, setDomLoaded] = useState(false);
+  const theme = useStore(themeStore)
+  const [domLoaded, setDomLoaded] = useState(false)
 
   useEffect(() => {
-    setDomLoaded(true);
-  }, []);
+    setDomLoaded(true)
+  }, [])
 
   return (
     domLoaded && (
@@ -25,5 +25,5 @@ export const ThemeSwitch = memo(({ className }: ThemeSwitchProps) => {
         onClick={toggleTheme}
       />
     )
-  );
-});
+  )
+})

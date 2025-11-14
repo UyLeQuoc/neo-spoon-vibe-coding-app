@@ -1,23 +1,22 @@
-import { useStore } from '@nanostores/react';
-import { chatStore } from '~/lib/stores/chat';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { classNames } from '~/utils/classNames';
-import { useState } from 'react';
-import { DeployButton } from '~/components/workbench/DeployButton';
+import { useStore } from '@nanostores/react'
+import { DeployButton } from '~/components/workbench/DeployButton'
+import { chatStore } from '~/lib/stores/chat'
+import { workbenchStore } from '~/lib/stores/workbench'
+import { classNames } from '~/utils/classNames'
 
-interface HeaderActionButtonsProps {}
+export function HeaderActionButtons() {
+  const showWorkbench = useStore(workbenchStore.showWorkbench)
+  const { showChat } = useStore(chatStore)
 
-export function HeaderActionButtons({}: HeaderActionButtonsProps) {
-  const showWorkbench = useStore(workbenchStore.showWorkbench);
-  const { showChat } = useStore(chatStore);
-
-  const canHideChat = showWorkbench || !showChat;
+  const canHideChat = showWorkbench || !showChat
 
   return (
     <div className="flex gap-2">
       <button
         className="rounded-md text-xs px-4 py-2 bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text flex gap-1.7 items-center justify-center px-3 py-1.5 hover:text-bolt-elements-button-secondary-textHover hover:bg-bolt-elements-button-secondary-backgroundHover"
-        onClick={() => { workbenchStore.downloadProject(); }}
+        onClick={() => {
+          workbenchStore.downloadProject()
+        }}
       >
         <div className="i-ph:download-duotone text-lg" />
         Download
@@ -31,7 +30,7 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
           disabled={!canHideChat}
           onClick={() => {
             if (canHideChat) {
-              chatStore.setKey('showChat', !showChat);
+              chatStore.setKey('showChat', !showChat)
             }
           }}
         >
@@ -42,24 +41,24 @@ export function HeaderActionButtons({}: HeaderActionButtonsProps) {
           active={showWorkbench}
           onClick={() => {
             if (showWorkbench && !showChat) {
-              chatStore.setKey('showChat', true);
+              chatStore.setKey('showChat', true)
             }
 
-            workbenchStore.showWorkbench.set(!showWorkbench);
+            workbenchStore.showWorkbench.set(!showWorkbench)
           }}
         >
           <div className="i-ph:code-bold" />
         </Button>
       </div>
     </div>
-  );
+  )
 }
 
 interface ButtonProps {
-  active?: boolean;
-  disabled?: boolean;
-  children?: any;
-  onClick?: VoidFunction;
+  active?: boolean
+  disabled?: boolean
+  children?: any
+  onClick?: VoidFunction
 }
 
 function Button({ active = false, disabled = false, children, onClick }: ButtonProps) {
@@ -70,11 +69,11 @@ function Button({ active = false, disabled = false, children, onClick }: ButtonP
           !active,
         'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent': active && !disabled,
         'bg-bolt-elements-item-backgroundDefault text-alpha-gray-20 dark:text-alpha-white-20 cursor-not-allowed':
-          disabled,
+          disabled
       })}
       onClick={onClick}
     >
       {children}
     </button>
-  );
+  )
 }

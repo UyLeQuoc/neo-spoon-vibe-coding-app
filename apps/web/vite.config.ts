@@ -1,11 +1,10 @@
 import { cloudflareDevProxyVitePlugin as remixCloudflareDevProxy, vitePlugin as remixVitePlugin } from '@remix-run/dev'
 import UnoCSS from 'unocss/vite'
 import { defineConfig, type ViteDevServer } from 'vite'
+import devtoolsJson from 'vite-plugin-devtools-json'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import { optimizeCssModules } from 'vite-plugin-optimize-css-modules'
 import tsconfigPaths from 'vite-tsconfig-paths'
-
-import devtoolsJson from 'vite-plugin-devtools-json'
 
 export default defineConfig(config => ({
   build: { target: 'esnext' },

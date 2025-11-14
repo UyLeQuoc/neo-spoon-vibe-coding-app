@@ -1,12 +1,12 @@
-import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
+import { AnimatePresence, cubicBezier, motion } from 'framer-motion'
 
 interface SendButtonProps {
-  show: boolean;
-  isStreaming?: boolean;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  show: boolean
+  isStreaming?: boolean
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
 }
 
-const customEasingFn = cubicBezier(0.4, 0, 0.2, 1);
+const customEasingFn = cubicBezier(0.4, 0, 0.2, 1)
 
 export function SendButton({ show, isStreaming, onClick }: SendButtonProps) {
   return (
@@ -18,9 +18,9 @@ export function SendButton({ show, isStreaming, onClick }: SendButtonProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 10 }}
-          onClick={(event) => {
-            event.preventDefault();
-            onClick?.(event);
+          onClick={event => {
+            event.preventDefault()
+            onClick?.(event)
           }}
         >
           <div className="text-lg">
@@ -29,5 +29,5 @@ export function SendButton({ show, isStreaming, onClick }: SendButtonProps) {
         </motion.button>
       ) : null}
     </AnimatePresence>
-  );
+  )
 }

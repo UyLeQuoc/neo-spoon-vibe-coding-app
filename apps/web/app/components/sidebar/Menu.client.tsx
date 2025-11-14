@@ -1,15 +1,15 @@
-import { motion, type Variants } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { toast } from 'react-toastify';
-import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog';
-import { ThemeSwitch } from '~/components/ui/ThemeSwitch';
-import { db, deleteById, getAll, chatId, type ChatHistoryItem } from '~/lib/persistence';
-import { cubicEasingFn } from '~/utils/easings';
-import { logger } from '~/utils/logger';
-import { HistoryItem } from './HistoryItem';
-import { binDates } from './date-binning';
-import { SettingsButton } from '~/components/ui/SettingsButton';
-import { SettingsDialog } from '~/components/settings/SettingsDialog';
+import { motion, type Variants } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'react-toastify'
+import { SettingsDialog } from '~/components/settings/SettingsDialog'
+import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog'
+import { SettingsButton } from '~/components/ui/SettingsButton'
+import { ThemeSwitch } from '~/components/ui/ThemeSwitch'
+import { type ChatHistoryItem, chatId, db, deleteById, getAll } from '~/lib/persistence'
+import { cubicEasingFn } from '~/utils/easings'
+import { logger } from '~/utils/logger'
+import { binDates } from './date-binning'
+import { HistoryItem } from './HistoryItem'
 
 const menuVariants = {
   closed: {
@@ -18,8 +18,8 @@ const menuVariants = {
     left: '-150px',
     transition: {
       duration: 0.2,
-      ease: cubicEasingFn,
-    },
+      ease: cubicEasingFn
+    }
   },
   open: {
     opacity: 1,
@@ -27,80 +27,83 @@ const menuVariants = {
     left: 0,
     transition: {
       duration: 0.2,
-      ease: cubicEasingFn,
-    },
-  },
-} satisfies Variants;
+      ease: cubicEasingFn
+    }
+  }
+} satisfies Variants
 
-type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null;
+type DialogContent = { type: 'delete'; item: ChatHistoryItem } | null
 
 export function Menu() {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [list, setList] = useState<ChatHistoryItem[]>([]);
-  const [open, setOpen] = useState(false);
-  const [dialogContent, setDialogContent] = useState<DialogContent>(null);
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [list, setList] = useState<ChatHistoryItem[]>([])
+  const [open, setOpen] = useState(false)
+  const [dialogContent, setDialogContent] = useState<DialogContent>(null)
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const loadEntries = useCallback(() => {
     if (db) {
       getAll(db)
-        .then((list) => list.filter((item) => item.urlId && item.description))
+        .then(list => list.filter(item => item.urlId && item.description))
         .then(setList)
-        .catch((error) => toast.error(error.message));
+        .catch(error => toast.error(error.message))
     }
-  }, []);
+  }, [])
 
-  const deleteItem = useCallback((event: React.UIEvent, item: ChatHistoryItem) => {
-    event.preventDefault();
+  const deleteItem = useCallback(
+    (event: React.UIEvent, item: ChatHistoryItem) => {
+      event.preventDefault()
 
-    if (db) {
-      deleteById(db, item.id)
-        .then(() => {
-          loadEntries();
+      if (db) {
+        deleteById(db, item.id)
+          .then(() => {
+            loadEntries()
 
-          if (chatId.get() === item.id) {
-            // hard page navigation to clear the stores
-            window.location.pathname = '/';
-          }
-        })
-        .catch((error) => {
-          toast.error('Failed to delete conversation');
-          logger.error(error);
-        });
-    }
-  }, []);
+            if (chatId.get() === item.id) {
+              // hard page navigation to clear the stores
+              window.location.pathname = '/'
+            }
+          })
+          .catch(error => {
+            toast.error('Failed to delete conversation')
+            logger.error(error)
+          })
+      }
+    },
+    [loadEntries]
+  )
 
   const closeDialog = () => {
-    setDialogContent(null);
-  };
+    setDialogContent(null)
+  }
 
   useEffect(() => {
     if (open) {
-      loadEntries();
+      loadEntries()
     }
-  }, [open]);
+  }, [open, loadEntries])
 
   useEffect(() => {
-    const enterThreshold = 40;
-    const exitThreshold = 40;
+    const enterThreshold = 40
+    const exitThreshold = 40
 
     function onMouseMove(event: MouseEvent) {
       if (event.pageX < enterThreshold) {
-        setOpen(true);
+        setOpen(true)
       }
 
       if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
-        setOpen(false);
+        setOpen(false)
       }
     }
 
-    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousemove', onMouseMove)
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-    };
-  }, []);
+      window.removeEventListener('mousemove', onMouseMove)
+    }
+  }, [])
 
   return (
     <motion.div
@@ -130,7 +133,7 @@ export function Menu() {
                 <div className="text-bolt-elements-textTertiary sticky top-0 z-1 bg-bolt-elements-background-depth-2 pl-2 pt-2 pb-1">
                   {category}
                 </div>
-                {items.map((item) => (
+                {items.map(item => (
                   <HistoryItem key={item.id} item={item} onDelete={() => setDialogContent({ type: 'delete', item })} />
                 ))}
               </div>
@@ -153,9 +156,9 @@ export function Menu() {
                     </DialogButton>
                     <DialogButton
                       type="danger"
-                      onClick={(event) => {
-                        deleteItem(event, dialogContent.item);
-                        closeDialog();
+                      onClick={event => {
+                        deleteItem(event, dialogContent.item)
+                        closeDialog()
                       }}
                     >
                       Delete
@@ -167,13 +170,15 @@ export function Menu() {
           </DialogRoot>
         </div>
         <div className="flex items-center border-t border-bolt-elements-borderColor p-4">
-          <SettingsButton onClick={() => {
-            setSettingsOpen(true);
-          }} />
+          <SettingsButton
+            onClick={() => {
+              setSettingsOpen(true)
+            }}
+          />
           <ThemeSwitch className="ml-auto" />
         </div>
         <SettingsDialog open={settingsOpen} setOpen={setSettingsOpen} />
       </div>
     </motion.div>
-  );
+  )
 }

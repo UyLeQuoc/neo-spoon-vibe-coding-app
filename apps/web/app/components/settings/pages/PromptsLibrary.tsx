@@ -1,26 +1,26 @@
-import { useLocalStorage } from 'usehooks-ts';
+import { useLocalStorage } from 'usehooks-ts'
 
 interface Prompt {
-  id: string;
-  name: string;
-  description: string;
+  id: string
+  name: string
+  description: string
 }
 
 const defaultPrompts: Prompt[] = [
   {
     id: 'extended-v1',
     name: 'Extended V1',
-    description: 'General-purpose extended prompt',
+    description: 'General-purpose extended prompt'
   },
   {
     id: 'system-default',
     name: 'System Default',
-    description: 'Basic system prompt',
+    description: 'Basic system prompt'
   }
-];
+]
 
 export const PromptsLibrary = () => {
-  const [selectedPrompt, setSelectedPrompt] = useLocalStorage('system-prompt', 'extended-v1');
+  const [selectedPrompt, setSelectedPrompt] = useLocalStorage('system-prompt', 'extended-v1')
 
   return (
     <div className="space-y-4 max-w-2xl">
@@ -32,7 +32,7 @@ export const PromptsLibrary = () => {
       </div>
 
       <div className="space-y-3">
-        {defaultPrompts.map((prompt) => (
+        {defaultPrompts.map(prompt => (
           <div
             key={prompt.id}
             className={`p-4 rounded-lg border transition-all ${
@@ -58,5 +58,5 @@ export const PromptsLibrary = () => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}

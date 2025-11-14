@@ -1,35 +1,35 @@
-import { type ActionFunctionArgs } from '@remix-run/cloudflare';
-import { type StreamingOptions, streamText } from '~/lib/.server/llm/stream-text';
-import { stripIndents } from '~/utils/stripIndent';
+import type { ActionFunctionArgs } from '@remix-run/cloudflare'
+import { type StreamingOptions, streamText } from '~/lib/.server/llm/stream-text'
+import { stripIndents } from '~/utils/stripIndent'
 
 export async function action(args: ActionFunctionArgs) {
-  return enhancerAction(args);
+  return enhancerAction(args)
 }
 
 async function enhancerAction({ context, request }: ActionFunctionArgs) {
   const { message, provider, model, apiKey, temperature, topP, topK, systemPromptId } = await request.json<{
-    message: string,
-    provider: string,
-    model: string,
-    apiKey: string,
-    temperature: number,
-    topP: number,
-    topK: number,
-    systemPromptId: string,
-  }>();
+    message: string
+    provider: string
+    model: string
+    apiKey: string
+    temperature: number
+    topP: number
+    topK: number
+    systemPromptId: string
+  }>()
 
   if (!message || !provider || !model) {
     throw new Response(null, {
       status: 400,
-      statusText: 'Bad Request',
-    });
+      statusText: 'Bad Request'
+    })
   }
 
   try {
-    const options: StreamingOptions = {};
-    if (temperature) options.temperature = temperature;
-    if (topP) options.topP = topP;
-    if (topK) options.topK = topK;
+    const options: StreamingOptions = {}
+    if (temperature) options.temperature = temperature
+    if (topP) options.topP = topP
+    if (topK) options.topK = topK
 
     const result = await streamText(
       [
@@ -43,8 +43,8 @@ async function enhancerAction({ context, request }: ActionFunctionArgs) {
           <original_prompt>
             ${message}
           </original_prompt>
-        `,
-        },
+        `
+        }
       ],
       context.cloudflare.env,
       options,
@@ -52,20 +52,20 @@ async function enhancerAction({ context, request }: ActionFunctionArgs) {
       model,
       apiKey,
       systemPromptId
-    );
+    )
 
     return new Response(result.textStream, {
       status: 200,
       headers: {
-        contentType: 'text/plain; charset=utf-8',
-      },
-    });
+        contentType: 'text/plain; charset=utf-8'
+      }
+    })
   } catch (error) {
-    console.log(error);
+    console.log(error)
 
     throw new Response(null, {
       status: 500,
-      statusText: 'Internal Server Error',
-    });
+      statusText: 'Internal Server Error'
+    })
   }
 }

@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { APP_NAME, ApiAuthRefreshInput, apiFailed, generateJwtToken, ok, type ApiAuthRefreshOutput } from 'shared'
+import { APP_NAME, ApiAuthRefreshInput, type ApiAuthRefreshOutput, apiFailed, generateJwtToken, ok } from 'shared'
 import { factory } from '~/factory'
 import { verifyAndRotateRefreshToken } from './_lib/refresh-token'
 import { ADMIN_ADDRESSES } from './api.auth.verify'

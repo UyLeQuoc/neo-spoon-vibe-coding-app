@@ -1,52 +1,52 @@
-import { useRef, useCallback } from 'react';
+import { useCallback, useRef } from 'react'
 
 export function useSnapScroll() {
-  const autoScrollRef = useRef(true);
-  const scrollNodeRef = useRef<HTMLDivElement>();
-  const onScrollRef = useRef<() => void>();
-  const observerRef = useRef<ResizeObserver>();
+  const autoScrollRef = useRef(true)
+  const scrollNodeRef = useRef<HTMLDivElement>()
+  const onScrollRef = useRef<() => void>()
+  const observerRef = useRef<ResizeObserver>()
 
   const messageRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       const observer = new ResizeObserver(() => {
         if (autoScrollRef.current && scrollNodeRef.current) {
-          const { scrollHeight, clientHeight } = scrollNodeRef.current;
-          const scrollTarget = scrollHeight - clientHeight;
+          const { scrollHeight, clientHeight } = scrollNodeRef.current
+          const scrollTarget = scrollHeight - clientHeight
 
           scrollNodeRef.current.scrollTo({
-            top: scrollTarget,
-          });
+            top: scrollTarget
+          })
         }
-      });
+      })
 
-      observer.observe(node);
+      observer.observe(node)
     } else {
-      observerRef.current?.disconnect();
-      observerRef.current = undefined;
+      observerRef.current?.disconnect()
+      observerRef.current = undefined
     }
-  }, []);
+  }, [])
 
   const scrollRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {
       onScrollRef.current = () => {
-        const { scrollTop, scrollHeight, clientHeight } = node;
-        const scrollTarget = scrollHeight - clientHeight;
+        const { scrollTop, scrollHeight, clientHeight } = node
+        const scrollTarget = scrollHeight - clientHeight
 
-        autoScrollRef.current = Math.abs(scrollTop - scrollTarget) <= 10;
-      };
-
-      node.addEventListener('scroll', onScrollRef.current);
-
-      scrollNodeRef.current = node;
-    } else {
-      if (onScrollRef.current) {
-        scrollNodeRef.current?.removeEventListener('scroll', onScrollRef.current);
+        autoScrollRef.current = Math.abs(scrollTop - scrollTarget) <= 10
       }
 
-      scrollNodeRef.current = undefined;
-      onScrollRef.current = undefined;
-    }
-  }, []);
+      node.addEventListener('scroll', onScrollRef.current)
 
-  return [messageRef, scrollRef];
+      scrollNodeRef.current = node
+    } else {
+      if (onScrollRef.current) {
+        scrollNodeRef.current?.removeEventListener('scroll', onScrollRef.current)
+      }
+
+      scrollNodeRef.current = undefined
+      onScrollRef.current = undefined
+    }
+  }, [])
+
+  return [messageRef, scrollRef]
 }

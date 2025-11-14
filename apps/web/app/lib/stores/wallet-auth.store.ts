@@ -1,11 +1,11 @@
-import { persistentAtom } from '@nanostores/persistent'
-import { decodeJwtToken } from 'shared'
-import { computed } from 'nanostores'
 import { NeonSigner } from '@cityofzion/neon-dappkit'
 import { wallet } from '@cityofzion/neon-js'
+import { persistentAtom } from '@nanostores/persistent'
+import { computed } from 'nanostores'
+import { decodeJwtToken } from 'shared'
 import { ensureExclusive } from '~/lib/ensureExclusive'
-import { toJsonResult } from '~/lib/result'
 import { hClient } from '~/lib/hono-client'
+import { toJsonResult } from '~/lib/result'
 
 class WalletAuthStore {
   /** Refresh token */

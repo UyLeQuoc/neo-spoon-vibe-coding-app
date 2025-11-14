@@ -50,12 +50,8 @@
           "name": "ChatMessages_session_id_ChatSessions_id_fk",
           "tableFrom": "ChatMessages",
           "tableTo": "ChatSessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -381,12 +377,8 @@
           "name": "SandboxFiles_session_id_ChatSessions_id_fk",
           "tableFrom": "SandboxFiles",
           "tableTo": "ChatSessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -491,12 +483,8 @@
           "name": "Sites_session_id_ChatSessions_id_fk",
           "tableFrom": "Sites",
           "tableTo": "ChatSessions",
-          "columnsFrom": [
-            "session_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["session_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

@@ -1,8 +1,15 @@
-import { acceptCompletion, autocompletion, closeBrackets } from '@codemirror/autocomplete';
-import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
-import { bracketMatching, foldGutter, indentOnInput, indentUnit } from '@codemirror/language';
-import { searchKeymap } from '@codemirror/search';
-import { Compartment, EditorSelection, EditorState, StateEffect, StateField, type Extension } from '@codemirror/state';
+import { acceptCompletion, autocompletion, closeBrackets } from '@codemirror/autocomplete'
+import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
+import { bracketMatching, foldGutter, indentOnInput, indentUnit } from '@codemirror/language'
+import { searchKeymap } from '@codemirror/search'
+import {
+  Compartment,
+  type EditorSelection,
+  EditorState,
+  type Extension,
+  StateEffect,
+  StateField
+} from '@codemirror/state'
 import {
   drawSelection,
   dropCursor,
@@ -13,111 +20,110 @@ import {
   lineNumbers,
   scrollPastEnd,
   showTooltip,
-  tooltips,
   type Tooltip,
-} from '@codemirror/view';
-import { memo, useEffect, useRef, useState, type MutableRefObject } from 'react';
-import type { Theme } from '~/types/theme';
-import { classNames } from '~/utils/classNames';
-import { debounce } from '~/utils/debounce';
-import { createScopedLogger, renderLogger } from '~/utils/logger';
-import { BinaryContent } from './BinaryContent';
-import { getTheme, reconfigureTheme } from './cm-theme';
-import { indentKeyBinding } from './indent';
-import { getLanguage } from './languages';
+  tooltips
+} from '@codemirror/view'
+import { type MutableRefObject, memo, useEffect, useRef, useState } from 'react'
+import type { Theme } from '~/types/theme'
+import { classNames } from '~/utils/classNames'
+import { debounce } from '~/utils/debounce'
+import { createScopedLogger, renderLogger } from '~/utils/logger'
+import { BinaryContent } from './BinaryContent'
+import { getTheme, reconfigureTheme } from './cm-theme'
+import { indentKeyBinding } from './indent'
+import { getLanguage } from './languages'
 
-const logger = createScopedLogger('CodeMirrorEditor');
+const logger = createScopedLogger('CodeMirrorEditor')
 
 export interface EditorDocument {
-  value: string;
-  isBinary: boolean;
-  filePath: string;
-  scroll?: ScrollPosition;
+  value: string
+  isBinary: boolean
+  filePath: string
+  scroll?: ScrollPosition
 }
 
 export interface EditorSettings {
-  fontSize?: string;
-  gutterFontSize?: string;
-  tabSize?: number;
+  fontSize?: string
+  gutterFontSize?: string
+  tabSize?: number
 }
 
 type TextEditorDocument = EditorDocument & {
-  value: string;
-};
+  value: string
+}
 
 export interface ScrollPosition {
-  top: number;
-  left: number;
+  top: number
+  left: number
 }
 
 export interface EditorUpdate {
-  selection: EditorSelection;
-  content: string;
+  selection: EditorSelection
+  content: string
 }
 
-export type OnChangeCallback = (update: EditorUpdate) => void;
-export type OnScrollCallback = (position: ScrollPosition) => void;
-export type OnSaveCallback = () => void;
+export type OnChangeCallback = (update: EditorUpdate) => void
+export type OnScrollCallback = (position: ScrollPosition) => void
+export type OnSaveCallback = () => void
 
 interface Props {
-  theme: Theme;
-  id?: unknown;
-  doc?: EditorDocument;
-  editable?: boolean;
-  debounceChange?: number;
-  debounceScroll?: number;
-  autoFocusOnDocumentChange?: boolean;
-  onChange?: OnChangeCallback;
-  onScroll?: OnScrollCallback;
-  onSave?: OnSaveCallback;
-  className?: string;
-  settings?: EditorSettings;
+  theme: Theme
+  id?: unknown
+  doc?: EditorDocument
+  editable?: boolean
+  debounceChange?: number
+  debounceScroll?: number
+  autoFocusOnDocumentChange?: boolean
+  onChange?: OnChangeCallback
+  onScroll?: OnScrollCallback
+  onSave?: OnSaveCallback
+  className?: string
+  settings?: EditorSettings
 }
 
-type EditorStates = Map<string, EditorState>;
+type EditorStates = Map<string, EditorState>
 
-const readOnlyTooltipStateEffect = StateEffect.define<boolean>();
+const readOnlyTooltipStateEffect = StateEffect.define<boolean>()
 
 const editableTooltipField = StateField.define<readonly Tooltip[]>({
   create: () => [],
   update(_tooltips, transaction) {
     if (!transaction.state.readOnly) {
-      return [];
+      return []
     }
 
     for (const effect of transaction.effects) {
       if (effect.is(readOnlyTooltipStateEffect) && effect.value) {
-        return getReadOnlyTooltip(transaction.state);
+        return getReadOnlyTooltip(transaction.state)
       }
     }
 
-    return [];
+    return []
   },
-  provide: (field) => {
-    return showTooltip.computeN([field], (state) => state.field(field));
-  },
-});
+  provide: field => {
+    return showTooltip.computeN([field], state => state.field(field))
+  }
+})
 
-const editableStateEffect = StateEffect.define<boolean>();
+const editableStateEffect = StateEffect.define<boolean>()
 
 const editableStateField = StateField.define<boolean>({
   create() {
-    return true;
+    return true
   },
   update(value, transaction) {
     for (const effect of transaction.effects) {
       if (effect.is(editableStateEffect)) {
-        return effect.value;
+        return effect.value
       }
     }
 
-    return value;
-  },
-});
+    return value
+  }
+})
 
 export const CodeMirrorEditor = memo(
   ({
-    id,
     doc,
     debounceScroll = 100,
     debounceChange = 150,
@@ -128,120 +134,124 @@ export const CodeMirrorEditor = memo(
     onSave,
     theme,
     settings,
-    className = '',
+    className = ''
   }: Props) => {
-    renderLogger.trace('CodeMirrorEditor');
+    renderLogger.trace('CodeMirrorEditor')
 
-    const [languageCompartment] = useState(new Compartment());
+    const [languageCompartment] = useState(new Compartment())
 
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const viewRef = useRef<EditorView>();
-    const themeRef = useRef<Theme>();
-    const docRef = useRef<EditorDocument>();
-    const editorStatesRef = useRef<EditorStates>();
-    const onScrollRef = useRef(onScroll);
-    const onChangeRef = useRef(onChange);
-    const onSaveRef = useRef(onSave);
+    const containerRef = useRef<HTMLDivElement | null>(null)
+    const viewRef = useRef<EditorView>()
+    const themeRef = useRef<Theme>()
+    const docRef = useRef<EditorDocument>()
+    const editorStatesRef = useRef<EditorStates>()
+    const onScrollRef = useRef(onScroll)
+    const onChangeRef = useRef(onChange)
+    const onSaveRef = useRef(onSave)
 
     /**
      * This effect is used to avoid side effects directly in the render function
      * and instead the refs are updated after each render.
      */
     useEffect(() => {
-      onScrollRef.current = onScroll;
-      onChangeRef.current = onChange;
-      onSaveRef.current = onSave;
-      docRef.current = doc;
-      themeRef.current = theme;
-    });
+      onScrollRef.current = onScroll
+      onChangeRef.current = onChange
+      onSaveRef.current = onSave
+      docRef.current = doc
+      themeRef.current = theme
+    })
 
     useEffect(() => {
       const onUpdate = debounce((update: EditorUpdate) => {
-        onChangeRef.current?.(update);
-      }, debounceChange);
+        onChangeRef.current?.(update)
+      }, debounceChange)
+
+      if (!containerRef.current) return
 
       const view = new EditorView({
-        parent: containerRef.current!,
+        parent: containerRef.current,
         dispatchTransactions(transactions) {
-          const previousSelection = view.state.selection;
+          const previousSelection = view.state.selection
 
-          view.update(transactions);
+          view.update(transactions)
 
-          const newSelection = view.state.selection;
+          const newSelection = view.state.selection
 
           const selectionChanged =
             newSelection !== previousSelection &&
-            (newSelection === undefined || previousSelection === undefined || !newSelection.eq(previousSelection));
+            (newSelection === undefined || previousSelection === undefined || !newSelection.eq(previousSelection))
 
-          if (docRef.current && (transactions.some((transaction) => transaction.docChanged) || selectionChanged)) {
+          if (docRef.current && (transactions.some(transaction => transaction.docChanged) || selectionChanged)) {
             onUpdate({
               selection: view.state.selection,
-              content: view.state.doc.toString(),
-            });
+              content: view.state.doc.toString()
+            })
 
-            editorStatesRef.current!.set(docRef.current.filePath, view.state);
+            editorStatesRef.current?.set(docRef.current.filePath, view.state)
           }
-        },
-      });
+        }
+      })
 
-      viewRef.current = view;
+      viewRef.current = view
 
       return () => {
-        viewRef.current?.destroy();
-        viewRef.current = undefined;
-      };
-    }, []);
+        viewRef.current?.destroy()
+        viewRef.current = undefined
+      }
+    }, [debounceChange])
 
     useEffect(() => {
       if (!viewRef.current) {
-        return;
+        return
       }
 
       viewRef.current.dispatch({
-        effects: [reconfigureTheme(theme)],
-      });
-    }, [theme]);
+        effects: [reconfigureTheme(theme)]
+      })
+    }, [theme])
 
     useEffect(() => {
-      editorStatesRef.current = new Map<string, EditorState>();
-    }, [id]);
+      editorStatesRef.current = new Map<string, EditorState>()
+    }, [])
 
     useEffect(() => {
-      const editorStates = editorStatesRef.current!;
-      const view = viewRef.current!;
-      const theme = themeRef.current!;
+      const editorStates = editorStatesRef.current
+      const view = viewRef.current
+      const theme = themeRef.current
+
+      if (!view || !theme || !editorStates) return
 
       if (!doc) {
         const state = newEditorState('', theme, settings, onScrollRef, debounceScroll, onSaveRef, [
-          languageCompartment.of([]),
-        ]);
+          languageCompartment.of([])
+        ])
 
-        view.setState(state);
+        view.setState(state)
 
-        setNoDocument(view);
+        setNoDocument(view)
 
-        return;
+        return
       }
 
       if (doc.isBinary) {
-        return;
+        return
       }
 
       if (doc.filePath === '') {
-        logger.warn('File path should not be empty');
+        logger.warn('File path should not be empty')
       }
 
-      let state = editorStates.get(doc.filePath);
+      let state = editorStates.get(doc.filePath)
 
       if (!state) {
         state = newEditorState(doc.value, theme, settings, onScrollRef, debounceScroll, onSaveRef, [
-          languageCompartment.of([]),
-        ]);
+          languageCompartment.of([])
+        ])
 
-        editorStates.set(doc.filePath, state);
+        editorStates.set(doc.filePath, state)
       }
 
-      view.setState(state);
+      view.setState(state)
 
       setEditorDocument(
         view,
@@ -249,22 +259,31 @@ export const CodeMirrorEditor = memo(
         editable,
         languageCompartment,
         autoFocusOnDocumentChange,
-        doc as TextEditorDocument,
-      );
-    }, [doc?.value, editable, doc?.filePath, autoFocusOnDocumentChange]);
+        doc as TextEditorDocument
+      )
+    }, [
+      doc?.value,
+      editable,
+      doc?.filePath,
+      autoFocusOnDocumentChange,
+      debounceScroll,
+      doc,
+      languageCompartment,
+      settings
+    ])
 
     return (
       <div className={classNames('relative h-full', className)}>
         {doc?.isBinary && <BinaryContent />}
         <div className="h-full overflow-hidden" ref={containerRef} />
       </div>
-    );
-  },
-);
+    )
+  }
+)
 
-export default CodeMirrorEditor;
+export default CodeMirrorEditor
 
-CodeMirrorEditor.displayName = 'CodeMirrorEditor';
+CodeMirrorEditor.displayName = 'CodeMirrorEditor'
 
 function newEditorState(
   content: string,
@@ -273,7 +292,7 @@ function newEditorState(
   onScrollRef: MutableRefObject<OnScrollCallback | undefined>,
   debounceScroll: number,
   onFileSaveRef: MutableRefObject<OnSaveCallback | undefined>,
-  extensions: Extension[],
+  extensions: Extension[]
 ) {
   return EditorState.create({
     doc: content,
@@ -281,22 +300,22 @@ function newEditorState(
       EditorView.domEventHandlers({
         scroll: debounce((event, view) => {
           if (event.target !== view.scrollDOM) {
-            return;
+            return
           }
 
-          onScrollRef.current?.({ left: view.scrollDOM.scrollLeft, top: view.scrollDOM.scrollTop });
+          onScrollRef.current?.({ left: view.scrollDOM.scrollLeft, top: view.scrollDOM.scrollTop })
         }, debounceScroll),
         keydown: (event, view) => {
           if (view.state.readOnly) {
             view.dispatch({
-              effects: [readOnlyTooltipStateEffect.of(event.key !== 'Escape')],
-            });
+              effects: [readOnlyTooltipStateEffect.of(event.key !== 'Escape')]
+            })
 
-            return true;
+            return true
           }
 
-          return false;
-        },
+          return false
+        }
       }),
       getTheme(theme, settings),
       history(),
@@ -309,29 +328,29 @@ function newEditorState(
           key: 'Mod-s',
           preventDefault: true,
           run: () => {
-            onFileSaveRef.current?.();
-            return true;
-          },
+            onFileSaveRef.current?.()
+            return true
+          }
         },
-        indentKeyBinding,
+        indentKeyBinding
       ]),
       indentUnit.of('\t'),
       autocompletion({
-        closeOnBlur: false,
+        closeOnBlur: false
       }),
       tooltips({
         position: 'absolute',
         parent: document.body,
-        tooltipSpace: (view) => {
-          const rect = view.dom.getBoundingClientRect();
+        tooltipSpace: view => {
+          const rect = view.dom.getBoundingClientRect()
 
           return {
             top: rect.top - 50,
             left: rect.left,
             bottom: rect.bottom,
-            right: rect.right + 10,
-          };
-        },
+            right: rect.right + 10
+          }
+        }
       }),
       closeBrackets(),
       lineNumbers(),
@@ -343,21 +362,21 @@ function newEditorState(
       indentOnInput(),
       editableTooltipField,
       editableStateField,
-      EditorState.readOnly.from(editableStateField, (editable) => !editable),
+      EditorState.readOnly.from(editableStateField, editable => !editable),
       highlightActiveLineGutter(),
       highlightActiveLine(),
       foldGutter({
-        markerDOM: (open) => {
-          const icon = document.createElement('div');
+        markerDOM: open => {
+          const icon = document.createElement('div')
 
-          icon.className = `fold-icon ${open ? 'i-ph-caret-down-bold' : 'i-ph-caret-right-bold'}`;
+          icon.className = `fold-icon ${open ? 'i-ph-caret-down-bold' : 'i-ph-caret-right-bold'}`
 
-          return icon;
-        },
+          return icon
+        }
       }),
-      ...extensions,
-    ],
-  });
+      ...extensions
+    ]
+  })
 }
 
 function setNoDocument(view: EditorView) {
@@ -366,11 +385,11 @@ function setNoDocument(view: EditorView) {
     changes: {
       from: 0,
       to: view.state.doc.length,
-      insert: '',
-    },
-  });
+      insert: ''
+    }
+  })
 
-  view.scrollDOM.scrollTo(0, 0);
+  view.scrollDOM.scrollTo(0, 0)
 }
 
 function setEditorDocument(
@@ -379,7 +398,7 @@ function setEditorDocument(
   editable: boolean,
   languageCompartment: Compartment,
   autoFocus: boolean,
-  doc: TextEditorDocument,
+  doc: TextEditorDocument
 ) {
   if (doc.value !== view.state.doc.toString()) {
     view.dispatch({
@@ -387,31 +406,31 @@ function setEditorDocument(
       changes: {
         from: 0,
         to: view.state.doc.length,
-        insert: doc.value,
-      },
-    });
+        insert: doc.value
+      }
+    })
   }
 
   view.dispatch({
-    effects: [editableStateEffect.of(editable && !doc.isBinary)],
-  });
+    effects: [editableStateEffect.of(editable && !doc.isBinary)]
+  })
 
-  getLanguage(doc.filePath).then((languageSupport) => {
+  getLanguage(doc.filePath).then(languageSupport => {
     if (!languageSupport) {
-      return;
+      return
     }
 
     view.dispatch({
-      effects: [languageCompartment.reconfigure([languageSupport]), reconfigureTheme(theme)],
-    });
+      effects: [languageCompartment.reconfigure([languageSupport]), reconfigureTheme(theme)]
+    })
 
     requestAnimationFrame(() => {
-      const currentLeft = view.scrollDOM.scrollLeft;
-      const currentTop = view.scrollDOM.scrollTop;
-      const newLeft = doc.scroll?.left ?? 0;
-      const newTop = doc.scroll?.top ?? 0;
+      const currentLeft = view.scrollDOM.scrollLeft
+      const currentTop = view.scrollDOM.scrollTop
+      const newLeft = doc.scroll?.left ?? 0
+      const newTop = doc.scroll?.top ?? 0
 
-      const needsScrolling = currentLeft !== newLeft || currentTop !== newTop;
+      const needsScrolling = currentLeft !== newLeft || currentTop !== newTop
 
       if (autoFocus && editable) {
         if (needsScrolling) {
@@ -419,43 +438,43 @@ function setEditorDocument(
           view.scrollDOM.addEventListener(
             'scroll',
             () => {
-              view.focus();
+              view.focus()
             },
-            { once: true },
-          );
+            { once: true }
+          )
         } else {
           // if the scroll position is still the same we can focus immediately
-          view.focus();
+          view.focus()
         }
       }
 
-      view.scrollDOM.scrollTo(newLeft, newTop);
-    });
-  });
+      view.scrollDOM.scrollTo(newLeft, newTop)
+    })
+  })
 }
 
 function getReadOnlyTooltip(state: EditorState) {
   if (!state.readOnly) {
-    return [];
+    return []
   }
 
   return state.selection.ranges
-    .filter((range) => {
-      return range.empty;
+    .filter(range => {
+      return range.empty
     })
-    .map((range) => {
+    .map(range => {
       return {
         pos: range.head,
         above: true,
         strictSide: true,
         arrow: true,
         create: () => {
-          const divElement = document.createElement('div');
-          divElement.className = 'cm-readonly-tooltip';
-          divElement.textContent = 'Cannot edit file while AI response is being generated';
+          const divElement = document.createElement('div')
+          divElement.className = 'cm-readonly-tooltip'
+          divElement.textContent = 'Cannot edit file while AI response is being generated'
 
-          return { dom: divElement };
-        },
-      };
-    });
+          return { dom: divElement }
+        }
+      }
+    })
 }

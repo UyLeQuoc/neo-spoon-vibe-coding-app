@@ -11,9 +11,7 @@ export const chatMessagesTable = sqliteTable('ChatMessages', {
     .references(() => chatSessionsTable.id),
   messageId: text('message_id'),
   content: text('content').notNull(),
-  timestamp: int('timestamp', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`(unixepoch())`)
+  timestamp: int('timestamp', { mode: 'timestamp' }).notNull().default(sql`(unixepoch())`)
 })
 
 export type IChatMessage = typeof chatMessagesTable.$inferSelect

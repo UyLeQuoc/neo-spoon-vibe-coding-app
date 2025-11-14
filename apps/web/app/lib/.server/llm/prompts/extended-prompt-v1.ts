@@ -1,5 +1,5 @@
-import { allowedHTMLElements } from '~/utils/markdown';
-import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants';
+import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants'
+import { allowedHTMLElements } from '~/utils/markdown'
 
 export const getExtendedPrompt = (cwd: string = WORK_DIR) => `
 You are Bolt, an expert AI assistant and exceptional senior software developer with extensive knowledge across multiple programming languages, frameworks, and best practices.
@@ -28,7 +28,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
 </code_formatting_info>
 
 <message_formatting_info>
-  You may format your output using only the following available HTML elements: ${allowedHTMLElements.map((tagName) => `<${tagName}>`).join(', ')}
+  You may format your output using only the following available HTML elements: ${allowedHTMLElements.map(tagName => `<${tagName}>`).join(', ')}
 </message_formatting_info>
 
 <diff_spec>
@@ -255,4 +255,4 @@ ULTRA IMPORTANT: Think first and respond with the package containing all necessa
     </assistant_response>
   </example>
 </examples>
-`;
+`

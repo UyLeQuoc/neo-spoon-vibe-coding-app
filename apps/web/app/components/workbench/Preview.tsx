@@ -1,115 +1,114 @@
-import { useStore } from '@nanostores/react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { IconButton } from '~/components/ui/IconButton';
-import { workbenchStore } from '~/lib/stores/workbench';
-import { PortDropdown } from './PortDropdown';
+import { useStore } from '@nanostores/react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { IconButton } from '~/components/ui/IconButton'
+import { workbenchStore } from '~/lib/stores/workbench'
+import { PortDropdown } from './PortDropdown'
 
 export const Preview = memo(() => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const previewPageRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [activePreviewIndex, setActivePreviewIndex] = useState(0);
-  const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const previewPageRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [activePreviewIndex, setActivePreviewIndex] = useState(0)
+  const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const hasSelectedPreview = useRef(false);
-  const previews = useStore(workbenchStore.previews);
-  const activePreview = previews[activePreviewIndex];
+  const hasSelectedPreview = useRef(false)
+  const previews = useStore(workbenchStore.previews)
+  const activePreview = previews[activePreviewIndex]
 
-  const [url, setUrl] = useState('');
-  const [iframeUrl, setIframeUrl] = useState<string | undefined>();
+  const [url, setUrl] = useState('')
+  const [iframeUrl, setIframeUrl] = useState<string | undefined>()
 
   useEffect(() => {
     if (!activePreview) {
-      setUrl('');
-      setIframeUrl(undefined);
+      setUrl('')
+      setIframeUrl(undefined)
 
-      return;
+      return
     }
 
-    const { baseUrl } = activePreview;
+    const { baseUrl } = activePreview
 
-    setUrl(baseUrl);
-    setIframeUrl(baseUrl);
-  }, [activePreview, iframeUrl]);
+    setUrl(baseUrl)
+    setIframeUrl(baseUrl)
+  }, [activePreview])
 
   const validateUrl = useCallback(
     (value: string) => {
       if (!activePreview) {
-        return false;
+        return false
       }
 
-      const { baseUrl } = activePreview;
+      const { baseUrl } = activePreview
 
       if (value === baseUrl) {
-        return true;
+        return true
       } else if (value.startsWith(baseUrl)) {
-        return ['/', '?', '#'].includes(value.charAt(baseUrl.length));
+        return ['/', '?', '#'].includes(value.charAt(baseUrl.length))
       }
 
-      return false;
+      return false
     },
-    [activePreview],
-  );
+    [activePreview]
+  )
 
   const findMinPortIndex = useCallback(
     (minIndex: number, preview: { port: number }, index: number, array: { port: number }[]) => {
-      return preview.port < array[minIndex].port ? index : minIndex;
+      return preview.port < array[minIndex].port ? index : minIndex
     },
-    [],
-  );
+    []
+  )
 
   // when previews change, display the lowest port if user hasn't selected a preview
   useEffect(() => {
     if (previews.length > 1 && !hasSelectedPreview.current) {
-      const minPortIndex = previews.reduce(findMinPortIndex, 0);
+      const minPortIndex = previews.reduce(findMinPortIndex, 0)
 
-      setActivePreviewIndex(minPortIndex);
+      setActivePreviewIndex(minPortIndex)
     }
-  }, [previews]);
+  }, [previews, findMinPortIndex])
 
   const reloadPreview = () => {
     if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
+      const src = iframeRef.current.src
+      iframeRef.current.src = ''
+      iframeRef.current.src = src
     }
-  };
+  }
 
   const toggleFullscreen = () => {
     if (isFullscreen) {
-      document.exitFullscreen();
+      document.exitFullscreen()
     } else if (previewPageRef.current) {
-      previewPageRef.current.requestFullscreen();
+      previewPageRef.current.requestFullscreen()
     }
   }
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+      setIsFullscreen(!!document.fullscreenElement)
+    }
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
-  }, []);
+  }, [])
 
   const openInNewTab = () => {
     if (activePreview?.baseUrl) {
-      const id = activePreview.baseUrl.split('.')[0].split('https://')[1];
+      const id = activePreview.baseUrl.split('.')[0].split('https://')[1]
 
-      const newTab = window.open(`/preview/${id}`, '_blank', 'noopener,noreferrer');
+      const newTab = window.open(`/preview/${id}`, '_blank', 'noopener,noreferrer')
       if (newTab) {
-        newTab.focus();
+        newTab.focus()
       }
     }
   }
 
   return (
-    <div
-      ref={previewPageRef}
-      className="w-full h-full flex flex-col"
-    >
+    <div ref={previewPageRef} className="w-full h-full flex flex-col">
       {isPortDropdownOpen && (
         <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
       )}
@@ -124,15 +123,15 @@ export const Preview = memo(() => {
             className="w-full bg-transparent outline-none"
             type="text"
             value={url}
-            onChange={(event) => {
-              setUrl(event.target.value);
+            onChange={event => {
+              setUrl(event.target.value)
             }}
-            onKeyDown={(event) => {
+            onKeyDown={event => {
               if (event.key === 'Enter' && validateUrl(url)) {
-                setIframeUrl(url);
+                setIframeUrl(url)
 
                 if (inputRef.current) {
-                  inputRef.current.blur();
+                  inputRef.current.blur()
                 }
               }
             }}
@@ -144,17 +143,15 @@ export const Preview = memo(() => {
               activePreviewIndex={activePreviewIndex}
               setActivePreviewIndex={setActivePreviewIndex}
               isDropdownOpen={isPortDropdownOpen}
-              setHasSelectedPreview={(value) => (hasSelectedPreview.current = value)}
+              setHasSelectedPreview={value => {
+                hasSelectedPreview.current = value
+              }}
               setIsDropdownOpen={setIsPortDropdownOpen}
               previews={previews}
             />
           )}
 
-          <IconButton
-            icon="i-ph:arrow-square-out"
-            title="Open in new tab"
-            onClick={openInNewTab}
-          />
+          <IconButton icon="i-ph:arrow-square-out" title="Open in new tab" onClick={openInNewTab} />
 
           <IconButton
             icon={isFullscreen ? 'i-ph:corners-in' : 'i-ph:corners-out'}
@@ -171,5 +168,5 @@ export const Preview = memo(() => {
         )}
       </div>
     </div>
-  );
-});
+  )
+})
