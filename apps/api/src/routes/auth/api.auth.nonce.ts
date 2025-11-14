@@ -1,6 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { ApiAuthNonceInput, type ApiAuthNonceOutput } from '@wal-0/shared'
-import { ok } from 'node_modules/@wal-0/shared/src/result'
+import { ApiAuthNonceInput, type ApiAuthNonceOutput, ok } from 'shared'
 import { factory } from '~/factory'
 import { genAuthMessageAndSaveNonce } from './_lib/auth-messages'
 

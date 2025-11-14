@@ -1,11 +1,11 @@
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client'
-import { parseSerializedSignature } from '@mysten/sui/cryptography'
-import { verifyPersonalMessageSignature } from '@mysten/sui/verify'
-import { APP_NAME, NONCE_TTL } from '@wal-0/shared'
+import { NeonSigner } from '@cityofzion/neon-dappkit'
+import { APP_NAME, failed, NONCE_TTL, ok, type TResult } from 'shared'
 import { Web3AuthMessage } from './Web3AuthMessage'
 
-export async function genAuthMessageAndSaveNonce(kv: KVNamespace, id: string) {
-  const key = `nonce:${id.toLowerCase()}`
+type SignedMessage = Awaited<ReturnType<NeonSigner['signMessage']>>
+
+export async function genAuthMessageAndSaveNonce(kv: KVNamespace, walletAddr: string) {
+  const key = `auth_nonce:${walletAddr.toLowerCase()}`
   let nonce = await kv.get(key)
   if (!nonce) {
     nonce = crypto.randomUUID()
@@ -17,46 +17,32 @@ export async function genAuthMessageAndSaveNonce(kv: KVNamespace, id: string) {
 export async function verifyAuthMessageAndDeleteNonce(
   kv: KVNamespace,
   walletAddress: string,
-  message: string,
-  signature: string
-): Promise<{ success: true } | { success: false; error: string }> {
+  signedMessage: SignedMessage
+): Promise<TResult> {
   console.group('verifyAuthMessageAndDeleteNonce')
   console.log('» walletAddress:', walletAddress)
-  console.log('» message:', message)
-  console.log('» signature:', signature)
+  console.log('» signed message:', signedMessage)
   try {
-    const authMsg = Web3AuthMessage.fromString(message)
-    console.log('» authMsg:', authMsg)
-    const key = `nonce:${walletAddress.toLowerCase()}`
+    // Validate nonce in original message
+    if (!signedMessage.message) return failed('Missing original message!')
+    const authMsg = Web3AuthMessage.fromString(signedMessage.message)
+    const key = `auth_nonce:${walletAddress.toLowerCase()}`
     const nonce = await kv.get(key)
-    console.log('» stored nonce:', nonce)
-    if (!nonce || nonce !== authMsg.nonce) {
-      console.log('⚠️ Nonce not found or does not match')
+    if (!nonce) return failed('Nonce not found')
+    if (nonce !== authMsg.nonce) {
+      console.log('⚠️ Nonce does not match')
       // Nonce is valid, delete it to prevent replay
       await kv.delete(key)
-      return { success: false, error: 'Invalid nonce' }
+      return failed('Invalid nonce')
     }
 
-    // Verify signature
-    const signatureScheme = parseSerializedSignature(signature)
-    const useZkLogin = signatureScheme.signatureScheme === 'ZkLogin'
-    const result = await verifyPersonalMessageSignature(
-      new TextEncoder().encode(message),
-      signature,
-      {
-        address: walletAddress,
-        client: useZkLogin
-          ? new SuiClient({ url: getFullnodeUrl('testnet') })
-          : undefined
-      }
-    )
-    console.log('» Verification result:', result)
-    // Message is valid, delete nonce to prevent replay
-    await kv.delete(key)
-    return { success: true }
+    const signer = new NeonSigner()
+    const isValid = await signer.verifyMessage(signedMessage)
+    if (!isValid) return failed('Invalid signature')
+    return ok()
   } catch (e) {
     console.error('🚨 Error verifying message', e)
-    return { success: false, error: 'Invalid message signature' }
+    return failed('Error verifying message')
   } finally {
     console.groupEnd()
   }

@@ -1,4 +1,4 @@
-import { APP_NAME, REFRESH_TOKEN_TTL } from '@wal-0/shared'
+import { APP_NAME, REFRESH_TOKEN_TTL } from 'shared'
 import { sign, verify } from 'hono/jwt'
 import type { JWTPayload } from 'hono/utils/jwt/types'
 
@@ -11,11 +11,7 @@ interface RefreshTokenPayload extends JWTPayload {
 /**
  * Generate a refresh token for an identity (e.g., wallet address)
  */
-export async function generateAndSaveRefreshToken(
-  kv: KVNamespace,
-  id: string,
-  secret: string
-): Promise<string> {
+export async function generateAndSaveRefreshToken(kv: KVNamespace, id: string, secret: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
   const payload: RefreshTokenPayload = {
     sub: id,

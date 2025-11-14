@@ -1,4 +1,4 @@
-import { failed } from '@wal-0/shared'
+import { failed } from 'shared'
 import type { Context } from 'hono'
 import { type AppEnv, factory } from '~/factory'
 
@@ -54,6 +54,4 @@ export const ipBasedRateLimiterMiddleware = rateLimitMiddlewareGen(
  *
  * <https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/>
  */
-export const userBasedRateLimitMiddleware = rateLimitMiddlewareGen(
-  c => c.get('jwtPayload')?.sub || 'anonymous'
-)
+export const userBasedRateLimitMiddleware = rateLimitMiddlewareGen(c => c.get('jwtPayload')?.sub || 'anonymous')

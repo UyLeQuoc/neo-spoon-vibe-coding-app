@@ -13,8 +13,7 @@ This request will not trigger any blockchain transaction or cost any gas.
   }
 
   static fromString(s: string) {
-    const { x: appName } =
-      s.match(/authenticate with (?<x>.+?)\./)?.groups ?? {}
+    const { x: appName } = s.match(/authenticate with (?<x>.+?)\./)?.groups ?? {}
     const { x: nonce } = s.match(/Session: "(?<x>.+?)"/)?.groups ?? {}
     if (!appName || !nonce) throw new Error('Invalid message format')
 

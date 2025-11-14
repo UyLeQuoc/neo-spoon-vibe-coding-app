@@ -1,12 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import {
-  APP_NAME,
-  ApiAuthRefreshInput,
-  type ApiAuthRefreshOutput,
-  apiFailed,
-  generateJwtToken,
-  ok
-} from '@wal-0/shared'
+import { APP_NAME, ApiAuthRefreshInput, apiFailed, generateJwtToken, ok, type ApiAuthRefreshOutput } from 'shared'
 import { factory } from '~/factory'
 import { verifyAndRotateRefreshToken } from './_lib/refresh-token'
 import { ADMIN_ADDRESSES } from './api.auth.verify'
@@ -18,12 +11,7 @@ export const authRefreshRoute = factory
     const { walletAddress, refreshToken } = c.req.valid('json')
 
     // Verify the refresh token
-    const nextRefreshToken = await verifyAndRotateRefreshToken(
-      KV,
-      walletAddress,
-      refreshToken,
-      REFRESH_TOKEN_SECRET
-    )
+    const nextRefreshToken = await verifyAndRotateRefreshToken(KV, walletAddress, refreshToken, REFRESH_TOKEN_SECRET)
 
     if (!nextRefreshToken)
       return c.json(

@@ -10,6 +10,7 @@
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "moduleResolution": "bundler",
+    "declarationMap": true,
     "esModuleInterop": true,
     "target": "ES2022"
   },
