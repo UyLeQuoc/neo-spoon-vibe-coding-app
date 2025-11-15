@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neo0 Site Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://cdn.jsdelivr.net/npm/react@19.2.0/+esm",
+          "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@19.2.0/+esm",
+          "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@19.2.0/client/+esm",
+          "marked": "https://cdn.jsdelivr.net/npm/marked@17.0.0/+esm",
+          "@ai-sdk/mcp": "https://cdn.jsdelivr.net/npm/@ai-sdk/mcp@0.0.8/dist/index.mjs",
+          "@ai-sdk/provider-utils": "https://cdn.jsdelivr.net/npm/@ai-sdk/provider-utils@3.0/+esm",
+          "@ai-sdk/provider": "https://cdn.jsdelivr.net/npm/@ai-sdk/provider@2.0.0/+esm",
+          "zod": "https://cdn.jsdelivr.net/npm/zod@4.1.12/+esm",
+          "zod/v4": "https://cdn.jsdelivr.net/npm/zod@4.1.12/+esm",
+          "pkce-challenge": "https://cdn.jsdelivr.net/npm/pkce-challenge@5.0.0/+esm"
+        }
+      }
+    </script>
+    <style>
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .spinner {
+        animation: spin 0.8s linear infinite;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-6">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+      import React, { useState } from "react";
+      import { createRoot } from "react-dom/client";
+      import { experimental_createMCPClient } from "@ai-sdk/mcp";
+      import { marked } from "marked";
+
+      const PREDEFINED_PROMPTS = [
+        { label: "Todo", requirements: "Create a simple todo app", type: "mini web app", style: "minimalist" },
+        {
+          label: "Landing Page",
+          requirements:
+            "Create a modern landing page for a SaaS product with hero section, features, and call-to-action",
+          type: "landing page",
+          style: "modern, clean",
+        },
+        {
+          label: "Portfolio",
+          requirements: "Build a creative portfolio website to showcase projects and skills with image gallery",
+          type: "portfolio",
+          style: "minimalist, elegant",
+        },
+        {
+          label: "Blog",
+          requirements: "Design a simple blog with article listings, individual post pages, and responsive layout",
+          type: "blog",
+          style: "clean, readable",
+        },
+        {
+          label: "Restaurant",
+          requirements: "Create a restaurant website with menu, location, hours, and reservation form",
+          type: "business",
+          style: "warm, inviting",
+        },
+      ];
+
+      function App() {
+        const [requirements, setRequirements] = useState("");
+        const [siteType, setSiteType] = useState("");
+        const [stylePreferences, setStylePreferences] = useState("");
+        const [isGenerating, setIsGenerating] = useState(false);
+        const [events, setEvents] = useState([]);
+        const [result, setResult] = useState(null);
+
+        const loadPrompt = (prompt) => {
+          setRequirements(prompt.requirements);
+          setSiteType(prompt.type);
+          setStylePreferences(prompt.style);
+        };
+
+        const addEvent = (eventType, data) => {
+          setEvents((prev) => [
+            ...prev,
+            {
+              eventType,
+              data,
+              time: new Date().toLocaleTimeString(),
+            },
+          ]);
+        };
+
+        const handleSubmit = async (e) => {
+          e.preventDefault();
+          setEvents([]);
+          setResult(null);
+          setIsGenerating(true);
+
+          let mcpClient = null;
+
+          try {
+            addEvent("start", { message: "Connecting to MCP server..." });
+
+            // Create MCP client using the official library
+            mcpClient = await experimental_createMCPClient({
+              transport: { type: "sse", url: "http://localhost:8000/sse" },
+            });
+
+            addEvent("connection", { message: "Connected to MCP server" });
+
+            // Get available tools
+            addEvent("processing", { message: "Initializing MCP connection..." });
+            const tools = await mcpClient.tools();
+            addEvent("initialize", { message: `MCP server initialized with ${tools.length} tools` });
+
+            // Call generate_site tool
+            addEvent("processing", { message: "Calling generate_site tool..." });
+
+            // Find the generate_site tool
+            const generateSiteTool = tools.find((t) => t.name === "generate_site");
+            if (!generateSiteTool) {
+              throw new Error("generate_site tool not found");
+            }
+
+            // Call the tool
+            const toolResult = await generateSiteTool.execute({
+              requirements: requirements,
+              site_type: siteType || "",
+              style_preferences: stylePreferences || "",
+            });
+
+            // Parse result
+            if (typeof toolResult === "string") {
+              try {
+                const parsed = JSON.parse(toolResult);
+                setResult(parsed);
+                addEvent("complete", {
+                  message: "Site generation complete!",
+                  result: parsed,
+                });
+              } catch {
+                setResult(toolResult);
+                addEvent("complete", {
+                  message: "Site generation complete!",
+                  result: toolResult,
+                });
+              }
+            } else {
+              setResult(toolResult);
+              addEvent("complete", {
+                message: "Site generation complete!",
+                result: toolResult,
+              });
+            }
+
+            setIsGenerating(false);
+            mcpClient.close();
+          } catch (error) {
+            addEvent("error", { message: error.message || "Unknown error occurred" });
+            setIsGenerating(false);
+            if (mcpClient) {
+              mcpClient.close();
+            }
+          }
+        };
+
+        return (
+          <div className="max-w-3xl mx-auto bg-white rounded-lg shadow p-8">
+            <h1 className="text-2xl font-semibold mb-6">Neo0 Site Generator</h1>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Quick Start</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {PREDEFINED_PROMPTS.map((prompt, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => loadPrompt(prompt)}
+                    className="px-3 py-2 text-sm bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded transition"
+                  >
+                    {prompt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Requirements *</label>
+                <textarea
+                  value={requirements}
+                  onChange={(e) => setRequirements(e.target.value)}
+                  placeholder="Describe the website..."
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:outline-none resize-y min-h-[100px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Site Type</label>
+                <input
+                  value={siteType}
+                  onChange={(e) => setSiteType(e.target.value)}
+                  placeholder="e.g., landing page, portfolio"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Style</label>
+                <input
+                  value={stylePreferences}
+                  onChange={(e) => setStylePreferences(e.target.value)}
+                  placeholder="e.g., modern, minimalist"
+                  className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-gray-400 focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isGenerating}
+                className="w-full px-4 py-3 bg-gray-900 hover:bg-gray-700 text-white font-medium rounded disabled:opacity-60 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
+              >
+                {isGenerating && (
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-white rounded-full spinner"></div>
+                )}
+                {isGenerating ? "Generating..." : "Generate"}
+              </button>
+            </form>
+
+            {events.length > 0 && (
+              <div className="mt-6 bg-gray-50 rounded p-4 max-h-80 overflow-y-auto">
+                {events.map((e, i) => (
+                  <div
+                    key={i}
+                    className={`px-3 py-2 mb-2 bg-white rounded text-sm border-l-4 ${
+                      e.eventType === "start" || e.eventType === "connection"
+                        ? "border-blue-500"
+                        : e.eventType === "initialize" || e.eventType === "processing"
+                          ? "border-orange-500"
+                          : e.eventType === "complete"
+                            ? "border-green-500"
+                            : "border-red-500 text-red-600"
+                    }`}
+                  >
+                    {e.time} - {e.data.message || JSON.stringify(e.data)}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {result && (
+              <div className="mt-6 bg-green-50 border border-green-200 rounded p-4 max-h-96 overflow-y-auto">
+                <div className="font-medium text-green-800 mb-2">✓ Complete</div>
+                <div
+                  className="prose prose-sm max-w-none text-gray-800"
+                  dangerouslySetInnerHTML={{
+                    __html: marked.parse(typeof result === "string" ? result : JSON.stringify(result, null, 2)),
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>
