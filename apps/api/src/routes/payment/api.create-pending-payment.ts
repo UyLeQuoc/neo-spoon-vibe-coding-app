@@ -4,10 +4,10 @@ import { drizzle } from 'drizzle-orm/d1'
 import { factory } from '~/factory'
 import { authMiddware } from '~/middlewares/auth.middleware'
 import z from 'zod'
-import type { IPendingPayment } from '~/db/tables'
 import { dbSchema, pendingPaymentsTable } from '~/db/schema'
 import { apiFailed, ok } from 'shared'
 import { toApiPendingPayment } from './helpers'
+import type { ApiPendingPayment } from './helpers'
 
 const createPendingPaymentInputSchema = z.object({
   nonce: z.string().min(1, 'Nonce is required'),
@@ -15,7 +15,7 @@ const createPendingPaymentInputSchema = z.object({
 })
 
 export type CreatePendingPaymentResponse = {
-  pendingPayment: IPendingPayment | null
+  pendingPayment: ApiPendingPayment | null
 }
 // POST /create-pending-payment
 export const createPendingPaymentRoute = factory

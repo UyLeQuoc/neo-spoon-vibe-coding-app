@@ -5,7 +5,9 @@ import tailwindReset from '@unocss/reset/tailwind-compat.css?url'
 import xtermStyles from '@xterm/xterm/css/xterm.css?url'
 import { useEffect } from 'react'
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url'
+import { ToastContainer } from 'react-toastify'
 import { createHead } from 'remix-island'
+import { QueryProvider } from './lib/providers/QueryProvider'
 import { themeStore } from './lib/stores/theme'
 import globalStyles from './styles/index.scss?url'
 import { stripIndents } from './utils/stripIndent'
@@ -72,6 +74,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {children}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={theme}
+      />
       <ScrollRestoration />
       <Scripts />
     </>
@@ -79,5 +93,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />
+  return (
+    <QueryProvider>
+      <Outlet />
+    </QueryProvider>
+  )
 }
