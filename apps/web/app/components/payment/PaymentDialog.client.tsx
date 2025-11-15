@@ -2,6 +2,7 @@
 
 import { useStore } from '@nanostores/react'
 import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'react-toastify'
 import { Dialog, DialogRoot, DialogTitle, DialogDescription, DialogButton } from '~/components/ui/Dialog'
 import { paymentDialogStore, paymentDialogActions, PaymentStep, PaymentStatus } from '~/lib/stores/payment-dialog.store'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
@@ -133,12 +134,12 @@ export function PaymentDialog() {
 
   async function handleContinueFromEnterAmount() {
     if (!account || !isWalletAuthenticated) {
-      alert('Please connect your wallet first')
+      toast.error('Please connect your wallet first')
       return
     }
 
     if (!amount || Number(amount) <= 0) {
-      alert('Please enter a valid amount')
+      toast.error('Please enter a valid amount')
       return
     }
 
@@ -155,7 +156,7 @@ export function PaymentDialog() {
 
       const result = await response.json()
       if (!result.ok) {
-        alert(`Failed to create payment: ${result.error?.message || 'Unknown error'}`)
+        toast.error(`Failed to create payment: ${result.error?.message || 'Unknown error'}`)
         paymentDialogActions.setStatus(PaymentStatus.Failed)
         return
       }
@@ -165,14 +166,14 @@ export function PaymentDialog() {
       paymentDialogActions.setStatus(PaymentStatus.Idle)
     } catch (error: any) {
       console.error('Failed to create payment:', error)
-      alert(`Failed to create payment: ${error?.message || 'Unknown error'}`)
+      toast.error(`Failed to create payment: ${error?.message || 'Unknown error'}`)
       paymentDialogActions.setStatus(PaymentStatus.Failed)
     }
   }
 
   async function handleSignTransaction() {
     if (!neoline || !account || !pendingPaymentId) {
-      alert('Please connect your wallet first')
+      toast.error('Please connect your wallet first')
       return
     }
 
@@ -245,32 +246,70 @@ export function PaymentDialog() {
 
       const updateResult = await updateResponse.json()
       if (!updateResult.ok) {
-        alert(`Failed to update payment status: ${updateResult.error?.message || 'Unknown error'}`)
+        toast.error(`Failed to update payment status: ${updateResult.error?.message || 'Unknown error'}`)
         paymentDialogActions.setStatus(PaymentStatus.Failed)
         return
       }
 
+      toast.success('Transaction signed successfully! Verifying on blockchain...')
       paymentDialogActions.setStep(PaymentStep.VerifyTransaction)
       paymentDialogActions.setStatus(PaymentStatus.Idle)
+
+      // Auto-check transaction after a short delay
+      setTimeout(async () => {
+        await checkAndVerifyTransaction(txid)
+      }, 3000) // Wait 3 seconds for transaction to be included in a block
     } catch (error: any) {
       console.error('Failed to sign transaction:', error)
       const errorMessage = error?.description || error?.message || 'Unknown error'
       
       if (error?.type === 'CANCELED' || errorMessage.includes('cancel')) {
-        alert('Transaction was cancelled. You can try again.')
+        toast.warning('Transaction was cancelled. You can try again.')
       } else if (error?.type === 'INSUFFICIENT_FUNDS' || errorMessage.includes('insufficient')) {
-        alert('Insufficient balance. Please ensure you have enough GAS.')
+        toast.error('Insufficient balance. Please ensure you have enough GAS.')
       } else {
-        alert(`Failed to sign transaction: ${errorMessage}`)
+        toast.error(`Failed to sign transaction: ${errorMessage}`)
       }
       paymentDialogActions.setStatus(PaymentStatus.Failed)
+    }
+  }
+
+  async function checkAndVerifyTransaction(txid: string, retries = 5) {
+    if (!neoline || !pendingPaymentId) return
+
+    try {
+      // Try to get transaction to check if it's confirmed
+      const tx = await neoline.getTransaction({ txid })
+      
+      if (tx && tx.block_index !== undefined && tx.block_index > 0) {
+        // Transaction is confirmed, proceed with verification
+        await handleVerifyTransaction(txid)
+      } else if (retries > 0) {
+        // Transaction not confirmed yet, retry after delay
+        setTimeout(() => {
+          checkAndVerifyTransaction(txid, retries - 1)
+        }, 3000) // Retry every 3 seconds
+      } else {
+        // Max retries reached, let user manually verify
+        paymentDialogActions.setStatus(PaymentStatus.Idle)
+      }
+    } catch {
+      // Transaction might not be in blockchain yet, retry if we have retries left
+      if (retries > 0) {
+        setTimeout(() => {
+          checkAndVerifyTransaction(txid, retries - 1)
+        }, 3000)
+      } else {
+        // Max retries reached, let user manually verify
+        paymentDialogActions.setStatus(PaymentStatus.Idle)
+      }
     }
   }
 
   async function handleVerifyTransaction(digest?: string) {
     const verifyDigest = digest || txDigest
     if (!verifyDigest || !pendingPaymentId) {
-      alert('No transaction digest or pending payment found')
+      toast.error('No transaction digest or pending payment found')
       return
     }
 
@@ -286,13 +325,15 @@ export function PaymentDialog() {
 
       const result = await response.json()
       if (!result.ok) {
-        alert(`Failed to verify payment: ${result.error?.message || 'Unknown error'}`)
+        const errorMsg = result.error?.message || 'Unknown error'
+        toast.error(`Failed to verify payment: ${errorMsg}`)
         paymentDialogActions.setStatus(PaymentStatus.Failed)
         return
       }
 
-      alert(
-        `Payment verified! Added ${result.data.pointsAdded} points. New balance: ${result.data.newBalance}`
+      toast.success(
+        `Payment verified! Added ${result.data.pointsAdded} points. New balance: ${result.data.newBalance}`,
+        { autoClose: 5000 }
       )
 
       paymentDialogActions.setStep(PaymentStep.Completed)
@@ -308,7 +349,7 @@ export function PaymentDialog() {
       }, 2000)
     } catch (error: any) {
       console.error('Failed to verify payment:', error)
-      alert(`Failed to verify payment: ${error?.message || 'Unknown error'}`)
+      toast.error(`Failed to verify payment: ${error?.message || 'Unknown error'}`)
       paymentDialogActions.setStatus(PaymentStatus.Failed)
     }
   }
@@ -330,23 +371,25 @@ export function PaymentDialog() {
 
       const result = await response.json()
       if (!result.ok) {
-        alert(`Failed to cancel payment: ${result.error?.message || 'Unknown error'}`)
+        toast.error(`Failed to cancel payment: ${result.error?.message || 'Unknown error'}`)
         return
       }
 
+      toast.info('Payment cancelled')
       paymentDialogActions.reset()
       paymentDialogActions.close()
     } catch (error: any) {
       console.error('Failed to cancel payment:', error)
-      alert(`Failed to cancel payment: ${error?.message || 'Unknown error'}`)
+      toast.error(`Failed to cancel payment: ${error?.message || 'Unknown error'}`)
     }
   }
 
   function handleCancelIncompletePayment() {
     if (paymentDialogActions.clearIncompletePayment()) {
       setShowIncompleteWarning(false)
+      toast.info('Incomplete payment cleared')
     } else {
-      alert('Cannot cancel signed payment. Please complete verification.')
+      toast.warning('Cannot cancel signed payment. Please complete verification.')
     }
   }
 

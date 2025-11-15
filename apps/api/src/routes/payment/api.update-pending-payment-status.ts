@@ -2,10 +2,11 @@ import { zValidator } from '@hono/zod-validator'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 import z from 'zod'
-import { dbSchema, pendingPaymentsTable, type IPendingPayment } from '~/db/schema'
+import { dbSchema, pendingPaymentsTable } from '~/db/schema'
 import { factory } from '~/factory'
 import { authMiddware } from '~/middlewares/auth.middleware'
 import { toApiPendingPayment } from './helpers'
+import type { ApiPendingPayment } from './helpers'
 import { apiFailed, ok } from 'shared'
 
 const updatePaymentStatusInputSchema = z.object({
@@ -15,7 +16,7 @@ const updatePaymentStatusInputSchema = z.object({
 })
 
 export type UpdatePaymentStatusResponse = {
-  pendingPayment: IPendingPayment | null
+  pendingPayment: ApiPendingPayment | null
 } 
 
 // POST /update-pending-payment-status

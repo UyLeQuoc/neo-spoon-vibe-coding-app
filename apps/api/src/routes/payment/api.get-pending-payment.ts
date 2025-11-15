@@ -2,13 +2,14 @@ import { and, eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/d1'
 import { apiFailed, ok } from 'shared'
 import { dbSchema } from '~/db/schema'
-import { pendingPaymentsTable, type IPendingPayment } from '~/db/tables'
+import { pendingPaymentsTable } from '~/db/tables'
 import { factory } from '~/factory'
 import { authMiddware } from '~/middlewares/auth.middleware'
 import { toApiPendingPayment } from './helpers'
+import type { ApiPendingPayment } from './helpers'
 
 export type GetPendingPaymentResponse = {
-  pendingPayment: IPendingPayment | null
+  pendingPayment: ApiPendingPayment | null
 }
 
 // GET /pending-payment - Get user's last incomplete pending payment

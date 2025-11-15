@@ -1,5 +1,7 @@
+import { Link } from '@remix-run/react'
 import { useStore } from '@nanostores/react'
 import { ClientOnly } from 'remix-utils/client-only'
+import { Sparkles } from 'lucide-react'
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client'
 import { chatStore } from '~/lib/stores/chat'
 import { classNames } from '~/utils/classNames'
@@ -36,9 +38,25 @@ export function Header() {
           )}
         </ClientOnly>
       )}
-      <ClientOnly>
-        {() => <WalletButton />}
-      </ClientOnly>
+      <div className="flex items-center gap-3">
+        <ClientOnly>
+          {() => (
+            <Link
+              to="/neo-ns-management"
+              className="buy-neons-button relative px-4 py-2 rounded-lg font-medium text-white overflow-hidden group transition-all duration-300"
+            >
+              <div className="relative flex items-center gap-2 z-10">
+                <Sparkles className="w-4 h-4" />
+                <span>Buy Neo NS</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%]"></div>
+            </Link>
+          )}
+        </ClientOnly>
+        <ClientOnly>
+          {() => <WalletButton />}
+        </ClientOnly>
+      </div>
     </header>
   )
 }
