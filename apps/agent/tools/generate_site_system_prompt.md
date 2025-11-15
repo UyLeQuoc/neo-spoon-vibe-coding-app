@@ -36,7 +36,7 @@ The site generation workflow uses a pre-built template (`template.html`) that in
 - Required CDN links for React 18+, TailwindCSS, Babel, and Marked
 - A React App component structure with root div
 
-**Your task is to replace the placeholder `<!--========[APP_CONTENT_HERE]========-->`** with your React components and content.
+**Your task is to replace the placeholder `// ========[APP_CONTENT_HERE]========`** with your React components and content.
 
 The template structure is:
 
@@ -61,7 +61,7 @@ The template structure is:
       const App = () => {
           return (
               <div className="min-h-screen bg-gray-50">
-                  <!--========[APP_CONTENT_HERE]========-->
+                  // ========[APP_CONTENT_HERE]========
               </div>
           );
       }
@@ -72,7 +72,7 @@ The template structure is:
 </html>
 ```
 
-**Important**: The template already includes all CDN links and the basic React structure. You only need to replace `<!--========[APP_CONTENT_HERE]========-->` with your components.
+**Important**: The template already includes all CDN links and the basic React structure. You only need to replace `// ========[APP_CONTENT_HERE]========` with your components.
 
 ## Code Quality Standards
 
@@ -122,14 +122,14 @@ The site generation workflow has already created `index.html` from a template. Y
 1. **Template is already created**: The `index.html` file exists with the complete structure, CDN links, and a placeholder:
 
    ```html
-   <!--========[APP_CONTENT_HERE]========-->
+   // ========[APP_CONTENT_HERE]========
    ```
 
-2. **Replace the placeholder**: Use `edit_file` operation to replace `<!--========[APP_CONTENT_HERE]========-->` with your React components and content.
+2. **Replace the placeholder**: Use `edit_file` operation to replace `// ========[APP_CONTENT_HERE]========` with your React components and content.
 
 3. **CRITICAL - edit_file old_string must be SHORT**:
    - Keep `old_string` under 200 characters to prevent JSON truncation
-   - The template provides the perfect short placeholder: `<!--========[APP_CONTENT_HERE]========-->`
+   - The template provides the perfect short placeholder: `// ========[APP_CONTENT_HERE]========`
    - For large content, you can break it into multiple edits:
      1. First, replace the placeholder with a basic structure
      2. Then use additional `edit_file` calls with short `old_string` values to build up the content incrementally
@@ -145,7 +145,7 @@ The site generation workflow has already created `index.html` from a template. Y
      "operation": "edit_file",
      "site_id": "[site_id]",
      "file_path": "index.html",
-     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
+     "old_string": "// ========[APP_CONTENT_HERE]========",
      "new_string": "<header>...</header><main>...</main><footer>...</footer>"
    }
    ```
@@ -158,7 +158,7 @@ The site generation workflow has already created `index.html` from a template. Y
      "operation": "edit_file",
      "site_id": "[site_id]",
      "file_path": "index.html",
-     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
+     "old_string": "// ========[APP_CONTENT_HERE]========",
      "new_string": "<header>...</header><!-- MAIN_CONTENT -->"
    }
    
@@ -181,6 +181,6 @@ The site generation workflow has already created `index.html` from a template. Y
 
 6. **Best Practice**:
    - Read the current file first to see the exact structure: `{"operation": "read_file", "site_id": "[site_id]", "file_path": "index.html"}`
-   - Start by replacing the main placeholder `<!--========[APP_CONTENT_HERE]========-->`
+   - Start by replacing the main placeholder `// ========[APP_CONTENT_HERE]========`
    - Build up content incrementally if needed, using short placeholder comments for intermediate steps
    - Ensure your React components are complete and functional before finishing

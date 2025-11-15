@@ -37,10 +37,10 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-      import React, { useState } from "react";
+      import React, { useState, useMemo, useEffect } from "react";
       import { createRoot } from "react-dom/client";
       import { experimental_createMCPClient } from "@ai-sdk/mcp";
-      import { marked } from "marked";
+      import { z } from "zod";
 
       const PREDEFINED_PROMPTS = [
         { label: "Todo", requirements: "Create a simple todo app", type: "mini web app", style: "minimalist" },
@@ -71,6 +71,20 @@
         },
       ];
 
+      // sample result: { "content": [ { "type": "text", "text": "{\n "success": true,\n "site_id": "20251115_224150",\n "url": "http://localhost:8000/sites/20251115_224150\",\n "requirements": "Create a simple todo app",\n "site_type": "mini web app",\n "style_preferences": "minimalist",\n "created_at": "2025-11-15T22:42:52.641143",\n "verification_passed": true,\n "error": null,\n "message": "Site generated successfully. Use site_id '20251115_224150' with manage_site_files tool to update this site."\n}" } ], "isError": false, "structuredContent": { "result": "{\n "success": true,\n "site_id": "20251115_224150",\n "url": "http://localhost:8000/sites/20251115_224150\",\n "requirements": "Create a simple todo app",\n "site_type": "mini web app",\n "style_preferences": "minimalist",\n "created_at": "2025-11-15T22:42:52.641143",\n "verification_passed": true,\n "error": null,\n "message": "Site generated successfully. Use site_id '20251115_224150' with manage_site_files tool to update this site."\n}" } }
+      const resultSchema = z.object({
+        content: z.array(
+          z.object({
+            type: z.enum(["text", "json"]),
+            text: z.string().transform((val) => JSON.parse(val)),
+          }),
+        ),
+        isError: z.boolean(),
+        structuredContent: z.object({
+          result: z.string().transform((val) => JSON.parse(val)),
+        }),
+      });
+
       function App() {
         const [requirements, setRequirements] = useState("");
         const [siteType, setSiteType] = useState("");
@@ -78,6 +92,11 @@
         const [isGenerating, setIsGenerating] = useState(false);
         const [events, setEvents] = useState([]);
         const [result, setResult] = useState(null);
+        const parsedResult = useMemo(() => resultSchema.safeParse(result), [result]);
+
+        useEffect(() => {
+          console.log(`🪲 Parsed result:`, parsedResult);
+        }, [parsedResult]);
 
         const loadPrompt = (prompt) => {
           setRequirements(prompt.requirements);
@@ -259,12 +278,9 @@
             {result && (
               <div className="mt-6 bg-green-50 border border-green-200 rounded p-4 max-h-96 overflow-y-auto">
                 <div className="font-medium text-green-800 mb-2">✓ Complete</div>
-                <div
-                  className="prose prose-sm max-w-none text-gray-800"
-                  dangerouslySetInnerHTML={{
-                    __html: marked.parse(typeof result === "string" ? result : JSON.stringify(result, null, 2)),
-                  }}
-                />
+                <pre className="prose prose-sm max-w-none text-gray-800">
+                  {JSON.stringify(parsedResult.data, null, 2)}
+                </pre>
               </div>
             )}
           </div>

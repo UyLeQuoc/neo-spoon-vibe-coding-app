@@ -169,7 +169,7 @@ Site Type: {state.get('site_type', '')}
 Style Preferences: {state.get('style_preferences', '')}
 
 The HTML template has been created with the basic structure. Your task is to:
-1. Replace <!--========[APP_CONTENT_HERE]========--> with complete React components
+1. Replace // ========[APP_CONTENT_HERE]======== with complete React components
 2. Add all necessary styling, components, and functionality
 3. Ensure the site is production-ready
 {retry_instruction}
@@ -185,14 +185,14 @@ Example tool call format:
   "operation": "edit_file",
   "site_id": "{state['site_id']}",
   "file_path": "index.html",
-  "old_string": "<!--========[APP_CONTENT_HERE]========-->",
+  "old_string": "// ========[APP_CONTENT_HERE]========",
   "new_string": "...your content here..."
 }}
 
 IMPORTANT RULES:
 - ALWAYS include operation, site_id, and file_path in EVERY tool call
 - Keep old_string SHORT (under 200 chars) to avoid JSON truncation
-- Use <!--========[APP_CONTENT_HERE]========--> as the old_string for the first edit
+- Use // ========[APP_CONTENT_HERE]======== as the old_string for the first edit
 - Build incrementally if needed (create, read, edit in steps)
 - Ensure React 18+ and TailwindCSS 4+ are used (already in head)
 
@@ -243,7 +243,7 @@ Generate a complete, production-ready website."""
             content = result_data.get("content", "")
 
             # Check if placeholder is still present (content not fully generated)
-            placeholder_present = "<!--========[APP_CONTENT_HERE]========-->" in content
+            placeholder_present = "// ========[APP_CONTENT_HERE]========" in content
             has_react = "React" in content or "react" in content or "ReactDOM" in content
             has_content = len(content) > 500  # Reasonable minimum size
 

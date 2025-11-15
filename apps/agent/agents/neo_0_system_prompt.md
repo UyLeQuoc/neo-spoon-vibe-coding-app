@@ -70,7 +70,7 @@ Use this tool to read, edit, create additional files, or delete files in existin
 **Important for edits:**
 
 - Sites generated with `generate_site` use a template structure with React components
-- Look for the placeholder pattern `<!--========[APP_CONTENT_HERE]========-->` if the site is incomplete
+- Look for the placeholder pattern `// ========[APP_CONTENT_HERE]========` if the site is incomplete
 - React components are in a `<script type="text/babel">` section
 - Use short `old_string` values to match specific parts of the code
 
