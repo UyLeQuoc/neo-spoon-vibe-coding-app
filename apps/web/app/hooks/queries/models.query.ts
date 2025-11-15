@@ -23,4 +23,3 @@ export function useModelsQuery(search: string = '') {
     retry: 2
   })
 }
-

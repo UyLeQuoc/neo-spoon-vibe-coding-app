@@ -2,11 +2,11 @@ import { Buffer } from 'node:buffer'
 import * as nodePath from 'node:path'
 import { getEncoding } from 'istextorbinary'
 import { type MapStore, map } from 'nanostores'
+import { fs, initializeZenFS } from '~/lib/zenfs'
 import { WORK_DIR } from '~/utils/constants'
 import { computeFileModifications, type FileModifications } from '~/utils/diff'
 import { createScopedLogger } from '~/utils/logger'
 import { unreachable } from '~/utils/unreachable'
-import { fs, initializeZenFS } from '~/lib/zenfs'
 
 const logger = createScopedLogger('FilesStore')
 
@@ -133,9 +133,7 @@ export class FilesStore {
 
       for (const entry of entries) {
         const fullPath = nodePath.join(dirPath, entry.name)
-        const relativePath = fullPath.startsWith(WORK_DIR)
-          ? fullPath
-          : nodePath.join(WORK_DIR, fullPath)
+        const relativePath = fullPath.startsWith(WORK_DIR) ? fullPath : nodePath.join(WORK_DIR, fullPath)
 
         if (entry.isDirectory()) {
           // Skip node_modules and .git

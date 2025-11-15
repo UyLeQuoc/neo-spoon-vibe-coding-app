@@ -1,6 +1,6 @@
 import { zValidator } from '@hono/zod-validator'
 import { drizzle } from 'drizzle-orm/d1'
-import { APP_NAME, ApiAuthVerifyInput, apiFailed, generateJwtToken, ok, type AppJwtPayload } from 'shared'
+import { APP_NAME, ApiAuthVerifyInput, type AppJwtPayload, apiFailed, generateJwtToken, ok } from 'shared'
 import { dbSchema } from '~/db/schema'
 import { factory } from '~/factory'
 import { verifyAuthMessageAndDeleteNonce } from './_lib/auth-messages'

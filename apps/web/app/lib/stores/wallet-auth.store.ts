@@ -2,6 +2,7 @@ import { persistentAtom } from '@nanostores/persistent'
 import { computed } from 'nanostores'
 import { decodeJwtToken } from 'shared'
 import { hClient } from '~/lib/hono-client'
+import { ensureExclusive } from '../ensureExclusive'
 import { toJsonResult } from '../result'
 
 class WalletAuthStore {
@@ -20,6 +21,7 @@ class WalletAuthStore {
   /** Is the user authenticated? */
   isAuthenticated = computed(this.authenticatedAddress, a => !!a)
 
+  @ensureExclusive('WalletAuthStore_getOrRefreshJwtToken')
   async getOrRefreshJwtToken(): Promise<string | null> {
     const token = this.jwtToken.get()
     if (!token) return null

@@ -55,4 +55,3 @@ export const modelsRoute = factory.createApp().get('/models', async c => {
 
   return c.json(ok<ModelInfo[]>(filteredModels))
 })
-
