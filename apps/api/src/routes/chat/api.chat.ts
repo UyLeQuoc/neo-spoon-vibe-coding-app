@@ -125,7 +125,7 @@ export const chatRoute = factory
         originalMessages: allMessages,
         execute: async ({ writer }) => {
           const sseClient = await experimental_createMCPClient({
-            transport: { type: 'sse', url: 'http://localhost:8000/generate' }
+            transport: { type: 'sse', url: 'http://localhost:8000/sse' }
           })
           const result = streamText({
             model: model,

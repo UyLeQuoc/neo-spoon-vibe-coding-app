@@ -9,11 +9,7 @@ export const avatarProxyRoute = factory.createApp().get('/avatar/:seed', async c
 
   try {
     const response = await fetch(`https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(seed)}`)
-
-    if (!response.ok) {
-      return c.text('Failed to fetch avatar', response.status)
-    }
-
+    if (!response.ok) return c.text('Failed to fetch avatar', 500)
     const svg = await response.text()
 
     return c.html(svg, 200, {

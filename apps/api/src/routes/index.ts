@@ -3,6 +3,7 @@ import { balanceRoute } from './api.balance'
 import { authRoutes } from './auth'
 import { avatarProxyRoute } from './avatar/api.avatar-proxy'
 import { chatRoute } from './chat/api.chat'
+import { modelsRoute } from './models/api.models'
 import { rpcProxyRoute } from './neons/api.rpc-proxy'
 import { createPendingPaymentRoute } from './payment/api.create-pending-payment'
 import { getPendingPaymentRoute } from './payment/api.get-pending-payment'
@@ -22,3 +23,4 @@ export const routes = factory
   .route('/', rpcProxyRoute)
   .route('/', avatarProxyRoute)
   .route('/', chatRoute)
+  .route('/', modelsRoute)

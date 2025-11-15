@@ -25,23 +25,22 @@ export async function initializeZenFS(): Promise<void> {
     return zenfsInitialized
   }
 
-  zenfsInitialized = Promise.resolve()
-    .then(async () => {
-      await configure({
-        mounts: {
-          '/': { backend: IndexedDB }
-        }
-      })
-
-      // Ensure work directory exists
-      try {
-        await fs.promises.mkdir(WORK_DIR, { recursive: true })
-      } catch (error) {
-        // Directory might already exist, ignore
+  zenfsInitialized = Promise.resolve().then(async () => {
+    await configure({
+      mounts: {
+        '/': { backend: IndexedDB }
       }
-
-      zenfsContext.initialized = true
     })
+
+    // Ensure work directory exists
+    try {
+      await fs.promises.mkdir(WORK_DIR, { recursive: true })
+    } catch (error) {
+      // Directory might already exist, ignore
+    }
+
+    zenfsContext.initialized = true
+  })
 
   return zenfsInitialized
 }
@@ -53,4 +52,3 @@ if (!import.meta.env.SSR) {
 
 export { fs }
 export { fs as zenfs }
-
