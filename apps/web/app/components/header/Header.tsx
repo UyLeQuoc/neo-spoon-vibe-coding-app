@@ -1,7 +1,7 @@
-import { Link } from '@remix-run/react'
 import { useStore } from '@nanostores/react'
-import { ClientOnly } from 'remix-utils/client-only'
+import { Link } from '@remix-run/react'
 import { Sparkles } from 'lucide-react'
+import { ClientOnly } from 'remix-utils/client-only'
 import { ChatDescription } from '~/lib/persistence/ChatDescription.client'
 import { chatStore } from '~/lib/stores/chat'
 import { classNames } from '~/utils/classNames'
@@ -53,9 +53,7 @@ export function Header() {
         </ClientOnly>
       )}
       <div className="flex items-center gap-2">
-        <ClientOnly>
-          {() => <WalletButton />}
-        </ClientOnly>
+        <ClientOnly>{() => <WalletButton />}</ClientOnly>
       </div>
     </header>
   )

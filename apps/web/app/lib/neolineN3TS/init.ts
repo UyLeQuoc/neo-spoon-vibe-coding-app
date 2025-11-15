@@ -30,7 +30,7 @@ export async function initNeoLineN3(): Promise<NeoLineN3 | null> {
   }
 
   // Wait for SDK to be injected by extension
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     let resolved = false
     let checkCount = 0
     const maxChecks = 20 // 2 seconds max wait
@@ -131,7 +131,7 @@ export async function waitForNeoLine(timeoutMs: number = 2000): Promise<NeoLineN
     return createNeoLineInstance()
   }
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     let resolved = false
     const timeout = setTimeout(() => {
       if (!resolved) {
@@ -157,4 +157,3 @@ export async function waitForNeoLine(timeoutMs: number = 2000): Promise<NeoLineN
     }
   })
 }
-

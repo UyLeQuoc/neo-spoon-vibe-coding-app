@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogRoot, DialogTitle, DialogDescription, DialogButton } from '~/components/ui/Dialog'
+import { useEffect, useState } from 'react'
+import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
-import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
+import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 
 interface SignInDialogProps {
   isOpen: boolean
@@ -82,7 +82,7 @@ export function SignInDialog({ isOpen, onClose, onSignInSuccess }: SignInDialogP
   }
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <DialogRoot open={isOpen} onOpenChange={open => !open && onClose()}>
       <Dialog onBackdrop={onClose} onClose={onClose}>
         <DialogTitle>Sign In Required</DialogTitle>
         <DialogDescription>
@@ -115,4 +115,3 @@ export function SignInDialog({ isOpen, onClose, onSignInSuccess }: SignInDialogP
     </DialogRoot>
   )
 }
-

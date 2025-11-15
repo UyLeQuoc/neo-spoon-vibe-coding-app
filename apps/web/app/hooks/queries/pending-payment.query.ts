@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { useStore } from '@nanostores/react'
-import { throwIfFailed, toJsonResult } from '~/lib/result'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '~/hooks/keys'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
+import { throwIfFailed, toJsonResult } from '~/lib/result'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
-import { queryKeys } from '~/hooks/keys'
 
 export function usePendingPaymentQuery() {
   const { isWalletAuthenticated } = useWalletAuth()
@@ -13,10 +13,7 @@ export function usePendingPaymentQuery() {
   return useQuery({
     queryKey: queryKeys.pendingPayment(authenticatedAddress),
     queryFn: async () => {
-      const result = await hClientWithAuth.api['pending-payment']
-        .$get()
-        .then(toJsonResult)
-        .then(throwIfFailed)
+      const result = await hClientWithAuth.api['pending-payment'].$get().then(toJsonResult).then(throwIfFailed)
       return result.pendingPayment
     },
     enabled: isWalletAuthenticated && !!authenticatedAddress,
@@ -24,4 +21,3 @@ export function usePendingPaymentQuery() {
     retry: 1
   })
 }
-

@@ -1,14 +1,14 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
-import { useState, useEffect, useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { Dialog, DialogRoot, DialogTitle, DialogDescription, DialogButton } from '~/components/ui/Dialog'
-import { paymentDialogStore, paymentDialogActions, PaymentStep, PaymentStatus } from '~/lib/stores/payment-dialog.store'
+import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog'
+import { VibeCodingAppPaymentContract } from '~/contracts/vibecodingapppaymentcontract'
+import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
-import { hClientWithAuth } from '~/lib/hono-authenticated-client'
-import { VibeCodingAppPaymentContract } from '~/contracts/vibecodingapppaymentcontract'
+import { PaymentStatus, PaymentStep, paymentDialogActions, paymentDialogStore } from '~/lib/stores/payment-dialog.store'
 
 const EXAMPLE_AMOUNTS = [0.1, 0.5, 1, 5, 10]
 
@@ -58,9 +58,7 @@ function Stepper({ steps, currentStep, isLoading }: StepperProps) {
           </div>
           {index < steps.length - 1 && (
             <div
-              className={`flex-1 h-0.5 mx-2 ${
-                index < currentStep ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
-              }`}
+              className={`flex-1 h-0.5 mx-2 ${index < currentStep ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'}`}
             />
           )}
         </div>
@@ -90,7 +88,8 @@ export function PaymentDialog() {
   const { isWalletAuthenticated } = useWalletAuth()
   const [showIncompleteWarning, setShowIncompleteWarning] = useState(false)
 
-  const isWorking = status !== PaymentStatus.Idle && status !== PaymentStatus.Completed && status !== PaymentStatus.Failed
+  const isWorking =
+    status !== PaymentStatus.Idle && status !== PaymentStatus.Completed && status !== PaymentStatus.Failed
 
   const loadExistingPayment = useCallback(async () => {
     try {
@@ -262,7 +261,7 @@ export function PaymentDialog() {
     } catch (error: any) {
       console.error('Failed to sign transaction:', error)
       const errorMessage = error?.description || error?.message || 'Unknown error'
-      
+
       if (error?.type === 'CANCELED' || errorMessage.includes('cancel')) {
         toast.warning('Transaction was cancelled. You can try again.')
       } else if (error?.type === 'INSUFFICIENT_FUNDS' || errorMessage.includes('insufficient')) {
@@ -280,7 +279,7 @@ export function PaymentDialog() {
     try {
       // Try to get transaction to check if it's confirmed
       const tx = await neoline.getTransaction({ txid })
-      
+
       if (tx && tx.block_index !== undefined && tx.block_index > 0) {
         // Transaction is confirmed, proceed with verification
         await handleVerifyTransaction(txid)
@@ -455,9 +454,7 @@ export function PaymentDialog() {
 
             {showIncompleteWarning && canCancel && (
               <div className="p-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded">
-                <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  💡 Incomplete Payment Found
-                </p>
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">💡 Incomplete Payment Found</p>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
                   You have an incomplete payment. Would you like to continue or start over?
                 </p>
@@ -540,9 +537,7 @@ export function PaymentDialog() {
                 <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
                   Click the button below to verify your payment on-chain.
                 </p>
-                {isWorking && (
-                  <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Verifying...</p>
-                )}
+                {isWorking && <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Verifying...</p>}
               </div>
             )}
 
@@ -565,7 +560,11 @@ export function PaymentDialog() {
                 </>
               ) : (
                 <>
-                  <DialogButton type="secondary" onClick={() => handleClose(false)} disabled={isWorking || mustComplete}>
+                  <DialogButton
+                    type="secondary"
+                    onClick={() => handleClose(false)}
+                    disabled={isWorking || mustComplete}
+                  >
                     {mustComplete ? 'Cannot Close' : 'Cancel'}
                   </DialogButton>
                   <DialogButton
@@ -587,8 +586,8 @@ export function PaymentDialog() {
 
             <div className="p-2 bg-amber-50 dark:bg-amber-950 rounded">
               <p className="text-xs text-gray-600 dark:text-gray-400">
-                ⚠️ Once you sign the transaction, you must complete the verification step. Do not close this dialog
-                until the process is complete.
+                ⚠️ Once you sign the transaction, you must complete the verification step. Do not close this dialog until
+                the process is complete.
               </p>
             </div>
           </div>

@@ -228,7 +228,8 @@ export const EditorPanel = memo(
                           className={classNames(
                             'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
                             {
-                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary': isActive,
+                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary':
+                                isActive,
                               'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
                                 !isActive
                             }
@@ -244,7 +245,8 @@ export const EditorPanel = memo(
                           className={classNames(
                             'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
                             {
-                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary': isActive,
+                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary':
+                                isActive,
                               'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
                                 !isActive
                             }

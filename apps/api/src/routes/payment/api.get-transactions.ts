@@ -27,69 +27,63 @@ export type GetTransactionsResponse = {
 }
 
 // GET /transactions - Get user's transaction history with paging
-export const getTransactionsRoute = factory
-  .createApp()
-  .get('/transactions', authMiddware, async c => {
-    const { sub: userAddr } = c.get('jwtPayload') ?? {}
+export const getTransactionsRoute = factory.createApp().get('/transactions', authMiddware, async c => {
+  const { sub: userAddr } = c.get('jwtPayload') ?? {}
 
-    const db = drizzle(c.env.DB, { schema: dbSchema })
+  const db = drizzle(c.env.DB, { schema: dbSchema })
 
-    try {
-      // Parse query parameters
-      const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
-      const pageSize = Math.min(
-        MAX_PAGE_SIZE,
-        Math.max(1, parseInt(c.req.query('pageSize') || String(DEFAULT_PAGE_SIZE), 10))
-      )
+  try {
+    // Parse query parameters
+    const page = Math.max(1, parseInt(c.req.query('page') || '1', 10))
+    const pageSize = Math.min(
+      MAX_PAGE_SIZE,
+      Math.max(1, parseInt(c.req.query('pageSize') || String(DEFAULT_PAGE_SIZE), 10))
+    )
 
-      // Get total count
-      const totalCountResult = await db
-        .select()
-        .from(transactionsTable)
-        .where(eq(transactionsTable.address, userAddr))
-      const totalCount = totalCountResult.length
+    // Get total count
+    const totalCountResult = await db.select().from(transactionsTable).where(eq(transactionsTable.address, userAddr))
+    const totalCount = totalCountResult.length
 
-      // Get transactions with pagination
-      const transactions = await db
-        .select()
-        .from(transactionsTable)
-        .where(eq(transactionsTable.address, userAddr))
-        .orderBy(desc(transactionsTable.timestamp))
-        .limit(pageSize)
-        .offset((page - 1) * pageSize)
-        .all()
+    // Get transactions with pagination
+    const transactions = await db
+      .select()
+      .from(transactionsTable)
+      .where(eq(transactionsTable.address, userAddr))
+      .orderBy(desc(transactionsTable.timestamp))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize)
+      .all()
 
-      const totalPages = Math.ceil(totalCount / pageSize)
+    const totalPages = Math.ceil(totalCount / pageSize)
 
-      return c.json(
-        ok<GetTransactionsResponse>({
-          transactions: transactions.map(tx => ({
-            id: tx.id,
-            address: tx.address,
-            amount: tx.amount,
-            note: tx.note,
-            // Convert Date to Unix timestamp (seconds) for API response
-            timestamp: tx.timestamp ? Math.floor(new Date(tx.timestamp).getTime() / 1000) : null
-          })),
-          pagination: {
-            page,
-            pageSize,
-            total: totalCount,
-            totalPages,
-            hasNext: page < totalPages,
-            hasPrev: page > 1
-          }
-        })
-      )
-    } catch (error) {
-      console.error('Failed to get transactions:', error)
-      return c.json(
-        apiFailed({
-          code: 'GET_TRANSACTIONS_FAILED',
-          message: 'Failed to get transactions'
-        }),
-        500
-      )
-    }
-  })
-
+    return c.json(
+      ok<GetTransactionsResponse>({
+        transactions: transactions.map(tx => ({
+          id: tx.id,
+          address: tx.address,
+          amount: tx.amount,
+          note: tx.note,
+          // Convert Date to Unix timestamp (seconds) for API response
+          timestamp: tx.timestamp ? Math.floor(new Date(tx.timestamp).getTime() / 1000) : null
+        })),
+        pagination: {
+          page,
+          pageSize,
+          total: totalCount,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1
+        }
+      })
+    )
+  } catch (error) {
+    console.error('Failed to get transactions:', error)
+    return c.json(
+      apiFailed({
+        code: 'GET_TRANSACTIONS_FAILED',
+        message: 'Failed to get transactions'
+      }),
+      500
+    )
+  }
+})

@@ -3,7 +3,6 @@ import { computed } from 'nanostores'
 import { decodeJwtToken } from 'shared'
 import { hClient } from '~/lib/hono-client'
 import { toJsonResult } from '../result'
-import { ensureExclusive } from '../ensureExclusive'
 
 class WalletAuthStore {
   /** Refresh token */
@@ -60,9 +59,7 @@ class WalletAuthStore {
   }
 
   async getSignInMessage(address: string) {
-    const result = await hClient.api.auth.nonce
-      .$post({ json: { walletAddress: address } })
-      .then(toJsonResult)
+    const result = await hClient.api.auth.nonce.$post({ json: { walletAddress: address } }).then(toJsonResult)
     if (!result.ok) {
       console.error('Failed to get sign-in message', result.error)
       return null
@@ -81,18 +78,20 @@ class WalletAuthStore {
     }
   ): Promise<boolean> {
     try {
-      const result = await hClient.api.auth.verify.$post({
-        json: {
-          walletAddress,
-          signedMessage: {
-            data: signedMessage.data,
-            message: message, // Original message that was signed
-            messageHex: signedMessage.messageHex,
-            publicKey: signedMessage.publicKey,
-            salt: signedMessage.salt
+      const result = await hClient.api.auth.verify
+        .$post({
+          json: {
+            walletAddress,
+            signedMessage: {
+              data: signedMessage.data,
+              message: message, // Original message that was signed
+              messageHex: signedMessage.messageHex,
+              publicKey: signedMessage.publicKey,
+              salt: signedMessage.salt
+            }
           }
-        }
-      }).then(toJsonResult)
+        })
+        .then(toJsonResult)
 
       if (!result.ok) {
         console.error('Login failed', result.error)

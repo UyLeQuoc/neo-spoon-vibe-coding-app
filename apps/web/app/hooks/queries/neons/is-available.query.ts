@@ -19,4 +19,3 @@ export function useIsAvailableQuery(domain: string | null) {
     retry: 1
   })
 }
-

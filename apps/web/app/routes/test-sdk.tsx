@@ -22,10 +22,10 @@ export default function TestSDKPage() {
 
   // Helper to execute and store results
   const executeTest = async (testId: string, testFn: () => Promise<any>) => {
-    setLoading((prev) => ({ ...prev, [testId]: true }))
+    setLoading(prev => ({ ...prev, [testId]: true }))
     try {
       const data = await testFn()
-      setResults((prev) => ({
+      setResults(prev => ({
         ...prev,
         [testId]: {
           success: true,
@@ -34,7 +34,7 @@ export default function TestSDKPage() {
         }
       }))
     } catch (err: any) {
-      setResults((prev) => ({
+      setResults(prev => ({
         ...prev,
         [testId]: {
           success: false,
@@ -43,7 +43,7 @@ export default function TestSDKPage() {
         }
       }))
     } finally {
-      setLoading((prev) => ({ ...prev, [testId]: false }))
+      setLoading(prev => ({ ...prev, [testId]: false }))
     }
   }
 
@@ -62,7 +62,7 @@ export default function TestSDKPage() {
           Returns information about the dAPI provider, including name, website, version, and compatibility.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getProvider())}
+          onClick={() => executeTest(testId, () => neoline?.getProvider())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -109,16 +109,14 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={e => setAddress(e.target.value)}
             placeholder={account || 'Enter address'}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
           onClick={() =>
-            executeTest(testId, () =>
-              neoline!.getBalance([{ address: address || account!, contracts: [] }])
-            )
+            executeTest(testId, () => neoline?.getBalance([{ address: address || account!, contracts: [] }]))
           }
           disabled={!neoline || !address || loading[testId]}
           style={{
@@ -167,7 +165,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={scriptHash}
-            onChange={(e) => setScriptHash(e.target.value)}
+            onChange={e => setScriptHash(e.target.value)}
             placeholder="0x006b26dd0d2aa076b11082847a094772450f05af"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
@@ -177,13 +175,13 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={key}
-            onChange={(e) => setKey(e.target.value)}
+            onChange={e => setKey(e.target.value)}
             placeholder="token0"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getStorage({ scriptHash, key }))}
+          onClick={() => executeTest(testId, () => neoline?.getStorage({ scriptHash, key }))}
           disabled={!neoline || !scriptHash || !key || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -232,7 +230,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={scriptHash}
-            onChange={(e) => setScriptHash(e.target.value)}
+            onChange={e => setScriptHash(e.target.value)}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
@@ -241,7 +239,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={operation}
-            onChange={(e) => setOperation(e.target.value)}
+            onChange={e => setOperation(e.target.value)}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
@@ -249,9 +247,15 @@ export default function TestSDKPage() {
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Args (JSON):</label>
           <textarea
             value={argsJson}
-            onChange={(e) => setArgsJson(e.target.value)}
+            onChange={e => setArgsJson(e.target.value)}
             rows={3}
-            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'monospace' }}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #ddd',
+              fontFamily: 'monospace'
+            }}
           />
         </div>
         <button
@@ -262,9 +266,9 @@ export default function TestSDKPage() {
                 alert('Please connect wallet first')
                 return
               }
-              const scriptHashResult = await neoline!.AddressToScriptHash({ address: account })
+              const scriptHashResult = await neoline?.AddressToScriptHash({ address: account })
               executeTest(testId, () =>
-                neoline!.invokeRead({
+                neoline?.invokeRead({
                   scriptHash,
                   operation,
                   args,
@@ -321,12 +325,12 @@ export default function TestSDKPage() {
           <input
             type="number"
             value={blockHeight}
-            onChange={(e) => setBlockHeight(e.target.value)}
+            onChange={e => setBlockHeight(e.target.value)}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getBlock({ blockHeight: parseInt(blockHeight) }))}
+          onClick={() => executeTest(testId, () => neoline?.getBlock({ blockHeight: parseInt(blockHeight, 10) }))}
           disabled={!neoline || !blockHeight || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -373,13 +377,13 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={txid}
-            onChange={(e) => setTxid(e.target.value)}
+            onChange={e => setTxid(e.target.value)}
             placeholder="0xe5a5fdacad0ba4e8d34d2fa0638357adb0f05e7fc902ec150739616320870f50"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getTransaction({ txid }))}
+          onClick={() => executeTest(testId, () => neoline?.getTransaction({ txid }))}
           disabled={!neoline || !txid || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -426,13 +430,13 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={txid}
-            onChange={(e) => setTxid(e.target.value)}
+            onChange={e => setTxid(e.target.value)}
             placeholder="0xe5a5fdacad0ba4e8d34d2fa0638357adb0f05e7fc902ec150739616320870f50"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getApplicationLog({ txid }))}
+          onClick={() => executeTest(testId, () => neoline?.getApplicationLog({ txid }))}
           disabled={!neoline || !txid || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -479,13 +483,13 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
+            onChange={e => setAddress(e.target.value)}
             placeholder={account || 'Enter N3 address'}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.AddressToScriptHash({ address }))}
+          onClick={() => executeTest(testId, () => neoline?.AddressToScriptHash({ address }))}
           disabled={!neoline || !address || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -536,7 +540,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={toAddress}
-            onChange={(e) => setToAddress(e.target.value)}
+            onChange={e => setToAddress(e.target.value)}
             placeholder="NaUjKgf5vMuFt7Ffgfffcpc41uH3adx1jq"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
@@ -546,7 +550,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={asset}
-            onChange={(e) => setAsset(e.target.value)}
+            onChange={e => setAsset(e.target.value)}
             placeholder="GAS or contract hash"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
@@ -556,7 +560,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={e => setAmount(e.target.value)}
             placeholder="1"
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
@@ -564,7 +568,7 @@ export default function TestSDKPage() {
         <button
           onClick={() =>
             executeTest(testId, () =>
-              neoline!.send({
+              neoline?.send({
                 fromAddress: account!,
                 toAddress,
                 asset,
@@ -623,7 +627,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={scriptHash}
-            onChange={(e) => setScriptHash(e.target.value)}
+            onChange={e => setScriptHash(e.target.value)}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
@@ -632,7 +636,7 @@ export default function TestSDKPage() {
           <input
             type="text"
             value={operation}
-            onChange={(e) => setOperation(e.target.value)}
+            onChange={e => setOperation(e.target.value)}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
@@ -640,18 +644,24 @@ export default function TestSDKPage() {
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Args (JSON):</label>
           <textarea
             value={argsJson}
-            onChange={(e) => setArgsJson(e.target.value)}
+            onChange={e => setArgsJson(e.target.value)}
             rows={4}
-            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd', fontFamily: 'monospace' }}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '4px',
+              border: '1px solid #ddd',
+              fontFamily: 'monospace'
+            }}
           />
         </div>
         <button
           onClick={async () => {
             try {
               const args = JSON.parse(argsJson) as Argument[]
-              const scriptHashResult = await neoline!.AddressToScriptHash({ address: account! })
+              const scriptHashResult = await neoline?.AddressToScriptHash({ address: account! })
               executeTest(testId, () =>
-                neoline!.invoke({
+                neoline?.invoke({
                   scriptHash,
                   operation,
                   args,
@@ -708,13 +718,13 @@ export default function TestSDKPage() {
           <label style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>Message:</label>
           <textarea
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={e => setMessage(e.target.value)}
             rows={3}
             style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ddd' }}
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline!.signMessage({ message }))}
+          onClick={() => executeTest(testId, () => neoline?.signMessage({ message }))}
           disabled={!neoline || !message || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -758,7 +768,7 @@ export default function TestSDKPage() {
           Returns the Account that is currently connected to the dApp.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getAccount())}
+          onClick={() => executeTest(testId, () => neoline?.getAccount())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -800,7 +810,7 @@ export default function TestSDKPage() {
           Returns the networks available and the default network the wallet is currently set to.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getNetworks())}
+          onClick={() => executeTest(testId, () => neoline?.getNetworks())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -842,7 +852,7 @@ export default function TestSDKPage() {
           Returns the public key of the Account that is currently connected to the dApp.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline!.getPublicKey())}
+          onClick={() => executeTest(testId, () => neoline?.getPublicKey())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -875,9 +885,7 @@ export default function TestSDKPage() {
 
   return (
     <div style={{ padding: '40px', fontFamily: 'monospace', maxWidth: '1400px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '28px', marginBottom: '10px', color: '#333' }}>
-        🧪 NeoLine N3 SDK Playground
-      </h1>
+      <h1 style={{ fontSize: '28px', marginBottom: '10px', color: '#333' }}>🧪 NeoLine N3 SDK Playground</h1>
       <p style={{ color: '#666', marginBottom: '30px', fontSize: '14px' }}>
         Test all features of the NeoLine N3 dAPI library. Make sure NeoLine extension is installed and connected.
       </p>
@@ -890,7 +898,15 @@ export default function TestSDKPage() {
       )}
 
       {error && (
-        <div style={{ padding: '15px', background: '#f8d7da', borderRadius: '8px', marginBottom: '20px', color: '#721c24' }}>
+        <div
+          style={{
+            padding: '15px',
+            background: '#f8d7da',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            color: '#721c24'
+          }}
+        >
           ⚠️ {error}
         </div>
       )}
@@ -953,7 +969,7 @@ export default function TestSDKPage() {
             { id: 'read', label: '📖 Read Methods', color: '#4CAF50' },
             { id: 'write', label: '✍️ Write Methods', color: '#FF9800' },
             { id: 'common', label: '🔧 Common Methods', color: '#2196F3' }
-          ].map((tab) => (
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -1009,4 +1025,3 @@ export default function TestSDKPage() {
     </div>
   )
 }
-

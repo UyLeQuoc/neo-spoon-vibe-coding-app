@@ -1,9 +1,9 @@
+import { useStore } from '@nanostores/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { queryKeys } from '~/hooks/keys'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { throwIfFailed, toJsonResult } from '~/lib/result'
-import { queryKeys } from '~/hooks/keys'
-import { useStore } from '@nanostores/react'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 
 interface CreatePendingPaymentInput {
@@ -34,10 +34,7 @@ export function useCreatePendingPayment() {
     },
     onError: error => {
       console.error('Create pending payment failed:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to create pending payment'
-      )
+      toast.error(error instanceof Error ? error.message : 'Failed to create pending payment')
     }
   })
 }
-

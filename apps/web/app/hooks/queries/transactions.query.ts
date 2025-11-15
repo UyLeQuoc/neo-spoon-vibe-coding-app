@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { useStore } from '@nanostores/react'
-import { throwIfFailed, toJsonResult } from '~/lib/result'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '~/hooks/keys'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
+import { throwIfFailed, toJsonResult } from '~/lib/result'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
-import { queryKeys } from '~/hooks/keys'
 
 interface UseTransactionsQueryOptions {
   page?: number
@@ -19,12 +19,13 @@ export function useTransactionsQuery(options: UseTransactionsQueryOptions = {}) 
   return useQuery({
     queryKey: queryKeys.transactions(authenticatedAddress, page, pageSize),
     queryFn: async () => {
-      const result = await hClientWithAuth.api.transactions.$get({
-        query: {
-          page: String(page),
-          pageSize: String(pageSize)
-        }
-      })
+      const result = await hClientWithAuth.api.transactions
+        .$get({
+          query: {
+            page: String(page),
+            pageSize: String(pageSize)
+          }
+        })
         .then(toJsonResult)
         .then(throwIfFailed)
       return result
@@ -34,4 +35,3 @@ export function useTransactionsQuery(options: UseTransactionsQueryOptions = {}) 
     retry: 1
   })
 }
-

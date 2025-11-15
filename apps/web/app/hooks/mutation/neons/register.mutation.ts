@@ -1,8 +1,8 @@
+import { useStore } from '@nanostores/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { queryKeys } from '../../keys'
-import { useStore } from '@nanostores/react'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
+import { queryKeys } from '../../keys'
 
 interface RegisterInput {
   name: string
@@ -40,10 +40,7 @@ export function useRegisterDomain() {
     },
     onError: error => {
       console.error('Register domain failed:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to register domain'
-      )
+      toast.error(error instanceof Error ? error.message : 'Failed to register domain')
     }
   })
 }
-

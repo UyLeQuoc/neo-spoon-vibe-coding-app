@@ -7,3 +7,6 @@ export const JWT_TOKEN_TTL = 900
 export const REFRESH_TOKEN_TTL = 2_592_000
 /** Nonce Time-To-Live (TTL) in seconds (5min) */
 export const NONCE_TTL = 300
+
+export const DEFAULT_MODEL = 'anthropic/claude-haiku-4.5'
+export const DEFAULT_PROVIDER = 'OpenRouter'

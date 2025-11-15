@@ -189,7 +189,8 @@ function File({ file: { depth, name }, onClick, selected, unsavedChanges = false
   return (
     <NodeButton
       className={classNames('group', {
-        'bg-transparent hover:bg-neozero-elements-item-backgroundActive text-neozero-elements-item-contentDefault': !selected,
+        'bg-transparent hover:bg-neozero-elements-item-backgroundActive text-neozero-elements-item-contentDefault':
+          !selected,
         'bg-neozero-elements-item-backgroundAccent text-neozero-elements-item-contentAccent': selected
       })}
       depth={depth}

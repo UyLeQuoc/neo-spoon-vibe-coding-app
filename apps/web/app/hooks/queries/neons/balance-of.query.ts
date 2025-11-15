@@ -1,10 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
 import { useStore } from '@nanostores/react'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '~/hooks/keys'
+import { useNeoLineN3 } from '~/lib/neolineN3TS'
+import { getBalanceOf } from '~/lib/neons/rpc'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
-import { useNeoLineN3 } from '~/lib/neolineN3TS'
-import { queryKeys } from '~/hooks/keys'
-import { getBalanceOf } from '~/lib/neons/rpc'
 
 interface BalanceOfResponse {
   balance: number
@@ -20,14 +20,14 @@ export function useBalanceOfQuery() {
     queryKey: queryKeys.neons.balanceOf(authenticatedAddress),
     queryFn: async () => {
       if (!authenticatedAddress || !neoline) return null
-      
+
       // Convert N3 address to Hash160 if needed
       let ownerHash = authenticatedAddress
       if (authenticatedAddress.startsWith('N')) {
         const scriptHashResult = await neoline.AddressToScriptHash({ address: authenticatedAddress })
         ownerHash = scriptHashResult.scriptHash
       }
-      
+
       return await getBalanceOf(ownerHash)
     },
     enabled: isWalletAuthenticated && !!authenticatedAddress && !!neoline,
@@ -35,4 +35,3 @@ export function useBalanceOfQuery() {
     retry: 2
   })
 }
-

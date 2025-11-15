@@ -1,4 +1,4 @@
-import type { IPendingPayment } from "~/db/tables";
+import type { IPendingPayment } from '~/db/tables'
 
 /**
  * API response format for pending payment with Unix timestamps (seconds)
@@ -11,9 +11,7 @@ export type ApiPendingPayment = Omit<IPendingPayment, 'createdAt' | 'updatedAt'>
 /**
  * Convert DB pending payment (with Date objects) to API response format (with Unix timestamps in seconds)
  */
-export function toApiPendingPayment(
-  payment: IPendingPayment
-): ApiPendingPayment {
+export function toApiPendingPayment(payment: IPendingPayment): ApiPendingPayment {
   return {
     id: payment.id,
     address: payment.address,
