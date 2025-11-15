@@ -116,6 +116,6 @@ export function getModel(provider: string, model: string, env: Env, apiKey?: str
     case 'LMStudio':
       return getLMStudioModel(baseURL, model)
     default:
-      return getAnthropicModel(apiKey, model)
+      return getOpenRouterModel(apiKey, model)
   }
 }
