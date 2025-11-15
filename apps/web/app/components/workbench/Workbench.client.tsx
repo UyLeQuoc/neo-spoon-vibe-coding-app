@@ -1,6 +1,5 @@
 import { useStore } from '@nanostores/react'
 import { type HTMLMotionProps, motion, type Variants } from 'framer-motion'
-import { computed } from 'nanostores'
 import { memo, useCallback, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import type {
@@ -8,7 +7,6 @@ import type {
   OnScrollCallback as OnEditorScroll
 } from '~/components/editor/codemirror/CodeMirrorEditor'
 import { IconButton } from '~/components/ui/IconButton'
-import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton'
 import { Slider, type SliderOptions } from '~/components/ui/Slider'
 import { type WorkbenchViewType, workbenchStore } from '~/lib/stores/workbench'
 import { classNames } from '~/utils/classNames'
@@ -55,7 +53,8 @@ const workbenchVariants = {
 export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => {
   renderLogger.trace('Workbench')
 
-  const hasPreview = useStore(computed(workbenchStore.previews, previews => previews.length > 0))
+  const previewUrl = useStore(workbenchStore.previewUrl)
+  const hasPreview = !!previewUrl
   const showWorkbench = useStore(workbenchStore.showWorkbench)
   const selectedFile = useStore(workbenchStore.selectedFile)
   const currentDocument = useStore(workbenchStore.currentDocument)

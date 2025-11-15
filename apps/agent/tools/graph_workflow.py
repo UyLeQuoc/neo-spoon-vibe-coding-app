@@ -179,7 +179,7 @@ CRITICAL - When calling manage_site_files tool, you MUST include ALL required pa
 - operation: "create_file", "edit_file", "read_file", or "delete_file" (REQUIRED)
 - site_id: "{state['site_id']}" (REQUIRED - use this exact value)
 - file_path: "index.html" or other file path (REQUIRED)
-- For edit_file: old_string (REQUIRED, keep under 200 chars) and new_string (REQUIRED)
+- For edit_file: old_string (REQUIRED, keep under 500 chars) and new_string (REQUIRED)
 - For create_file: content (REQUIRED)
 
 Example tool call format:
@@ -194,7 +194,7 @@ Example tool call format:
 IMPORTANT RULES:
 - Template uses ESM imports via import map with version pinning - use standard import/export syntax
 - ALWAYS include operation, site_id, and file_path in EVERY tool call
-- Keep old_string SHORT (under 200 chars) to avoid JSON truncation
+- Keep old_string SHORT (under 500 chars) to avoid JSON truncation
 - Use // ========[APP_CONTENT_HERE]======== as the old_string for the first edit
 - Replace SampleApp with your actual App component
 - Update the render call to use your component name

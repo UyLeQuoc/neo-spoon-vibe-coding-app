@@ -9,7 +9,6 @@ import { importFromGitHub } from '~/utils/import'
 import { unreachable } from '~/utils/unreachable'
 import { EditorStore } from './editor'
 import { type FileMap, FilesStore } from './files'
-import { PreviewsStore } from './previews'
 
 export interface ArtifactState {
   id: string
@@ -25,7 +24,6 @@ type Artifacts = MapStore<Record<string, ArtifactState>>
 export type WorkbenchViewType = 'code' | 'preview'
 
 export class WorkbenchStore {
-  #previewsStore = new PreviewsStore()
   #filesStore = new FilesStore()
   #editorStore = new EditorStore(this.#filesStore)
 
@@ -34,6 +32,7 @@ export class WorkbenchStore {
   showWorkbench: WritableAtom<boolean> = import.meta.hot?.data.showWorkbench ?? atom(false)
   currentView: WritableAtom<WorkbenchViewType> = import.meta.hot?.data.currentView ?? atom('code')
   unsavedFiles: WritableAtom<Set<string>> = import.meta.hot?.data.unsavedFiles ?? atom(new Set<string>())
+  previewUrl: WritableAtom<string | undefined> = import.meta.hot?.data.previewUrl ?? atom(undefined)
   modifiedFiles = new Set<string>()
   artifactIdList: string[] = []
 
@@ -43,6 +42,7 @@ export class WorkbenchStore {
       import.meta.hot.data.unsavedFiles = this.unsavedFiles
       import.meta.hot.data.showWorkbench = this.showWorkbench
       import.meta.hot.data.currentView = this.currentView
+      import.meta.hot.data.previewUrl = this.previewUrl
     }
   }
 
@@ -135,9 +135,6 @@ export class WorkbenchStore {
     this.showWorkbench.set(true)
   }
 
-  get previews() {
-    return this.#previewsStore.previews
-  }
 
   get files() {
     return this.#filesStore.files

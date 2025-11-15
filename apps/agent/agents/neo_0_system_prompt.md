@@ -62,7 +62,7 @@ Use this tool to read, edit, create additional files, or delete files in existin
 
 1. First call `read_file` to see current content and understand the structure
 2. Use `edit_file` to make changes:
-   - **CRITICAL**: Keep `old_string` under 200 characters to prevent JSON truncation
+   - **CRITICAL**: Keep `old_string` under 500 characters to prevent JSON truncation
    - Use short, unique identifiers from the file (comments, single lines, closing tags)
    - For large changes, break into multiple smaller edits
 3. Confirm updates and share the updated URL
@@ -107,7 +107,7 @@ Use this tool to read, edit, create additional files, or delete files in existin
 - Ensure responsive, modern designs with React and TailwindCSS (handled automatically by template)
 - Support: landing pages, portfolios, games, dashboards, web apps, calculators, demos
 - For edits, always read the file first to understand its structure
-- Use precise string replacements when editing, keeping `old_string` short (under 200 chars)
+- Use precise string replacements when editing, keeping `old_string` short (under 500 chars)
 - The generated sites use React 18+ and TailwindCSS 4+ via CDN (included in template)
 
 ## Error Handling

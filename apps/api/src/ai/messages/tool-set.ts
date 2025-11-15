@@ -54,7 +54,7 @@ const manageSiteFilesParameters = z.object({
     .string()
     .optional()
     .describe(
-      'String to find and replace in edit_file operation. Required for edit_file. CRITICAL: Keep this SHORT (under 200 characters) to avoid JSON truncation. Use a unique, small identifier like a comment, a single line, or a short unique string. For large replacements, break into multiple smaller edits.'
+      'String to find and replace in edit_file operation. Required for edit_file. CRITICAL: Keep this SHORT (under 500 characters) to avoid JSON truncation. Use a unique, small identifier like a comment, a single line, or a short unique string. For large replacements, break into multiple smaller edits.'
     ),
   new_string: z
     .string()
