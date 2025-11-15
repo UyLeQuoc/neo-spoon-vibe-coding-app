@@ -1,4 +1,4 @@
-import { createAnthropic } from '@ai-sdk/anthropic'
+// import { createAnthropic } from '@ai-sdk/anthropic'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import type { LanguageModel } from 'ai'
 import { DEFAULT_MODEL } from 'shared'
@@ -23,30 +23,30 @@ import { DEFAULT_MODEL } from 'shared'
  * 4. Remove ANTHROPIC_API_KEY and GOOGLE_GENERATIVE_AI_API_KEY from environment variables
  */
 export function getModel({ model = DEFAULT_MODEL, env }: { model?: string; env: Cloudflare.Env }): LanguageModel {
-  const ANTHROPIC_BASE_URL = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.AI_GATEWAY_NAME}/anthropic`
+  // const ANTHROPIC_BASE_URL = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.AI_GATEWAY_NAME}/anthropic`
   const OPENROUTER_BASE_URL = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.AI_GATEWAY_NAME}/openrouter`
 
   if (!model) {
     throw new Error(`Unsupported model`)
   }
 
-  switch (model.toLowerCase()) {
-    case 'anthropic': {
-      if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set')
+  // switch (model.toLowerCase()) {
+  //   case 'anthropic': {
+  //     if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set')
 
-      const anthropic = createAnthropic({ apiKey: env.ANTHROPIC_API_KEY, baseURL: ANTHROPIC_BASE_URL })
-      return anthropic(model)
-    }
-    case 'openrouter': {
-      if (!env.OPEN_ROUTER_API_KEY) throw new Error('OPENROUTER_TOKEN is not set')
+  //     const anthropic = createAnthropic({ apiKey: env.ANTHROPIC_API_KEY, baseURL: ANTHROPIC_BASE_URL })
+  //     return anthropic(model)
+  //   }
+  //   case 'openrouter': {
+  if (!env.OPEN_ROUTER_API_KEY) throw new Error('OPENROUTER_TOKEN is not set')
 
-      const openrouter = createOpenRouter({
-        apiKey: env.OPEN_ROUTER_API_KEY,
-        baseURL: OPENROUTER_BASE_URL
-      })
-      return openrouter(model)
-    }
-    default:
-      throw new Error(`Unsupported provider for model: ${model}`)
-  }
+  const openrouter = createOpenRouter({
+    apiKey: env.OPEN_ROUTER_API_KEY,
+    baseURL: OPENROUTER_BASE_URL
+  })
+  return openrouter(model)
+  // }
+  // default:
+  //   throw new Error(`Unsupported provider for model: ${model}`)
+  // }
 }

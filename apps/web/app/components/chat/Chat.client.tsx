@@ -1,15 +1,16 @@
 import { useStore } from '@nanostores/react'
-import type { Message } from 'ai'
-import { useChat } from 'ai/react'
+import type { UIMessage } from 'ai'
+import { useChat } from '@ai-sdk/react'
 import { useAnimate } from 'framer-motion'
-import { type DragEvent, memo, useEffect, useRef, useState } from 'react'
-import { cssTransition, type Id, ToastContainer, toast } from 'react-toastify'
+import { type DragEvent, memo, useEffect, useMemo, useRef, useState } from 'react'
+import { cssTransition, ToastContainer, toast } from 'react-toastify'
 import { useLocalStorage } from 'usehooks-ts'
+import { createAuthenticatedChatTransport } from '~/lib/ai-transport'
 import { useMessageParser, usePromptEnhancer, useShortcuts, useSnapScroll } from '~/lib/hooks'
-import { useChatHistory } from '~/lib/persistence'
+import { useChatHistory, chatId } from '~/lib/persistence'
 import { chatStore } from '~/lib/stores/chat'
+import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 import { workbenchStore } from '~/lib/stores/workbench'
-import { webcontainer } from '~/lib/webcontainer'
 import { fileModificationsToHTML } from '~/utils/diff'
 import { cubicEasingFn } from '~/utils/easings'
 import { isValidFileType } from '~/utils/fileValidation'
@@ -64,8 +65,8 @@ export function Chat() {
 }
 
 interface ChatProps {
-  initialMessages: Message[]
-  storeMessageHistory: (messages: Message[]) => Promise<void>
+  initialMessages: UIMessage[]
+  storeMessageHistory: (messages: UIMessage[]) => Promise<void>
 }
 
 export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProps) => {
@@ -142,24 +143,41 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
     model: DEFAULT_MODEL
   })
 
-  const [systemPrompt] = useLocalStorage('system-prompt', 'extended-v1')
+  const authenticatedAddress = useStore(walletAuthStore.authenticatedAddress)
+  const currentSessionId = useStore(chatId)
 
-  const { messages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
-    api: '/api/chat',
+  // Input state management (not provided by useChat)
+  const [input, setInput] = useState('')
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(event.target.value)
+  }
+
+  // Create transport with current values
+  const transport = useMemo(
+    () =>
+      createAuthenticatedChatTransport(
+        authenticatedAddress || '',
+        currentSessionId || 'default',
+        modelConfig.model || DEFAULT_MODEL
+      ),
+    [authenticatedAddress, currentSessionId, modelConfig.model]
+  )
+
+  const chatHelpers = useChat({
+    transport,
     onError: error => {
-      logger.error('Request failed\n\n', error)
+      logger.error('Request failed\n\n', error.message)
       toast.error('There was an error processing your request')
     },
     onFinish: () => {
       logger.debug('Finished streaming')
     },
-    initialMessages,
-    body: {
-      ...modelConfig,
-      systemPromptId: systemPrompt
-    }
+    messages: initialMessages
   })
 
+  const { messages, status, stop, sendMessage: sendChatMessage } = chatHelpers
+  const isLoading = status === 'streaming'
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
   const { parsedMessages, parseMessages } = useMessageParser()
 
@@ -220,6 +238,11 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
   }
 
   const sendMessage = async (_event: React.UIEvent, messageInput?: string) => {
+    if (!authenticatedAddress) {
+      toast.error('Please connect your wallet to send a message')
+      return
+    }
+
     const _input = messageInput || input
 
     if (_input.length === 0 || isLoading) {
@@ -245,13 +268,11 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
       const diff = fileModificationsToHTML(fileModifications)
 
       /**
-       * If we have file modifications we append a new user message manually since we have to prefix
+       * If we have file modifications we send a new user message manually since we have to prefix
        * the user input with the file modifications and we don't want the new user input to appear
-       * in the prompt. Using `append` is almost the same as `handleSubmit` except that we have to
-       * manually reset the input and we'd have to manually pass in file attachments. However, those
-       * aren't relevant here.
+       * in the prompt. Using `sendMessage` triggers the API call and we manually reset the input.
        */
-      append({ role: 'user', content: `${diff}\n\n${_input}` })
+      await sendChatMessage({ text: `${diff}\n\n${_input}` })
 
       /**
        * After sending a new message we reset all modifications since the model
@@ -259,43 +280,13 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
        */
       workbenchStore.resetAllFileModifications()
     } else {
-      const filePromises: Promise<{
-        name?: string
-        contentType?: string
-        url: string
-      }>[] = Array.from(fileInputs || []).map(file => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader()
-          reader.readAsDataURL(file)
-          reader.onload = () => {
-            let contentType = file.type || 'text/plain'
-            if (contentType === 'application/octet-stream') {
-              contentType = 'text/plain'
-            }
-            if (reader.result === null || typeof reader.result !== 'string') {
-              reject(new Error('Failed to read file'))
-              return
-            }
-            resolve({
-              name: file.name,
-              contentType: contentType,
-              url: reader.result
-            })
-          }
-          reader.onerror = reject
-        })
-      })
-
-      const experimental_attachments: {
-        name?: string
-        contentType?: string
-        url: string
-      }[] = await Promise.all(filePromises)
-      append({
-        role: 'user',
-        content: `${_input}`,
-        experimental_attachments: experimental_attachments
-      })
+      if (fileInputs && fileInputs.length > 0) {
+        // Send message with file attachments
+        await sendChatMessage({ text: _input, files: fileInputs })
+      } else {
+        // Send message without attachments
+        await sendChatMessage({ text: _input })
+      }
     }
 
     setFileInputs(null)
@@ -329,76 +320,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
     setIsDragging(false)
   }
 
-  useEffect(() => {
-    const sentErrors = new Set<string>()
-    let currentToastId: Id = -1
-
-    const handleWebcontainerError = (exception: Error) => {
-      if (sentErrors.has(exception.message)) return
-      sentErrors.add(exception.message)
-
-      const joinedErrors = Array.from(sentErrors).join('\n')
-      const errorElement = (
-        <div className="flex flex-col gap-2">
-          <div>Ran into errors while executing the command:</div>
-          <div className="text-sm text-neozero-elements-textSecondary">
-            {exception.message.slice(0, 100)}
-            {exception.message.length > 100 && '...'}
-
-            {sentErrors.size > 1 && ` (+${sentErrors.size - 1} more)`}
-          </div>
-          <button
-            onClick={() => {
-              const errorMessage = `The following errors occurred while running the command:\n${joinedErrors}\n\nHow can we fix these errors?`
-              sentErrors.clear()
-              toast.dismiss(currentToastId)
-              currentToastId = -1
-              append({
-                role: 'user',
-                content: `${errorMessage}`
-              })
-            }}
-            className="px-3 py-1.5 bg-neozero-elements-button-primary-background hover:bg-neozero-elements-button-primary-backgroundHover text-neozero-elements-button-primary-text rounded-md text-sm font-medium"
-          >
-            Fix errors
-          </button>
-        </div>
-      )
-
-      if (currentToastId !== -1) {
-        toast.update(currentToastId, {
-          render: errorElement
-        })
-        return
-      } else {
-        currentToastId = toast.error(errorElement, {
-          autoClose: false,
-          closeOnClick: false
-        })
-      }
-    }
-
-    const handleCommandFinished = (sessionId: string, result: { output: string; exitCode: number }) => {
-      console.log('Command finished', sessionId, result)
-      if ([0, 8].includes(result.exitCode)) {
-        return
-      }
-
-      handleWebcontainerError(new Error(result.output))
-    }
-
-    webcontainer.then(() => {
-      workbenchStore.attachBoltTerminalHandler('error', handleWebcontainerError)
-      workbenchStore.attachBoltTerminalHandler('commandFinished', handleCommandFinished)
-    })
-
-    return () => {
-      webcontainer.then(() => {
-        workbenchStore.unattachBoltTerminalHandler('error', handleWebcontainerError)
-        workbenchStore.unattachBoltTerminalHandler('commandFinished', handleCommandFinished)
-      })
-    }
-  }, [append])
+  // Terminal error handlers removed - terminal functionality has been removed
 
   const setProviderModel = (provider: string, model: string) => {
     setModelConfig({ ...modelConfig, provider: provider as Provider, model })

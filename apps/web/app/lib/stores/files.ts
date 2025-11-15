@@ -1,13 +1,12 @@
 import { Buffer } from 'node:buffer'
 import * as nodePath from 'node:path'
-import type { PathWatcherEvent, WebContainer } from '@webcontainer/api'
 import { getEncoding } from 'istextorbinary'
 import { type MapStore, map } from 'nanostores'
-import { bufferWatchEvents } from '~/utils/buffer'
 import { WORK_DIR } from '~/utils/constants'
-import { computeFileModifications } from '~/utils/diff'
+import { computeFileModifications, type FileModifications } from '~/utils/diff'
 import { createScopedLogger } from '~/utils/logger'
 import { unreachable } from '~/utils/unreachable'
+import { fs, initializeZenFS } from '~/lib/zenfs'
 
 const logger = createScopedLogger('FilesStore')
 
@@ -28,8 +27,6 @@ type Dirent = File | Folder
 export type FileMap = Record<string, Dirent | undefined>
 
 export class FilesStore {
-  #webcontainer: Promise<WebContainer>
-
   /**
    * Tracks the number of files without folders.
    */
@@ -43,7 +40,7 @@ export class FilesStore {
   #modifiedFiles: Map<string, string> = import.meta.hot?.data.modifiedFiles ?? new Map()
 
   /**
-   * Map of files that matches the state of WebContainer.
+   * Map of files that matches the state of ZenFS.
    */
   files: MapStore<FileMap> = import.meta.hot?.data.files ?? map({})
 
@@ -51,9 +48,7 @@ export class FilesStore {
     return this.#size
   }
 
-  constructor(webcontainerPromise: Promise<WebContainer>) {
-    this.#webcontainer = webcontainerPromise
-
+  constructor() {
     if (import.meta.hot) {
       import.meta.hot.data.files = this.files
       import.meta.hot.data.modifiedFiles = this.#modifiedFiles
@@ -72,7 +67,7 @@ export class FilesStore {
     return dirent
   }
 
-  getFileModifications() {
+  getFileModifications(): FileModifications | undefined {
     return computeFileModifications(this.files.get(), this.#modifiedFiles)
   }
 
@@ -81,14 +76,11 @@ export class FilesStore {
   }
 
   async saveFile(filePath: string, content: string) {
-    const webcontainer = await this.#webcontainer
+    await initializeZenFS()
 
     try {
-      const relativePath = nodePath.relative(webcontainer.workdir, filePath)
-
-      if (!relativePath) {
-        throw new Error(`EINVAL: invalid file path, write '${relativePath}'`)
-      }
+      // Ensure path is absolute and within work directory
+      const normalizedPath = filePath.startsWith(WORK_DIR) ? filePath : nodePath.join(WORK_DIR, filePath)
 
       const oldContent = this.getFile(filePath)?.content
 
@@ -96,13 +88,21 @@ export class FilesStore {
         unreachable('Expected content to be defined')
       }
 
-      await webcontainer.fs.writeFile(relativePath, content)
+      // Ensure directory exists
+      const dir = nodePath.dirname(normalizedPath)
+      try {
+        await fs.promises.mkdir(dir, { recursive: true })
+      } catch {
+        // Directory might already exist
+      }
+
+      await fs.promises.writeFile(normalizedPath, content, 'utf8')
 
       if (!this.#modifiedFiles.has(filePath)) {
         this.#modifiedFiles.set(filePath, oldContent)
       }
 
-      // we immediately update the file and don't rely on the `change` event coming from the watcher
+      // Update the file immediately
       this.files.setKey(filePath, { type: 'file', content, isBinary: false })
 
       logger.info('File updated')
@@ -114,71 +114,52 @@ export class FilesStore {
   }
 
   async #init() {
-    const webcontainer = await this.#webcontainer
-
-    webcontainer.internal.watchPaths(
-      { include: [`${WORK_DIR}/**`], exclude: ['**/node_modules', '.git'], includeContent: true },
-      bufferWatchEvents(100, this.#processEventBuffer.bind(this))
-    )
+    await initializeZenFS()
+    // Load existing files from ZenFS
+    await this.#loadFilesFromZenFS()
   }
 
-  #processEventBuffer(events: Array<[events: PathWatcherEvent[]]>) {
-    const watchEvents = events.flat(2)
+  async #loadFilesFromZenFS() {
+    try {
+      await this.#loadDirectory(WORK_DIR)
+    } catch (error) {
+      logger.error('Failed to load files from ZenFS\n\n', error)
+    }
+  }
 
-    for (const { type, path, buffer } of watchEvents) {
-      // remove any trailing slashes
-      const sanitizedPath = path.replace(/\/+$/g, '')
+  async #loadDirectory(dirPath: string) {
+    try {
+      const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
 
-      switch (type) {
-        case 'add_dir': {
-          // we intentionally add a trailing slash so we can distinguish files from folders in the file tree
-          this.files.setKey(sanitizedPath, { type: 'folder' })
-          break
-        }
-        case 'remove_dir': {
-          this.files.setKey(sanitizedPath, undefined)
+      for (const entry of entries) {
+        const fullPath = nodePath.join(dirPath, entry.name)
+        const relativePath = fullPath.startsWith(WORK_DIR)
+          ? fullPath
+          : nodePath.join(WORK_DIR, fullPath)
 
-          for (const [direntPath] of Object.entries(this.files)) {
-            if (direntPath.startsWith(sanitizedPath)) {
-              this.files.setKey(direntPath, undefined)
-            }
+        if (entry.isDirectory()) {
+          // Skip node_modules and .git
+          if (entry.name === 'node_modules' || entry.name === '.git') {
+            continue
           }
-
-          break
-        }
-        case 'add_file':
-        case 'change': {
-          if (type === 'add_file') {
-            this.#size++
+          this.files.setKey(relativePath, { type: 'folder' })
+          await this.#loadDirectory(fullPath)
+        } else if (entry.isFile()) {
+          this.#size++
+          try {
+            const buffer = await fs.promises.readFile(fullPath)
+            const isBinary = isBinaryFile(buffer)
+            const content = isBinary ? '' : this.#decodeFileContent(buffer)
+            this.files.setKey(relativePath, { type: 'file', content, isBinary })
+          } catch (error) {
+            logger.error(`Failed to read file ${fullPath}\n\n`, error)
           }
-
-          let content = ''
-
-          /**
-           * @note This check is purely for the editor. The way we detect this is not
-           * bullet-proof and it's a best guess so there might be false-positives.
-           * The reason we do this is because we don't want to display binary files
-           * in the editor nor allow to edit them.
-           */
-          const isBinary = isBinaryFile(buffer)
-
-          if (!isBinary) {
-            content = this.#decodeFileContent(buffer)
-          }
-
-          this.files.setKey(sanitizedPath, { type: 'file', content, isBinary })
-
-          break
         }
-        case 'remove_file': {
-          this.#size--
-          this.files.setKey(sanitizedPath, undefined)
-          break
-        }
-        case 'update_directory': {
-          // we don't care about these events
-          break
-        }
+      }
+    } catch (error) {
+      // Directory might not exist yet
+      if ((error as any).code !== 'ENOENT') {
+        logger.error(`Failed to load directory ${dirPath}\n\n`, error)
       }
     }
   }

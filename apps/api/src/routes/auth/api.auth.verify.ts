@@ -1,6 +1,6 @@
 import { zValidator } from '@hono/zod-validator'
 import { drizzle } from 'drizzle-orm/d1'
-import { APP_NAME, ApiAuthVerifyInput, apiFailed, generateJwtToken, ok } from 'shared'
+import { APP_NAME, ApiAuthVerifyInput, apiFailed, generateJwtToken, ok, type AppJwtPayload } from 'shared'
 import { dbSchema } from '~/db/schema'
 import { factory } from '~/factory'
 import { verifyAuthMessageAndDeleteNonce } from './_lib/auth-messages'
@@ -37,16 +37,14 @@ export const authVerifyRoute = factory
         .returning()
       user = insertedUser
     }
+    const payload: AppJwtPayload = {
+      sub: user.address,
+      iss: APP_NAME,
+      roles: ADMIN_ADDRESSES.includes(user.address) ? ['admin'] : ['user']
+    }
 
     // Generate access token
-    const token = await generateJwtToken(
-      {
-        sub: user.address,
-        iss: APP_NAME,
-        roles: ADMIN_ADDRESSES.includes(user.address) ? ['admin'] : ['user']
-      },
-      JWT_SECRET
-    )
+    const token = await generateJwtToken(payload, JWT_SECRET)
     const refreshToken = await generateAndSaveRefreshToken(KV, user.address, REFRESH_TOKEN_SECRET)
 
     return c.json(ok({ token, refreshToken }))

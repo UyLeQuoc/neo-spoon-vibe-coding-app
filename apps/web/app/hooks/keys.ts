@@ -30,5 +30,7 @@ export const queryKeys = {
     balanceOf: (owner: string | null) => ['neons', 'balanceOf', owner] as const,
     domains: (owner: string | null, limit?: number, offset?: number) =>
       ['neons', 'domains', owner, limit, offset] as const
-  }
+  },
+  // Models keys
+  models: (search?: string) => ['models', search] as const
 } as const
