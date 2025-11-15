@@ -1,11 +1,11 @@
 import fs from 'node:fs/promises'
 import { basename } from 'node:path'
 import { globSync } from 'fast-glob'
-import { defineConfig, presetIcons, presetUno, transformerDirectives } from 'unocss'
+import { defineConfig, presetIcons, presetUno, presetWebFonts, transformerDirectives } from 'unocss'
 
 const iconPaths = globSync('./icons/*.svg')
 
-const collectionName = 'bolt'
+const collectionName = 'neozero'
 
 const customIconCollection = iconPaths.reduce(
   (acc, iconPath) => {
@@ -35,17 +35,17 @@ const BASE_COLORS = {
     950: '#0A0A0A'
   },
   accent: {
-    50: '#EEF9FF',
-    100: '#D8F1FF',
-    200: '#BAE7FF',
-    300: '#8ADAFF',
-    400: '#53C4FF',
-    500: '#2BA6FF',
-    600: '#1488FC',
-    700: '#0D6FE8',
-    800: '#1259BB',
-    900: '#154E93',
-    950: '#122F59'
+    50: '#E6FDF7',
+    100: '#CCFCEF',
+    200: '#99F9DF',
+    300: '#66F6CF',
+    400: '#33F3BF',
+    500: '#01E698',
+    600: '#01B87A',
+    700: '#018A5C',
+    800: '#015C3D',
+    900: '#012E1F',
+    950: '#001710'
   },
   green: {
     50: '#F0FDF4',
@@ -99,9 +99,9 @@ const COLOR_PRIMITIVES = {
 
 export default defineConfig({
   shortcuts: {
-    'bolt-ease-cubic-bezier': 'ease-[cubic-bezier(0.4,0,0.2,1)]',
-    'transition-theme': 'transition-[background-color,border-color,color] duration-150 bolt-ease-cubic-bezier',
-    kdb: 'bg-bolt-elements-code-background text-bolt-elements-code-text py-1 px-1.5 rounded-md',
+    'neozero-ease-cubic-bezier': 'ease-[cubic-bezier(0.4,0,0.2,1)]',
+    'transition-theme': 'transition-[background-color,border-color,color] duration-150 neozero-ease-cubic-bezier',
+    kdb: 'bg-neozero-elements-code-background text-neozero-elements-code-text py-1 px-1.5 rounded-md',
     'max-w-chat': 'max-w-[var(--chat-max-width)]'
   },
   rules: [
@@ -114,115 +114,115 @@ export default defineConfig({
   theme: {
     colors: {
       ...COLOR_PRIMITIVES,
-      bolt: {
+      neozero: {
         elements: {
-          borderColor: 'var(--bolt-elements-borderColor)',
-          borderColorActive: 'var(--bolt-elements-borderColorActive)',
+          borderColor: 'var(--neozero-elements-borderColor)',
+          borderColorActive: 'var(--neozero-elements-borderColorActive)',
           background: {
             depth: {
-              1: 'var(--bolt-elements-bg-depth-1)',
-              2: 'var(--bolt-elements-bg-depth-2)',
-              3: 'var(--bolt-elements-bg-depth-3)',
-              4: 'var(--bolt-elements-bg-depth-4)'
+              1: 'var(--neozero-elements-bg-depth-1)',
+              2: 'var(--neozero-elements-bg-depth-2)',
+              3: 'var(--neozero-elements-bg-depth-3)',
+              4: 'var(--neozero-elements-bg-depth-4)'
             }
           },
-          textPrimary: 'var(--bolt-elements-textPrimary)',
-          textSecondary: 'var(--bolt-elements-textSecondary)',
-          textTertiary: 'var(--bolt-elements-textTertiary)',
+          textPrimary: 'var(--neozero-elements-textPrimary)',
+          textSecondary: 'var(--neozero-elements-textSecondary)',
+          textTertiary: 'var(--neozero-elements-textTertiary)',
           code: {
-            background: 'var(--bolt-elements-code-background)',
-            text: 'var(--bolt-elements-code-text)'
+            background: 'var(--neozero-elements-code-background)',
+            text: 'var(--neozero-elements-code-text)'
           },
           button: {
             primary: {
-              background: 'var(--bolt-elements-button-primary-background)',
-              backgroundHover: 'var(--bolt-elements-button-primary-backgroundHover)',
-              text: 'var(--bolt-elements-button-primary-text)'
+              background: 'var(--neozero-elements-button-primary-background)',
+              backgroundHover: 'var(--neozero-elements-button-primary-backgroundHover)',
+              text: 'var(--neozero-elements-button-primary-text)'
             },
             secondary: {
-              background: 'var(--bolt-elements-button-secondary-background)',
-              backgroundHover: 'var(--bolt-elements-button-secondary-backgroundHover)',
-              text: 'var(--bolt-elements-button-secondary-text)'
+              background: 'var(--neozero-elements-button-secondary-background)',
+              backgroundHover: 'var(--neozero-elements-button-secondary-backgroundHover)',
+              text: 'var(--neozero-elements-button-secondary-text)'
             },
             danger: {
-              background: 'var(--bolt-elements-button-danger-background)',
-              backgroundHover: 'var(--bolt-elements-button-danger-backgroundHover)',
-              text: 'var(--bolt-elements-button-danger-text)'
+              background: 'var(--neozero-elements-button-danger-background)',
+              backgroundHover: 'var(--neozero-elements-button-danger-backgroundHover)',
+              text: 'var(--neozero-elements-button-danger-text)'
             }
           },
           item: {
-            contentDefault: 'var(--bolt-elements-item-contentDefault)',
-            contentActive: 'var(--bolt-elements-item-contentActive)',
-            contentAccent: 'var(--bolt-elements-item-contentAccent)',
-            contentDanger: 'var(--bolt-elements-item-contentDanger)',
-            backgroundDefault: 'var(--bolt-elements-item-backgroundDefault)',
-            backgroundActive: 'var(--bolt-elements-item-backgroundActive)',
-            backgroundAccent: 'var(--bolt-elements-item-backgroundAccent)',
-            backgroundDanger: 'var(--bolt-elements-item-backgroundDanger)'
+            contentDefault: 'var(--neozero-elements-item-contentDefault)',
+            contentActive: 'var(--neozero-elements-item-contentActive)',
+            contentAccent: 'var(--neozero-elements-item-contentAccent)',
+            contentDanger: 'var(--neozero-elements-item-contentDanger)',
+            backgroundDefault: 'var(--neozero-elements-item-backgroundDefault)',
+            backgroundActive: 'var(--neozero-elements-item-backgroundActive)',
+            backgroundAccent: 'var(--neozero-elements-item-backgroundAccent)',
+            backgroundDanger: 'var(--neozero-elements-item-backgroundDanger)'
           },
           actions: {
-            background: 'var(--bolt-elements-actions-background)',
+            background: 'var(--neozero-elements-actions-background)',
             code: {
-              background: 'var(--bolt-elements-actions-code-background)'
+              background: 'var(--neozero-elements-actions-code-background)'
             }
           },
           artifacts: {
-            background: 'var(--bolt-elements-artifacts-background)',
-            backgroundHover: 'var(--bolt-elements-artifacts-backgroundHover)',
-            borderColor: 'var(--bolt-elements-artifacts-borderColor)',
+            background: 'var(--neozero-elements-artifacts-background)',
+            backgroundHover: 'var(--neozero-elements-artifacts-backgroundHover)',
+            borderColor: 'var(--neozero-elements-artifacts-borderColor)',
             inlineCode: {
-              background: 'var(--bolt-elements-artifacts-inlineCode-background)',
-              text: 'var(--bolt-elements-artifacts-inlineCode-text)'
+              background: 'var(--neozero-elements-artifacts-inlineCode-background)',
+              text: 'var(--neozero-elements-artifacts-inlineCode-text)'
             }
           },
           messages: {
-            background: 'var(--bolt-elements-messages-background)',
-            linkColor: 'var(--bolt-elements-messages-linkColor)',
+            background: 'var(--neozero-elements-messages-background)',
+            linkColor: 'var(--neozero-elements-messages-linkColor)',
             code: {
-              background: 'var(--bolt-elements-messages-code-background)'
+              background: 'var(--neozero-elements-messages-code-background)'
             },
             inlineCode: {
-              background: 'var(--bolt-elements-messages-inlineCode-background)',
-              text: 'var(--bolt-elements-messages-inlineCode-text)'
+              background: 'var(--neozero-elements-messages-inlineCode-background)',
+              text: 'var(--neozero-elements-messages-inlineCode-text)'
             }
           },
           icon: {
-            success: 'var(--bolt-elements-icon-success)',
-            error: 'var(--bolt-elements-icon-error)',
-            primary: 'var(--bolt-elements-icon-primary)',
-            secondary: 'var(--bolt-elements-icon-secondary)',
-            tertiary: 'var(--bolt-elements-icon-tertiary)'
+            success: 'var(--neozero-elements-icon-success)',
+            error: 'var(--neozero-elements-icon-error)',
+            primary: 'var(--neozero-elements-icon-primary)',
+            secondary: 'var(--neozero-elements-icon-secondary)',
+            tertiary: 'var(--neozero-elements-icon-tertiary)'
           },
           preview: {
             addressBar: {
-              background: 'var(--bolt-elements-preview-addressBar-background)',
-              backgroundHover: 'var(--bolt-elements-preview-addressBar-backgroundHover)',
-              backgroundActive: 'var(--bolt-elements-preview-addressBar-backgroundActive)',
-              text: 'var(--bolt-elements-preview-addressBar-text)',
-              textActive: 'var(--bolt-elements-preview-addressBar-textActive)'
+              background: 'var(--neozero-elements-preview-addressBar-background)',
+              backgroundHover: 'var(--neozero-elements-preview-addressBar-backgroundHover)',
+              backgroundActive: 'var(--neozero-elements-preview-addressBar-backgroundActive)',
+              text: 'var(--neozero-elements-preview-addressBar-text)',
+              textActive: 'var(--neozero-elements-preview-addressBar-textActive)'
             }
           },
           terminals: {
-            background: 'var(--bolt-elements-terminals-background)',
-            buttonBackground: 'var(--bolt-elements-terminals-buttonBackground)'
+            background: 'var(--neozero-elements-terminals-background)',
+            buttonBackground: 'var(--neozero-elements-terminals-buttonBackground)'
           },
-          dividerColor: 'var(--bolt-elements-dividerColor)',
+          dividerColor: 'var(--neozero-elements-dividerColor)',
           loader: {
-            background: 'var(--bolt-elements-loader-background)',
-            progress: 'var(--bolt-elements-loader-progress)'
+            background: 'var(--neozero-elements-loader-background)',
+            progress: 'var(--neozero-elements-loader-progress)'
           },
           prompt: {
-            background: 'var(--bolt-elements-prompt-background)'
+            background: 'var(--neozero-elements-prompt-background)'
           },
           sidebar: {
-            dropdownShadow: 'var(--bolt-elements-sidebar-dropdownShadow)',
-            buttonBackgroundDefault: 'var(--bolt-elements-sidebar-buttonBackgroundDefault)',
-            buttonBackgroundHover: 'var(--bolt-elements-sidebar-buttonBackgroundHover)',
-            buttonText: 'var(--bolt-elements-sidebar-buttonText)'
+            dropdownShadow: 'var(--neozero-elements-sidebar-dropdownShadow)',
+            buttonBackgroundDefault: 'var(--neozero-elements-sidebar-buttonBackgroundDefault)',
+            buttonBackgroundHover: 'var(--neozero-elements-sidebar-buttonBackgroundHover)',
+            buttonText: 'var(--neozero-elements-sidebar-buttonText)'
           },
           cta: {
-            background: 'var(--bolt-elements-cta-background)',
-            text: 'var(--bolt-elements-cta-text)'
+            background: 'var(--neozero-elements-cta-background)',
+            text: 'var(--neozero-elements-cta-text)'
           }
         }
       }
@@ -241,6 +241,12 @@ export default defineConfig({
       collections: {
         ...customIconCollection
       }
+    }),
+    presetWebFonts({
+      fonts: {
+        'open-sans': 'Open Sans',
+        'oswald': 'Oswald',
+      },
     })
   ]
 })

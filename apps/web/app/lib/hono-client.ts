@@ -9,4 +9,9 @@ import { hc } from 'hono/client'
  * pnpm -F api build
  * ```
  */
-export const hClient = hc<AppType>('/')
+// Use relative URL for production (same origin), localhost for dev
+export const getApiBaseUrl = () => {
+  return 'http://localhost:8787'
+}
+
+export const hClient = hc<AppType>(getApiBaseUrl())

@@ -26,7 +26,7 @@ export class TerminalStore {
       const wc = await this.#webcontainer
       await this.#boltTerminal.initialize(wc, terminal)
     } catch (error: any) {
-      terminal.write(coloredText.red('Failed to spawn bolt terminal\n\n') + error.message)
+      terminal.write(coloredText.red('Failed to spawn neozero terminal\n\n') + error.message)
       return
     }
   }

@@ -28,8 +28,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
               <div
                 key={index}
                 className={classNames('flex gap-4 p-6 w-full rounded-[calc(0.75rem-1px)]', {
-                  'bg-bolt-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
-                  'bg-gradient-to-b from-bolt-elements-messages-background from-30% to-transparent':
+                  'bg-neozero-elements-messages-background': isUserMessage || !isStreaming || (isStreaming && !isLast),
+                  'bg-gradient-to-b from-neozero-elements-messages-background from-30% to-transparent':
                     isStreaming && isLast,
                   'mt-4': !isFirst
                 })}
@@ -49,7 +49,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                             {Array.from(experimental_attachments).map((attachment, index) => {
                               return (
                                 <div className="relative" key={index}>
-                                  <div className="relative flex rounded-lg border border-bolt-elements-borderColor overflow-hidden">
+                                  <div className="relative flex rounded-lg border border-neozero-elements-borderColor overflow-hidden">
                                     <PopoverHover>
                                       <PopoverHover.Trigger>
                                         <button className="h-20 w-20 bg-transparent outline-none">
@@ -60,14 +60,14 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                                               alt={attachment.name}
                                             />
                                           ) : (
-                                            <div className="flex items-center justify-center w-full h-full text-bolt-elements-textTertiary">
+                                            <div className="flex items-center justify-center w-full h-full text-neozero-elements-textTertiary">
                                               <div className="i-ph:file" />
                                             </div>
                                           )}
                                         </button>
                                       </PopoverHover.Trigger>
                                       <PopoverHover.Content>
-                                        <span className="text-xs text-bolt-elements-textTertiary">
+                                        <span className="text-xs text-neozero-elements-textTertiary">
                                           {attachment.name}
                                         </span>
                                       </PopoverHover.Content>
@@ -87,7 +87,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
           })
         : null}
       {isStreaming && (
-        <div className="text-center w-full text-bolt-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
+        <div className="text-center w-full text-neozero-elements-textSecondary i-svg-spinners:3-dots-fade text-4xl mt-4"></div>
       )}
     </div>
   )

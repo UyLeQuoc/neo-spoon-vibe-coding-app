@@ -128,7 +128,7 @@ export const EditorPanel = memo(
         <Panel defaultSize={showTerminal ? DEFAULT_EDITOR_SIZE : 100} minSize={20}>
           <PanelGroup direction="horizontal">
             <Panel defaultSize={20} minSize={10} collapsible>
-              <div className="flex flex-col border-r border-bolt-elements-borderColor h-full">
+              <div className="flex flex-col border-r border-neozero-elements-borderColor h-full">
                 <PanelHeader>
                   <div className="i-ph:tree-structure-duotone shrink-0" />
                   Files
@@ -146,18 +146,18 @@ export const EditorPanel = memo(
                     />
                   </ScrollArea.Viewport>
                   <ScrollArea.Scrollbar
-                    className="flex select-none touch-none p-0.5 w-2 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3"
+                    className="flex select-none touch-none p-0.5 w-2 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
                     orientation="vertical"
                   >
-                    <ScrollArea.Thumb className="flex-1 bg-bolt-elements-background-depth-2 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+                    <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-2 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
                   </ScrollArea.Scrollbar>
                   <ScrollArea.Scrollbar
-                    className="flex select-none touch-none p-0.5 bg-bolt-elements-background-depth-3 transition-colors hover:bg-bolt-elements-background-depth-3"
+                    className="flex select-none touch-none p-0.5 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
                     orientation="horizontal"
                   >
-                    <ScrollArea.Thumb className="flex-1 bg-bolt-elements-background-depth-1 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+                    <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-1 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
                   </ScrollArea.Scrollbar>
-                  <ScrollArea.Corner className="bg-bolt-elements-background-depth-3" />
+                  <ScrollArea.Corner className="bg-neozero-elements-background-depth-3" />
                 </ScrollArea.Root>
               </div>
             </Panel>
@@ -215,8 +215,8 @@ export const EditorPanel = memo(
           }}
         >
           <div className="h-full">
-            <div className="bg-bolt-elements-terminals-background h-full flex flex-col">
-              <div className="flex items-center bg-bolt-elements-background-depth-2 border-y border-bolt-elements-borderColor gap-1.5 min-h-[34px] p-2">
+            <div className="bg-neozero-elements-terminals-background h-full flex flex-col">
+              <div className="flex items-center bg-neozero-elements-background-depth-2 border-y border-neozero-elements-borderColor gap-1.5 min-h-[34px] p-2">
                 {Array.from({ length: terminalCount }, (_, index) => {
                   const isActive = activeTerminal === index
 
@@ -228,15 +228,15 @@ export const EditorPanel = memo(
                           className={classNames(
                             'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
                             {
-                              'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textPrimary': isActive,
-                              'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
+                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary': isActive,
+                              'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
                                 !isActive
                             }
                           )}
                           onClick={() => setActiveTerminal(index)}
                         >
-                          <div className="i-bolt:logo-text?mask text-lg" />
-                          Bolt Terminal
+                          <div className="i-neozero:logo-text?mask text-lg" />
+                          NeoZero Terminal
                         </button>
                       ) : (
                         <button
@@ -244,8 +244,8 @@ export const EditorPanel = memo(
                           className={classNames(
                             'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
                             {
-                              'bg-bolt-elements-terminals-buttonBackground text-bolt-elements-textPrimary': isActive,
-                              'bg-bolt-elements-background-depth-2 text-bolt-elements-textSecondary hover:bg-bolt-elements-terminals-buttonBackground':
+                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary': isActive,
+                              'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
                                 !isActive
                             }
                           )}
