@@ -13,17 +13,6 @@ A Server-Sent Events (SSE) API server that generates complete, production-ready 
 
 ## Installation
 
-### Quick Start
-
-Run the setup script:
-
-```bash
-cd apps/agent
-./start.sh
-```
-
-### Manual Installation
-
 1. Install dependencies using uv:
 
     ```bash
@@ -39,9 +28,10 @@ cd apps/agent
 
 2. Set up your environment variables in `.env`:
 
+    Create a `.env` file in the `apps/agent` directory and add your `OPENROUTER_API_KEY`:
+
     ```bash
-    cp .env.example .env
-    # Edit .env and add your OPENROUTER_API_KEY
+    OPENROUTER_API_KEY=your_api_key_here
     ```
 
 ## Running the SSE Server
@@ -122,21 +112,59 @@ event: complete
 data: {"status": "complete", "result": "<html>...</html>"}
 ```
 
-## Testing
+### `GET /test`
 
-Run the test client:
+Serve the test HTML page for interactive testing.
+
+**Response:** HTML page with a form to test the site generation API.
+
+Open `http://localhost:8000/test` in your browser to access the test interface.
+
+### `GET /sites/{site_id}`
+
+Serve a generated site by its ID.
+
+**Path Parameters:**
+
+- `site_id` (required): The ID of the generated site (e.g., `20251115_111521`)
+
+**Response:** HTML content of the generated site.
+
+**Headers:**
+
+- `X-Site-Metadata`: JSON metadata about the site (if available)
+
+**Example:**
 
 ```bash
-python test_sse.py
+curl http://localhost:8000/sites/20251115_111521
 ```
 
-This will:
+## Testing
 
-1. List available tools
-2. Generate a sample website
-3. Save the result to `generated_site.html`
+### Using the Test HTML Page
 
-Or test with curl:
+The easiest way to test the API is using the built-in test page:
+
+1. Start the server:
+
+    ```bash
+    python main.py
+    ```
+
+2. Open your browser and navigate to:
+
+    ```
+    http://localhost:8000/test
+    ```
+
+3. Use the interactive form to:
+   - Select a predefined prompt or enter custom requirements
+   - Specify site type and style preferences
+   - Generate a website and see real-time progress updates
+   - View the generated HTML result
+
+### Using curl
 
 ```bash
 # List tools
@@ -157,32 +185,62 @@ curl -X POST http://localhost:8000/generate \
 ### JavaScript/TypeScript Example
 
 ```typescript
-const eventSource = new EventSource('http://localhost:8000/generate', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    requirements: 'Create a portfolio website',
-    site_type: 'portfolio'
-  })
-});
+async function generateSite() {
+  const response = await fetch('http://localhost:8000/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      requirements: 'Create a portfolio website',
+      site_type: 'portfolio',
+      style_preferences: 'modern, minimalist'
+    }),
+  });
 
-eventSource.addEventListener('start', (e) => {
-  console.log('Started:', JSON.parse(e.data));
-});
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
 
-eventSource.addEventListener('processing', (e) => {
-  console.log('Processing:', JSON.parse(e.data));
-});
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
 
-eventSource.addEventListener('complete', (e) => {
-  const data = JSON.parse(e.data);
-  console.log('Complete! HTML:', data.result);
-  eventSource.close();
-});
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
 
-eventSource.addEventListener('error', (e) => {
-  console.error('Error:', JSON.parse(e.data));
-  eventSource.close();
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      const [eventLine, dataLine] = line.split('\n');
+      const eventType = eventLine.replace('event: ', '').trim();
+      const data = JSON.parse(dataLine.replace('data: ', ''));
+
+      switch (eventType) {
+        case 'start':
+          console.log('Started:', data);
+          break;
+        case 'processing':
+          console.log('Processing:', data);
+          break;
+        case 'complete':
+          console.log('Complete! HTML:', data.result);
+          return data.result;
+        case 'error':
+          console.error('Error:', data);
+          throw new Error(data.message);
+      }
+    }
+  }
+}
+
+// Usage
+generateSite().then(html => {
+  console.log('Generated HTML:', html);
+}).catch(error => {
+  console.error('Generation failed:', error);
 });
 ```
 
@@ -246,7 +304,11 @@ Make it modern and animated.
 The server consists of:
 
 - `main.py`: FastAPI SSE server implementation
-- `generate-site.md`: System prompt for site generation
-- `test_sse.py`: Example client for testing
-
+- `agents/`: Agent implementations and system prompts
+- `tools/`: Tool implementations for site generation
+  - `generate_site.py`: Site generation tool
+  - `generate_site_system_prompt.md`: System prompt for site generation
+  - `manage_site_files.py`: File management tool
+- `test.html`: Interactive test page for the API
+- `generated_sites/`: Directory where generated sites are stored
 - `pyproject.toml`: Python dependencies
