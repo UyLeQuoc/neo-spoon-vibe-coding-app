@@ -57,6 +57,11 @@ export class StreamingMessageParser {
   constructor(private _options: StreamingMessageParserOptions = {}) {}
 
   parse(messageId: string, input: string) {
+    // Handle undefined/null input (can happen during migration or edge cases)
+    if (!input || typeof input !== 'string') {
+      return ''
+    }
+
     if (input.startsWith('```') && input.includes(ARTIFACT_TAG_OPEN)) {
       input = input.replace(/^```[a-zA-Z]*\n/, '')
       input = input.replace(/(?:\r?\n)?```[\s]*$/, '')
