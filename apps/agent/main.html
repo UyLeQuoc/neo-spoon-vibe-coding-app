@@ -107,23 +107,24 @@
           try {
             addEvent("start", { message: "Connecting to MCP server..." });
 
-            // Create MCP client using the official library
+            // Create MCP client using the official library with SSE transport
             mcpClient = await experimental_createMCPClient({
               transport: { type: "sse", url: "http://localhost:8000/sse" },
             });
 
             addEvent("connection", { message: "Connected to MCP server" });
 
-            // Get available tools
+            // Get available tools (returns an object with tool names as keys)
             addEvent("processing", { message: "Initializing MCP connection..." });
             const tools = await mcpClient.tools();
-            addEvent("initialize", { message: `MCP server initialized with ${tools.length} tools` });
+            const toolNames = Object.keys(tools);
+            addEvent("initialize", { message: `MCP server initialized with ${toolNames.length} tools` });
 
             // Call generate_site tool
             addEvent("processing", { message: "Calling generate_site tool..." });
 
-            // Find the generate_site tool
-            const generateSiteTool = tools.find((t) => t.name === "generate_site");
+            // Get the generate_site tool from the tools object
+            const generateSiteTool = tools.generate_site;
             if (!generateSiteTool) {
               throw new Error("generate_site tool not found");
             }

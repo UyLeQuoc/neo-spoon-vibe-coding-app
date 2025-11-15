@@ -1,225 +1,139 @@
-"""MCP server implementation for Neo0Agent."""
+"""MCP server implementation using the official Python SDK."""
 import json
 import logging
-import asyncio
-import uuid
-from typing import Dict, Any, Optional
-from collections import defaultdict
-from fastapi import Request
-from fastapi.responses import StreamingResponse, JSONResponse
-from pydantic import BaseModel
+from pathlib import Path
+from typing import Dict, Any
 
+from mcp.server.fastmcp import FastMCP
 from tools import GenerateSiteTool, ManageSiteFilesTool
 
+# Create FastMCP server instance
+mcp = FastMCP("Neo0Agent")
 
-# MCP Protocol Models
-class MCPRequest(BaseModel):
-    jsonrpc: str = "2.0"
-    id: Optional[str | int] = None
-    method: str
-    params: Optional[Dict[str, Any]] = None
+# Initialize tool instances
+_generate_tool = GenerateSiteTool()
+_manage_tool = ManageSiteFilesTool()
 
-
-# MCP SSE message queues for each connection
-mcp_sse_queues: Dict[str, asyncio.Queue] = defaultdict(asyncio.Queue)
+# Directory for generated sites
+GENERATED_SITES_DIR = Path(__file__).parent / "generated_sites"
 
 
-def get_mcp_tools() -> list[dict]:
-    """Get MCP-formatted tool list."""
-    generate_tool = GenerateSiteTool()
-    manage_tool = ManageSiteFilesTool()
+# Tools
+@mcp.tool()
+async def generate_site(
+    requirements: str,
+    site_type: str = "",
+    style_preferences: str = "",
+) -> str:
+    """
+    Generate a complete, production-ready single-page website.
 
-    return [
-        {
-            "name": generate_tool.name,
-            "description": generate_tool.description,
-            "inputSchema": generate_tool.parameters,
-        },
-        {
-            "name": manage_tool.name,
-            "description": manage_tool.description,
-            "inputSchema": manage_tool.parameters,
-        },
-    ]
+    Args:
+        requirements: Detailed requirements and specifications for the website
+        site_type: Optional type of site (e.g., 'landing page', 'portfolio', 'game')
+        style_preferences: Optional styling preferences like color scheme, animations, etc.
 
-
-async def execute_tool(tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
-    """Execute a tool by name with given arguments."""
-    if tool_name == "generate_site":
-        tool = GenerateSiteTool()
-        result = await tool.execute(
-            requirements=arguments.get("requirements", ""),
-            site_type=arguments.get("site_type", ""),
-            style_preferences=arguments.get("style_preferences", ""),
-        )
-        return {"content": [{"type": "text", "text": result}]}
-    elif tool_name == "manage_site_files":
-        tool = ManageSiteFilesTool()
-        result = await tool.execute(**arguments)
-        return {"content": [{"type": "text", "text": result}]}
-    else:
-        raise ValueError(f"Unknown tool: {tool_name}")
-
-
-async def process_mcp_request(mcp_request: MCPRequest) -> Dict[str, Any]:
-    """Process an MCP JSON-RPC request and return the response."""
-    # Handle MCP protocol methods
-    if mcp_request.method == "initialize":
-        return {
-            "jsonrpc": "2.0",
-            "id": mcp_request.id,
-            "result": {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {"tools": {}},
-                "serverInfo": {"name": "neo0-agent", "version": "1.0.0"},
-            },
-        }
-
-    elif mcp_request.method == "tools/list":
-        tools = get_mcp_tools()
-        return {"jsonrpc": "2.0", "id": mcp_request.id, "result": {"tools": tools}}
-
-    elif mcp_request.method == "tools/call":
-        tool_name = mcp_request.params.get("name") if mcp_request.params else None
-        arguments = (
-            mcp_request.params.get("arguments", {}) if mcp_request.params else {}
-        )
-
-        if not tool_name:
-            return {
-                "jsonrpc": "2.0",
-                "id": mcp_request.id,
-                "error": {"code": -32602, "message": "Tool name is required"},
-            }
-
-        try:
-            result = await execute_tool(tool_name, arguments)
-            return {"jsonrpc": "2.0", "id": mcp_request.id, "result": result}
-        except Exception as e:
-            return {
-                "jsonrpc": "2.0",
-                "id": mcp_request.id,
-                "error": {"code": -32603, "message": f"Tool execution error: {str(e)}"},
-            }
-
-    else:
-        return {
-            "jsonrpc": "2.0",
-            "id": mcp_request.id,
-            "error": {
-                "code": -32601,
-                "message": f"Method not found: {mcp_request.method}",
-            },
-        }
-
-
-async def mcp_sse_stream(connection_id: str):
-    """Generate SSE stream for MCP server."""
-    try:
-        # Send connection ID as initial event
-        yield f"event: connection\ndata: {json.dumps({'connectionId': connection_id})}\n\n"
-
-        # Keep connection alive and process messages from queue
-        while True:
-            try:
-                # Wait for a message with timeout to send keepalive
-                try:
-                    message = await asyncio.wait_for(
-                        mcp_sse_queues[connection_id].get(), timeout=30.0
-                    )
-                    # Send JSON-RPC response as SSE data
-                    yield f"data: {json.dumps(message)}\n\n"
-                    mcp_sse_queues[connection_id].task_done()
-                except asyncio.TimeoutError:
-                    # Send keepalive comment
-                    yield f": keepalive\n\n"
-            except asyncio.CancelledError:
-                break
-    except Exception as e:
-        logging.error(f"Error in MCP SSE stream: {e}")
-        error_response = {
-            "jsonrpc": "2.0",
-            "id": None,
-            "error": {"code": -32603, "message": f"Internal error: {str(e)}"},
-        }
-        yield f"data: {json.dumps(error_response)}\n\n"
-    finally:
-        # Clean up queue when connection closes
-        if connection_id in mcp_sse_queues:
-            del mcp_sse_queues[connection_id]
-            logging.info(f"Cleaned up SSE connection: {connection_id}")
-
-
-async def handle_mcp_sse_get(request: Request) -> StreamingResponse:
-    """Handle GET request for MCP SSE endpoint."""
-    # Generate a unique connection ID
-    connection_id = str(uuid.uuid4())
-
-    # Create a queue for this connection
-    queue = asyncio.Queue()
-    mcp_sse_queues[connection_id] = queue
-
-    return StreamingResponse(
-        mcp_sse_stream(connection_id),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-            "X-Accel-Buffering": "no",
-            "X-Connection-ID": connection_id,
-        },
+    Returns:
+        JSON string with site information including site_id, url, and metadata
+    """
+    result = await _generate_tool.execute(
+        requirements=requirements,
+        site_type=site_type,
+        style_preferences=style_preferences,
     )
 
+    # Ensure result is a string (MCP tools return strings)
+    if isinstance(result, dict):
+        return json.dumps(result)
 
-async def handle_mcp_sse_post(
-    request: Request, x_connection_id: Optional[str] = None
-) -> JSONResponse:
-    """Handle POST request for MCP SSE endpoint."""
-    try:
-        body = await request.json()
+    return result
 
-        # Check if this is a valid MCP request
-        if not isinstance(body, dict) or "jsonrpc" not in body or "method" not in body:
-            response = {
-                "jsonrpc": "2.0",
-                "id": body.get("id") if isinstance(body, dict) else None,
-                "error": {
-                    "code": -32600,
-                    "message": "Invalid Request: This endpoint expects MCP protocol requests.",
-                },
-            }
-            return JSONResponse(response, status_code=400)
 
-        mcp_request = MCPRequest(**body)
+@mcp.tool()
+async def manage_site_files(
+    operation: str,
+    site_id: str,
+    file_path: str,
+    content: str = "",
+    old_string: str = "",
+    new_string: str = "",
+) -> str:
+    """
+    Manage files in generated sites - create, edit, read, or delete files.
 
-        # Process the request and get response
-        response = await process_mcp_request(mcp_request)
+    Args:
+        operation: File operation (create_file, edit_file, read_file, delete_file)
+        site_id: Unique site identifier (timestamp format: YYYYMMDD_HHMMSS)
+        file_path: Relative path to file within site directory
+        content: File content for create_file operation
+        old_string: String to find and replace in edit_file operation
+        new_string: Replacement string for edit_file operation
 
-        # Send response via SSE to the matching connection
-        if x_connection_id and x_connection_id in mcp_sse_queues:
-            try:
-                await mcp_sse_queues[x_connection_id].put(response)
-                logging.debug(f"Sent response to connection: {x_connection_id}")
-            except Exception as e:
-                logging.error(f"Error sending to SSE queue {x_connection_id}: {e}")
-        elif mcp_sse_queues:
-            # Send to all active SSE connections
-            for conn_id, queue in mcp_sse_queues.items():
-                try:
-                    await queue.put(response)
-                    logging.debug(f"Sent response to connection: {conn_id}")
-                except Exception as e:
-                    logging.error(f"Error sending to SSE queue {conn_id}: {e}")
+    Returns:
+        JSON string with operation result
+    """
+    # Prepare arguments
+    kwargs = {
+        "operation": operation,
+        "site_id": site_id,
+        "file_path": file_path,
+    }
 
-        # Also return HTTP response for compatibility/fallback
-        return JSONResponse(response)
+    if operation == "create_file":
+        kwargs["content"] = content
+    elif operation == "edit_file":
+        kwargs["old_string"] = old_string
+        kwargs["new_string"] = new_string
 
-    except Exception as e:
-        logging.error(f"Error handling MCP SSE POST request: {e}")
-        response = {
-            "jsonrpc": "2.0",
-            "id": None,
-            "error": {"code": -32603, "message": f"Internal error: {str(e)}"},
-        }
-        return JSONResponse(response, status_code=500)
+    result = await _manage_tool.execute(**kwargs)
 
+    # Ensure result is a string (MCP tools return strings)
+    if isinstance(result, dict):
+        return json.dumps(result)
+
+    return result
+
+
+# Resources - Expose generated sites
+@mcp.resource("site://{site_id}/index.html")
+def get_site_html(site_id: str) -> str:
+    """
+    Get the generated HTML file for a specific site.
+
+    Args:
+        site_id: Unique site identifier (timestamp format: YYYYMMDD_HHMMSS)
+
+    Returns:
+        HTML content of the generated site
+    """
+    site_dir = GENERATED_SITES_DIR / site_id
+    html_file = site_dir / "index.html"
+
+    if not html_file.exists():
+        raise FileNotFoundError(f"Site '{site_id}' not found")
+
+    return html_file.read_text()
+
+
+@mcp.resource("site://{site_id}/metadata.json")
+def get_site_metadata(site_id: str) -> str:
+    """
+    Get the metadata JSON file for a specific site.
+
+    Args:
+        site_id: Unique site identifier (timestamp format: YYYYMMDD_HHMMSS)
+
+    Returns:
+        JSON string with site metadata
+    """
+    site_dir = GENERATED_SITES_DIR / site_id
+    metadata_file = site_dir / "metadata.json"
+
+    if not metadata_file.exists():
+        return json.dumps({"error": "Metadata not found"})
+
+    return metadata_file.read_text()
+
+
+# Export the mcp instance for use in main.py and SSE integration
+__all__ = ["mcp", "GENERATED_SITES_DIR"]
