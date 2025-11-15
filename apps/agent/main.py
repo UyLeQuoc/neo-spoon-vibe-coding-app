@@ -9,14 +9,15 @@ warnings.filterwarnings("ignore", category=DeprecationWarning, module="websocket
 import logging
 import json
 from typing import Optional
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from spoon_ai.chat import ChatBot
 
 from agents import Neo0Agent
-from tools.site_generator import SiteGeneratorTool
+from tools.generate_site import GenerateSiteTool
 
 logging.basicConfig(level=logging.INFO)
 
@@ -101,7 +102,7 @@ async def generate_sse_events(
 async def root():
     """Health check endpoint."""
     return {
-        "name": "Neo0 Site Generator SSE Server",
+        "name": "Neo-0 Site Generator SSE Server",
         "version": "1.0.0",
         "status": "running",
     }
@@ -110,7 +111,7 @@ async def root():
 @app.get("/tools")
 async def list_tools() -> ToolListResponse:
     """List available tools."""
-    tool = SiteGeneratorTool()
+    tool = GenerateSiteTool()
     return ToolListResponse(
         tools=[
             {
@@ -120,6 +121,15 @@ async def list_tools() -> ToolListResponse:
             }
         ]
     )
+
+
+@app.get("/test", response_class=HTMLResponse)
+async def serve_test_page():
+    """Serve the test HTML page."""
+    test_file = Path(__file__).parent / "test.html"
+    if not test_file.exists():
+        raise HTTPException(status_code=404, detail="Test page not found")
+    return test_file.read_text()
 
 
 @app.post("/generate")

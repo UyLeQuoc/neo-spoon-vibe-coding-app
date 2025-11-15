@@ -1,50 +1,37 @@
 import logging
-from spoon_ai.agents.spoon_react_mcp import SpoonReactMCP
+from pathlib import Path
+# from spoon_ai.agents.spoon_react_mcp import SpoonReactMCP
+from spoon_ai.agents import SpoonReactAI
 from spoon_ai.tools import ToolManager
 
-from tools import SiteGeneratorTool
+from tools import GenerateSiteTool
 
 
-class Neo0Agent(SpoonReactMCP):
+class Neo0Agent(SpoonReactAI):
     """
     Specialized website generation AI assistant built with SpoonOS framework.
     Expert in creating complete, production-ready single-page websites.
     """
 
     name: str = "neo-0"
-    system_prompt: str = """You are a specialized website generation AI assistant built with SpoonOS framework.
-Your primary expertise is creating complete, production-ready single-page websites.
-
-**Your Capabilities:**
-- Generate landing pages, portfolios, games, dashboards, and web applications
-- Create modern, responsive designs with inline CSS and JavaScript
-- Implement animations, gradients, and interactive features
-- Build functional web games and interactive experiences
-
-**How to Handle Requests:**
-1. When a user describes what they want, analyze their requirements carefully
-2. Extract key details: site type, features, design preferences, color schemes, functionality
-3. Use the `generate_site` tool with comprehensive requirements
-4. Always provide the complete HTML file ready for deployment
-
-**Best Practices:**
-- Ask clarifying questions if requirements are vague
-- Suggest improvements or additional features that would enhance the site
-- Ensure all generated sites are responsive and modern
-- Include appropriate meta tags, accessibility features, and SEO basics
-
-You are the expert in translating ideas into beautiful, functional websites.
-"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.avaliable_tools = ToolManager([])
+        self.available_tools = ToolManager([])
+
+
+    def _load_system_prompt(self) -> str:
+        """Load the system prompt from neo_0_system_prompt.md"""
+        prompt_path = Path(__file__).parent / "neo_0_system_prompt.md"
+        with open(prompt_path, "r") as f:
+            return f.read()
 
     async def initialize(self, __context=None):
         """Initialize agent and load tools"""
         logging.info("Initializing Neo0Agent and loading tools...")
 
         # Initialize site generator tool
-        site_tool = SiteGeneratorTool()
-        self.avaliable_tools = ToolManager([site_tool])
-        logging.info(f"Available tools: {list(self.avaliable_tools.tool_map.keys())}")
+        self.system_prompt = self._load_system_prompt()
+        self.available_tools = ToolManager([GenerateSiteTool()])
+        logging.info(f"Available tools: {list(self.available_tools.tool_map.keys())}")
+

@@ -1,9 +1,11 @@
 from pathlib import Path
 from spoon_ai.chat import ChatBot
 from spoon_ai.tools.base import BaseTool
+from spoon_ai.tools import ToolManager
+from spoon_ai.agents import ToolCallAgent
 
 
-class SiteGeneratorTool(BaseTool):
+class GenerateSiteTool(BaseTool):
     """Tool for generating complete, production-ready single-page websites."""
 
     name: str = "generate_site"
@@ -30,9 +32,8 @@ class SiteGeneratorTool(BaseTool):
     }
 
     def _load_system_prompt(self) -> str:
-        """Load the system prompt from generate-site.md"""
-        # Look for generate-site.md in the current directory (tools/)
-        prompt_path = Path(__file__).parent / "generate-site.md"
+        """Load the system prompt from generate_site_system_prompt.md"""
+        prompt_path = Path(__file__).parent / "generate_site_system_prompt.md"
         with open(prompt_path, "r") as f:
             return f.read()
 
@@ -43,8 +44,6 @@ class SiteGeneratorTool(BaseTool):
         Generate a complete HTML website based on the requirements.
         Creates a simple agent just for site generation with the loaded system prompt.
         """
-        from spoon_ai.agents.base import BaseAgent
-        from spoon_ai.tools import ToolManager
 
         # Create a ChatBot instance for site generation
         llm = ChatBot(
@@ -74,10 +73,11 @@ Output ONLY the HTML code without any explanations or markdown formatting.
             system_prompt = self._load_system_prompt()
 
             # Create a simple agent just for this generation task
-            site_agent = BaseAgent(
+            site_agent = ToolCallAgent(
                 llm=llm,
                 name="site_generator",
                 system_prompt=system_prompt,
+                available_tools=ToolManager([]),
             )
 
             response = await site_agent.run(user_message)

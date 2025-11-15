@@ -1,3 +1,3 @@
-from .site_generator import SiteGeneratorTool
+from .generate_site import GenerateSiteTool
 
-__all__ = ["SiteGeneratorTool"]
+__all__ = ["GenerateSiteTool"]
