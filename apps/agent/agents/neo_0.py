@@ -4,7 +4,7 @@ from pathlib import Path
 from spoon_ai.agents import SpoonReactAI
 from spoon_ai.tools import ToolManager
 
-from tools import GenerateSiteTool
+from tools import GenerateSiteTool, ManageSiteFilesTool
 
 
 class Neo0Agent(SpoonReactAI):
@@ -30,9 +30,12 @@ class Neo0Agent(SpoonReactAI):
         """Initialize agent and load tools"""
         logging.info("Initializing Neo0Agent and loading tools...")
 
-        # Initialize site generator tool
+        # Initialize site generator and file management tools
         self.system_prompt = self._load_system_prompt()
         self._default_timeout = 600  # 10 minutes
-        self.available_tools = ToolManager([GenerateSiteTool()])
+        self.available_tools = ToolManager([
+            GenerateSiteTool(),
+            ManageSiteFilesTool()
+        ])
         logging.info(f"Available tools: {list(self.available_tools.tool_map.keys())}")
 

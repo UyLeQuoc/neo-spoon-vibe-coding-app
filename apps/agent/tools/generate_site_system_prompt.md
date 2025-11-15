@@ -37,23 +37,16 @@ Landing pages, portfolios, interactive games, web apps, calculators, demos, prot
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="...">
     <title>...</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
     
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://esm.sh/react@18",
-        "react-dom/client": "https://esm.sh/react-dom@18/client"
-      }
-    }
-    </script>
-    
-    <script type="module">
-        import React from 'react';
-        import ReactDOM from 'react-dom/client';
+    <script type="text/babel">
+        const { useState, useEffect } = React;
         
         // React components here
         const App = () => {

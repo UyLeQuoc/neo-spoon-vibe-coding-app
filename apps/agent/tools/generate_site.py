@@ -1,3 +1,5 @@
+import json
+from datetime import datetime
 from pathlib import Path
 from spoon_ai.chat import ChatBot
 from spoon_ai.tools.base import BaseTool
@@ -10,7 +12,9 @@ class GenerateSiteTool(BaseTool):
 
     name: str = "generate_site"
     description: str = (
-        "Generate a complete, production-ready single-page website as a standalone index.html file with all resources inlined. Use this to create landing pages, portfolios, games, dashboards, or web apps."
+        "Generate a complete, production-ready single-page website and save it to disk. "
+        "Returns a URL where the site can be viewed. Use this to create landing pages, "
+        "portfolios, games, dashboards, or web apps from scratch."
     )
     parameters: dict = {
         "type": "object",
@@ -42,8 +46,20 @@ class GenerateSiteTool(BaseTool):
     ) -> str:
         """
         Generate a complete HTML website based on the requirements.
-        Creates a simple agent just for site generation with the loaded system prompt.
+        Saves the site to disk and returns a URL where it can be viewed.
+
+        Returns:
+            URL string (e.g., "http://localhost:8000/sites/20251115_143022")
+            or error message on failure
         """
+        # Generate unique site_id with timestamp
+        site_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Create site directory
+        sites_dir = Path(__file__).parent.parent / "generated_sites"
+        sites_dir.mkdir(parents=True, exist_ok=True)
+        site_dir = sites_dir / site_id
+        site_dir.mkdir(parents=True, exist_ok=True)
 
         # Create a ChatBot instance for site generation
         llm = ChatBot(
@@ -52,7 +68,7 @@ class GenerateSiteTool(BaseTool):
             max_tokens=64000,  # Need larger output for complete HTML files
         )
 
-        # Construct the user message
+        # Construct the user message with all requirements
         user_message = "Requirements:\n" + requirements
 
         if site_type:
@@ -80,7 +96,39 @@ Output ONLY the HTML code without any explanations or markdown formatting.
                 available_tools=ToolManager([]),
             )
 
-            response = await site_agent.run(user_message)
-            return response
+            # Generate HTML
+            agent_result = await site_agent.run(user_message)
+
+            # Extract HTML content from agent result
+            # Remove markdown code blocks if present
+            html_content = agent_result.strip()
+            if html_content.startswith("```html"):
+                html_content = html_content[7:]  # Remove ```html
+            elif html_content.startswith("```"):
+                html_content = html_content[3:]  # Remove ```
+
+            if html_content.endswith("```"):
+                html_content = html_content[:-3]  # Remove trailing ```
+
+            html_content = html_content.strip()
+
+            # Save HTML to disk
+            html_file = site_dir / "index.html"
+            html_file.write_text(html_content, encoding="utf-8")
+
+            # Save metadata
+            metadata = {
+                "site_id": site_id,
+                "created_at": datetime.now().isoformat(),
+                "requirements": requirements,
+                "site_type": site_type,
+                "style_preferences": style_preferences,
+            }
+            metadata_file = site_dir / "metadata.json"
+            metadata_file.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+
+            # Return URL
+            return f"http://localhost:8000/sites/{site_id}"
+
         except Exception as e:
             return f"Error generating site: {str(e)}"

@@ -11,7 +11,7 @@ import json
 from typing import Optional
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse, HTMLResponse
+from fastapi.responses import StreamingResponse, HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from spoon_ai.chat import ChatBot
@@ -32,6 +32,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Directory for generated sites
+GENERATED_SITES_DIR = Path(__file__).parent / "generated_sites"
 
 
 # Request/Response Models
@@ -111,13 +114,22 @@ async def root():
 @app.get("/tools")
 async def list_tools() -> ToolListResponse:
     """List available tools."""
-    tool = GenerateSiteTool()
+    from tools import GenerateSiteTool, ManageSiteFilesTool
+
+    generate_tool = GenerateSiteTool()
+    manage_tool = ManageSiteFilesTool()
+
     return ToolListResponse(
         tools=[
             {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.parameters,
+                "name": generate_tool.name,
+                "description": generate_tool.description,
+                "parameters": generate_tool.parameters,
+            },
+            {
+                "name": manage_tool.name,
+                "description": manage_tool.description,
+                "parameters": manage_tool.parameters,
             }
         ]
     )
@@ -147,6 +159,34 @@ async def generate_site_stream(request: GenerateSiteRequest):
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
         },
+    )
+
+
+@app.get("/sites/{site_id}", response_class=HTMLResponse)
+async def serve_generated_site(site_id: str):
+    """Serve generated site HTML file with metadata."""
+    site_dir = GENERATED_SITES_DIR / site_id
+    html_file = site_dir / "index.html"
+    metadata_file = site_dir / "metadata.json"
+
+    if not html_file.exists():
+        raise HTTPException(status_code=404, detail=f"Site '{site_id}' not found")
+
+    # Load metadata if available
+    metadata = {}
+    if metadata_file.exists():
+        with open(metadata_file, "r") as f:
+            metadata = json.load(f)
+
+    # Read and return HTML content with metadata in headers
+    html_content = html_file.read_text()
+
+    return HTMLResponse(
+        content=html_content,
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Site-Metadata": json.dumps(metadata)
+        }
     )
 
 

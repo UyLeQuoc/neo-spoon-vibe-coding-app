@@ -116,3 +116,4 @@ build/
 .coverage
 htmlcov/
 .tox/
+apps/agent/generated_sites/
