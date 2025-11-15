@@ -45,14 +45,11 @@ export function SignInDialog({ isOpen, onClose, onSignInSuccess }: SignInDialogP
       }
 
       // Sign message using NeoLine
-      const signResp = await neoline.signMessage({
-        message
-      })
+      const signResp = await neoline.signMessage({ message })
 
       // Login with signature
       const success = await walletAuthStore.login(account, message, {
         data: signResp.data,
-        messageHex: signResp.message,
         publicKey: signResp.publicKey,
         salt: signResp.salt
       })
