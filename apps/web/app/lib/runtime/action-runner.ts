@@ -134,7 +134,7 @@ export class ActionRunner {
     await boltTerminal.ready()
 
     if (!boltTerminal || !boltTerminal.getTerminal() || !boltTerminal.getProcess()) {
-      unreachable('Bolt terminal not found')
+      unreachable('NeoZero terminal not found')
     }
 
     const response = await boltTerminal.runCommand(this.runnerId.get(), action.content, () => {

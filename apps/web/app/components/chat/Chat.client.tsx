@@ -46,10 +46,10 @@ export function Chat() {
            */
           switch (type) {
             case 'success': {
-              return <div className="i-ph:check-bold text-bolt-elements-icon-success text-2xl" />
+              return <div className="i-ph:check-bold text-neozero-elements-icon-success text-2xl" />
             }
             case 'error': {
-              return <div className="i-ph:warning-circle-bold text-bolt-elements-icon-error text-2xl" />
+              return <div className="i-ph:warning-circle-bold text-neozero-elements-icon-error text-2xl" />
             }
           }
 
@@ -341,7 +341,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
       const errorElement = (
         <div className="flex flex-col gap-2">
           <div>Ran into errors while executing the command:</div>
-          <div className="text-sm text-bolt-elements-textSecondary">
+          <div className="text-sm text-neozero-elements-textSecondary">
             {exception.message.slice(0, 100)}
             {exception.message.length > 100 && '...'}
 
@@ -358,7 +358,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
                 content: `${errorMessage}`
               })
             }}
-            className="px-3 py-1.5 bg-bolt-elements-button-primary-background hover:bg-bolt-elements-button-primary-backgroundHover text-bolt-elements-button-primary-text rounded-md text-sm font-medium"
+            className="px-3 py-1.5 bg-neozero-elements-button-primary-background hover:bg-neozero-elements-button-primary-backgroundHover text-neozero-elements-button-primary-text rounded-md text-sm font-medium"
           >
             Fix errors
           </button>

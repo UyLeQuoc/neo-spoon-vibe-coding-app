@@ -184,7 +184,7 @@ export const DeployButton = memo(() => {
   return (
     <>
       <button
-        className="rounded-md text-xs px-4 py-2 bg-bolt-elements-item-backgroundAccent text-bolt-elements-button-secondary-text flex gap-1.7 items-center justify-center px-3 py-1.5 hover:text-bolt-elements-button-secondary-textHover hover:bg-bolt-elements-button-secondary-backgroundHover"
+        className="rounded-md text-xs px-4 py-2 bg-neozero-elements-item-backgroundAccent text-neozero-elements-button-secondary-text flex gap-1.7 items-center justify-center px-3 py-1.5 hover:text-neozero-elements-button-secondary-textHover hover:bg-neozero-elements-button-secondary-backgroundHover"
         onClick={() => setModalOpen(true)}
       >
         <div className="i-ph:rocket-launch text-lg" />
@@ -197,7 +197,7 @@ export const DeployButton = memo(() => {
           <DialogDescription>
             <label>
               <Select.Root value={selectedPlatform} onValueChange={value => handlePlatformChange(value)}>
-                <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-bolt-elements-background-depth-3 hover:bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary w-full">
+                <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-neozero-elements-background-depth-3 hover:bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary w-full">
                   <Select.Value>
                     {(selectedPlatform && getDeployer(selectedPlatform)?.name) || 'Select Platform'}
                   </Select.Value>
@@ -207,7 +207,7 @@ export const DeployButton = memo(() => {
                     position={'popper'}
                     side={'bottom'}
                     sideOffset={5}
-                    className="z-[1000] overflow-hidden bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-md w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
+                    className="z-[1000] overflow-hidden bg-neozero-elements-background-depth-1 rounded-md border border-neozero-elements-borderColor shadow-md w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
                   >
                     <Select.Viewport className="p-2">
                       {getDeployers().map(value => (
@@ -215,11 +215,11 @@ export const DeployButton = memo(() => {
                           key={value.key}
                           value={value.key}
                           disabled={!value.active}
-                          className="relative flex items-center px-6 py-2 text-sm text-bolt-elements-textPrimary rounded select-none
-                              hover:bg-bolt-elements-item-backgroundAccent
+                          className="relative flex items-center px-6 py-2 text-sm text-neozero-elements-textPrimary rounded select-none
+                              hover:bg-neozero-elements-item-backgroundAccent
                               data-[disabled]:opacity-50
                               data-[disabled]:pointer-events-none
-                              data-[highlighted]:bg-bolt-elements-item-backgroundAccent
+                              data-[highlighted]:bg-neozero-elements-item-backgroundAccent
                               data-[highlighted]:outline-none
                               cursor-default
                               focus:outline-none"
@@ -249,7 +249,7 @@ export const DeployButton = memo(() => {
                         <h3 className="text-lg font-medium mb-4">{currentStepData.title}</h3>
                         {currentStepData.inputs.map((input, index) => (
                           <label key={index} className="block mt-4">
-                            <span className="text-bolt-elements-textPrimary text-sm">{input.name}</span>
+                            <span className="text-neozero-elements-textPrimary text-sm">{input.name}</span>
                             <input
                               type={input.type}
                               name={input.name}
@@ -273,11 +273,11 @@ export const DeployButton = memo(() => {
                                   input.type === 'checkbox' ? e.target.checked.toString() : e.target.value
                                 )
                               }
-                              className="w-full mt-1 px-2 py-1 rounded-md border border-bolt-elements-borderColor bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary"
+                              className="w-full mt-1 px-2 py-1 rounded-md border border-neozero-elements-borderColor bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary"
                             />
                             {input.description && (
                               <p
-                                className="text-xs text-bolt-elements-textSecondary mt-1"
+                                className="text-xs text-neozero-elements-textSecondary mt-1"
                                 // biome-ignore lint/security/noDangerouslySetInnerHtml: trusted content
                                 dangerouslySetInnerHTML={{ __html: input.description }}
                               />
@@ -291,7 +291,7 @@ export const DeployButton = memo(() => {
               </div>
             )}
           </DialogDescription>
-          <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
+          <div className="px-5 pb-4 bg-neozero-elements-background-depth-2 flex gap-2 justify-end">
             <DialogButton type="secondary" onClick={handleModalClose} disabled={isDeploying}>
               Cancel
             </DialogButton>

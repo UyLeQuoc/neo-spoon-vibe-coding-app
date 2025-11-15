@@ -68,7 +68,7 @@ const githubDeployer: Deployer = {
           type: 'password',
           placeholder: 'GitHub Token',
           required: true,
-          description: `Create a personal access token in your <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-bolt-elements-textPrimary">GitHub developer settings</a>.`
+          description: `Create a personal access token in your <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer" class="text-neozero-elements-textPrimary">GitHub developer settings</a>.`
         },
         {
           name: 'GitHub Username',
@@ -244,7 +244,7 @@ const githubDeployer: Deployer = {
       const { data: newCommit } = await octokit.git.createCommit({
         owner,
         repo,
-        message: 'Deploy from Bolt',
+        message: 'Deploy from NeoZero',
         tree: newTree.sha,
         parents: [lastCommitSha]
       })
@@ -473,7 +473,7 @@ const generateReadme = async (mixedId: string) => {
   if (!mixedId) return
   if (!db) return
   const storedMessages = await getMessages(db, mixedId)
-  let readmeContent = `This is a [Bolt Extended](https://github.com/FurkannM/bolt.new-extended) project deployed to GitHub. 🚀 \n\n`
+  let readmeContent = `This is a [NeoZero Extended](https://github.com/FurkannM/neozero.new-extended) project deployed to GitHub. 🚀 \n\n`
   if (storedMessages && storedMessages.messages.length > 0) {
     const messages: any[] = storedMessages.messages
 

@@ -1,6 +1,7 @@
 import type { AppType } from 'api'
 import { hc } from 'hono/client'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
+import { getApiBaseUrl } from './hono-client'
 
 /**
  * Fully typed hono client for the API server. With authentication.
@@ -10,7 +11,7 @@ import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
  * pnpm -F api build
  * ```
  */
-export const hClientWithAuth = hc<AppType>('/', {
+export const hClientWithAuth = hc<AppType>(getApiBaseUrl(), {
   headers: async () => ({
     Authorization: `Bearer ${await walletAuthStore.getOrRefreshJwtToken()}`
   })

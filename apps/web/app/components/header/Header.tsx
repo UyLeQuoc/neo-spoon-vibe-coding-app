@@ -4,6 +4,7 @@ import { ChatDescription } from '~/lib/persistence/ChatDescription.client'
 import { chatStore } from '~/lib/stores/chat'
 import { classNames } from '~/utils/classNames'
 import { HeaderActionButtons } from './HeaderActionButtons.client'
+import { WalletButton } from './WalletButton.client'
 
 export function Header() {
   const chat = useStore(chatStore)
@@ -11,19 +12,19 @@ export function Header() {
   return (
     <header
       className={classNames(
-        'flex items-center bg-bolt-elements-background-depth-1 p-5 border-b h-[var(--header-height)]',
+        'flex items-center bg-neozero-elements-background-depth-1 p-5 border-b h-[var(--header-height)]',
         {
           'border-transparent': !chat.started,
-          'border-bolt-elements-borderColor': chat.started
+          'border-neozero-elements-borderColor': chat.started
         }
       )}
     >
-      <div className="flex items-center grow-1 basis-60 gap-2 z-logo text-bolt-elements-textPrimary cursor-pointer">
+      <div className="flex items-center grow-1 basis-60 gap-2 z-logo text-neozero-elements-textPrimary cursor-pointer">
         <a href="/" className="text-2xl font-black text-accent flex items-center font-oswald">
           NeoZero
         </a>
       </div>
-      <span className="flex-1 px-4 truncate text-center text-bolt-elements-textPrimary">
+      <span className="flex-1 px-4 truncate text-center text-neozero-elements-textPrimary">
         <ClientOnly>{() => <ChatDescription />}</ClientOnly>
       </span>
       {chat.started && (
@@ -35,8 +36,9 @@ export function Header() {
           )}
         </ClientOnly>
       )}
-      {/* connect wallet button */}
-      <button className="px-2 py-1 rounded-md font-oswald">Connect Wallet</button>
+      <ClientOnly>
+        {() => <WalletButton />}
+      </ClientOnly>
     </header>
   )
 }
