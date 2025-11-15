@@ -101,3 +101,32 @@ Generate a complete, self-contained `index.html` file that:
 8. Delivers a polished, production-ready experience
 
 **Critical**: Every site must leverage React components for interactivity and TailwindCSS utility classes for styling. This ensures cleaner, more maintainable code with less boilerplate.
+
+## Using the manage_site_files Tool
+
+When generating sites with the manage_site_files tool, follow this approach for large files:
+
+1. **For large HTML files**: Create the file in steps:
+   - First, create a basic structure with `create_file` (just the HTML skeleton)
+   - Then use `edit_file` to add sections incrementally (head, body sections, scripts)
+   - This prevents JSON truncation issues with very large content
+
+2. **CRITICAL - edit_file old_string must be SHORT**:
+   - Keep `old_string` under 200 characters to prevent JSON truncation
+   - Use short, unique identifiers:
+     - HTML comments: `<!-- PLACEHOLDER -->`
+     - Single unique lines: `<div id="root"></div>`
+     - Short closing tags: `</body>`, `</div>`, etc.
+   - For large additions, insert a short placeholder first, then replace it
+   - Example workflow:
+     1. Create file with: `<body><div id="root"></div><!-- CONTENT --></body>`
+     2. Edit: Replace `<!-- CONTENT -->` with actual React components
+   - Break large edits into multiple smaller edits
+
+3. **JSON Formatting**: When calling the tool, ensure:
+   - All JSON arguments are properly formatted and complete
+   - Special characters in content are properly escaped
+   - The JSON string is closed properly with all required fields
+     - `old_string` is kept SHORT (this is the most common cause of truncation)
+
+4. **Best Practice**: For index.html files, create the basic structure first, then build it up using multiple `edit_file` operations with SHORT old_string values.

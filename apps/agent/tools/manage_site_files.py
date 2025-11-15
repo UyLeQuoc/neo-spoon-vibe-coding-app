@@ -10,7 +10,9 @@ class ManageSiteFilesTool(BaseTool):
     name: str = "manage_site_files"
     description: str = (
         "Manage files in generated sites. Create new files, edit existing files (replace strings), "
-        "read file content, or delete files. Use this to update or modify existing generated sites."
+        "read file content, or delete files. Use this to update or modify existing generated sites. "
+        "IMPORTANT: When creating files with large content, ensure the JSON arguments are properly formatted and complete. "
+        "For very large files, consider creating a basic structure first, then using edit_file to add content incrementally."
     )
     parameters: dict = {
         "type": "object",
@@ -30,15 +32,15 @@ class ManageSiteFilesTool(BaseTool):
             },
             "content": {
                 "type": "string",
-                "description": "File content for create_file operation",
+                "description": "File content for create_file operation. Required for create_file. For large files, ensure JSON is properly escaped and complete.",
             },
             "old_string": {
                 "type": "string",
-                "description": "String to find and replace in edit_file operation",
+                "description": "String to find and replace in edit_file operation. Required for edit_file. CRITICAL: Keep this SHORT (under 200 characters) to avoid JSON truncation. Use a unique, small identifier like a comment, a single line, or a short unique string. For large replacements, break into multiple smaller edits.",
             },
             "new_string": {
                 "type": "string",
-                "description": "Replacement string for edit_file operation",
+                "description": "Replacement string for edit_file operation. Required for edit_file. Can be longer than old_string, but if very long, consider breaking into multiple edits.",
             },
         },
         "required": ["operation", "site_id", "file_path"],
@@ -52,12 +54,13 @@ class ManageSiteFilesTool(BaseTool):
 
     async def execute(
         self,
-        operation: str,
-        site_id: str,
-        file_path: str,
+        operation: Optional[str] = None,
+        site_id: Optional[str] = None,
+        file_path: Optional[str] = None,
         content: Optional[str] = None,
         old_string: Optional[str] = None,
         new_string: Optional[str] = None,
+        **kwargs
     ) -> str:
         """
         Execute file management operation.
@@ -65,6 +68,34 @@ class ManageSiteFilesTool(BaseTool):
         Returns JSON string with operation result including success status,
         file paths, URLs, and any relevant messages.
         """
+        # Handle arguments passed as kwargs (from JSON parsing)
+        if operation is None:
+            operation = kwargs.get("operation")
+        if site_id is None:
+            site_id = kwargs.get("site_id")
+        if file_path is None:
+            file_path = kwargs.get("file_path")
+        if content is None:
+            content = kwargs.get("content")
+        if old_string is None:
+            old_string = kwargs.get("old_string")
+        if new_string is None:
+            new_string = kwargs.get("new_string")
+        
+        # Validate required arguments
+        if not operation or not site_id or not file_path:
+            error_msg = (
+                f"Missing required arguments. "
+                f"operation={operation}, site_id={site_id}, file_path={file_path}. "
+                f"This usually means the JSON arguments were incomplete or malformed. "
+                f"Try creating files incrementally: first create a small skeleton, then use edit_file to add content."
+            )
+            return json.dumps({
+                "success": False,
+                "error": error_msg,
+                "received_kwargs": str(kwargs) if kwargs else "No kwargs received"
+            }, indent=2)
+        
         try:
             sites_dir = self._get_sites_dir()
             site_dir = sites_dir / site_id
@@ -85,6 +116,15 @@ class ManageSiteFilesTool(BaseTool):
                 return await self._create_file(site_dir, absolute_file_path, content, result)
 
             elif operation == "edit_file":
+                # Validate old_string length to prevent JSON truncation
+                if old_string and len(old_string) > 200:
+                    result["error"] = (
+                        f"old_string is too long ({len(old_string)} characters). "
+                        f"Keep it under 200 characters to prevent JSON truncation. "
+                        f"Use a shorter unique identifier like a comment or single line, "
+                        f"or break the edit into multiple smaller edits."
+                    )
+                    return json.dumps(result, indent=2)
                 return await self._edit_file(absolute_file_path, old_string, new_string, result)
 
             elif operation == "read_file":

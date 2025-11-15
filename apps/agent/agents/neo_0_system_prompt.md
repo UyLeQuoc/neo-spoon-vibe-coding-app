@@ -54,9 +54,69 @@ Use this tool to read, edit, create additional files, or delete files in existin
 - For edits, always read the file first to understand its structure
 - Use precise string replacements when editing
 
-## Error Handling:
+## Error Handling
 
 - If a tool fails, STOP immediately and report the error
 - Do not retry or continue without user guidance
 - Provide clear error messages to help debug issues
+
+## Output Format
+
+ALWAYS provide your final response in this structured format for easy parsing:
+
+```json
+{
+  "status": "success" | "error",
+  "action": "create" | "update" | "read" | "delete",
+  "site_url": "http://localhost:8000/sites/TIMESTAMP",
+  "site_id": "TIMESTAMP",
+  "message": "Brief description of what was done",
+  "files_affected": ["index.html", "styles.css"],
+  "error_details": "Error message if status is error"
+}
+```
+
+**Examples:**
+
+Creating a new site:
+
+```json
+{
+  "status": "success",
+  "action": "create",
+  "site_url": "http://localhost:8000/sites/20251115_143022",
+  "site_id": "20251115_143022",
+  "message": "Created a modern portfolio website with hero section and project gallery",
+  "files_affected": ["index.html"]
+}
+```
+
+Updating an existing site:
+
+```json
+{
+  "status": "success",
+  "action": "update",
+  "site_url": "http://localhost:8000/sites/20251115_143022",
+  "site_id": "20251115_143022",
+  "message": "Updated button colors to blue and added hover effects",
+  "files_affected": ["index.html"]
+}
+```
+
+Error scenario:
+
+```json
+{
+  "status": "error",
+  "action": "create",
+  "site_url": null,
+  "site_id": null,
+  "message": "Failed to generate site",
+  "files_affected": [],
+  "error_details": "Tool execution failed: Invalid HTML structure"
+}
+```
+
+After the JSON output, you may provide additional conversational context or explanations.
 

@@ -1,10 +1,13 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from typing import TypedDict, Dict, Any, Optional, Annotated
 from spoon_ai.chat import ChatBot
 from spoon_ai.tools.base import BaseTool
 from spoon_ai.tools import ToolManager
 from spoon_ai.agents import ToolCallAgent
+from .manage_site_files import ManageSiteFilesTool
+from .graph_workflow import SiteGenerationGraph, SiteGenerationState
 
 
 class GenerateSiteTool(BaseTool):
@@ -34,6 +37,30 @@ class GenerateSiteTool(BaseTool):
         },
         "required": ["requirements"],
     }
+
+    def _clean_html_content(self, content: str) -> str:
+        """
+        Remove markdown code block formatting from HTML content.
+
+        Args:
+            content: Raw content that may contain markdown code blocks
+
+        Returns:
+            Cleaned HTML content without markdown formatting
+        """
+        html_content = content.strip()
+
+        # Remove opening code block markers
+        if html_content.startswith("```html"):
+            html_content = html_content[7:]  # Remove ```html
+        elif html_content.startswith("```"):
+            html_content = html_content[3:]  # Remove ```
+
+        # Remove closing code block marker
+        if html_content.endswith("```"):
+            html_content = html_content[:-3]  # Remove trailing ```
+
+        return html_content.strip()
 
     def _load_system_prompt(self) -> str:
         """Load the system prompt from generate_site_system_prompt.md"""
@@ -68,53 +95,47 @@ class GenerateSiteTool(BaseTool):
             max_tokens=64000,  # Need larger output for complete HTML files
         )
 
-        # Construct the user message with all requirements
-        user_message = "Requirements:\n" + requirements
-
-        if site_type:
-            user_message = f"Site Type: {site_type}\n\n" + user_message
-
-        if style_preferences:
-            user_message += f"\n\nStyle Preferences:\n{style_preferences}"
-
-        user_message += """
-
-Please generate a complete, production-ready index.html file following all the guidelines in the system prompt.
-Output ONLY the HTML code without any explanations or markdown formatting.
-"""
-
-        # Generate the site using a simple agent
+        # Generate the site using Graph System for structured workflow
         try:
             # Load the system prompt
             system_prompt = self._load_system_prompt()
 
-            # Create a simple agent just for this generation task
-            site_agent = ToolCallAgent(
-                llm=llm,
-                name="site_generator",
-                system_prompt=system_prompt,
-                available_tools=ToolManager([]),
-            )
+            # Build graph workflow
+            graph_builder = SiteGenerationGraph(llm, system_prompt)
+            graph = graph_builder.build()
+            compiled = graph.compile()
 
-            # Generate HTML
-            agent_result = await site_agent.run(user_message)
+            # Initial state
+            initial_state: SiteGenerationState = {
+                "site_id": site_id,
+                "site_dir": str(site_dir),
+                "requirements": requirements,
+                "site_type": site_type,
+                "style_preferences": style_preferences,
+                "current_step": "initialized",
+                "html_skeleton_created": False,
+                "head_section_added": False,
+                "content_generated": False,
+                "verification_passed": False,
+                "error": None,
+                "result": None,
+                "memory": None,
+            }
 
-            # Extract HTML content from agent result
-            # Remove markdown code blocks if present
-            html_content = agent_result.strip()
-            if html_content.startswith("```html"):
-                html_content = html_content[7:]  # Remove ```html
-            elif html_content.startswith("```"):
-                html_content = html_content[3:]  # Remove ```
+            # Execute graph workflow
+            final_state = await compiled.invoke(initial_state)
 
-            if html_content.endswith("```"):
-                html_content = html_content[:-3]  # Remove trailing ```
-
-            html_content = html_content.strip()
-
-            # Save HTML to disk
+            # Verify that index.html was created
             html_file = site_dir / "index.html"
-            html_file.write_text(html_content, encoding="utf-8")
+            if not html_file.exists():
+                error_msg = final_state.get("error", "Unknown error")
+                current_step = final_state.get("current_step", "unknown")
+                return f"Error generating site: {error_msg} (step: {current_step})"
+
+            # Check if verification passed
+            if not final_state.get("verification_passed", False):
+                # Site was created but verification failed - still return URL but log warning
+                pass  # We'll still return the URL as the file exists
 
             # Save metadata
             metadata = {
@@ -123,6 +144,9 @@ Output ONLY the HTML code without any explanations or markdown formatting.
                 "requirements": requirements,
                 "site_type": site_type,
                 "style_preferences": style_preferences,
+                "generation_method": "graph_system",
+                "final_step": final_state.get("current_step", "unknown"),
+                "verification_passed": final_state.get("verification_passed", False),
             }
             metadata_file = site_dir / "metadata.json"
             metadata_file.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
