@@ -2,7 +2,6 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
 import { Label } from '@radix-ui/react-label'
 import * as Select from '@radix-ui/react-select'
-import type { Message } from 'ai'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { type RefCallback } from 'react'
 import { ClientOnly } from 'remix-utils/client-only'
@@ -15,6 +14,7 @@ import { useModelsQuery } from '~/hooks/queries/models.query'
 import { classNames } from '~/utils/classNames'
 import { debounce } from '~/utils/debounce'
 import type { ModelConfig, ModelInfo } from '~/utils/modelConstants'
+import type { UIMessage } from 'ai'
 import styles from './BaseChat.module.scss'
 import { Messages } from './Messages.client'
 import { SendButton } from './SendButton.client'
@@ -43,7 +43,7 @@ interface BaseChatProps {
   showChat?: boolean
   chatStarted?: boolean
   isStreaming?: boolean
-  messages?: Message[]
+  messages?: UIMessage[]
   enhancingPrompt?: boolean
   promptEnhanced?: boolean
   input?: string

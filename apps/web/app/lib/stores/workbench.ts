@@ -1,18 +1,15 @@
 import nodePath from 'node:path'
-import type { WebContainer } from '@webcontainer/api'
 import JSZip from 'jszip'
 import { atom, type MapStore, map, type ReadableAtom, type WritableAtom } from 'nanostores'
 import type { EditorDocument, ScrollPosition } from '~/components/editor/codemirror/CodeMirrorEditor'
 import { ActionRunner } from '~/lib/runtime/action-runner'
 import type { ActionCallbackData, ArtifactCallbackData } from '~/lib/runtime/message-parser'
-import { webcontainer } from '~/lib/webcontainer'
-import type { ITerminal } from '~/types/terminal'
+import { fs, initializeZenFS } from '~/lib/zenfs'
 import { importFromGitHub } from '~/utils/import'
 import { unreachable } from '~/utils/unreachable'
 import { EditorStore } from './editor'
 import { type FileMap, FilesStore } from './files'
 import { PreviewsStore } from './previews'
-import { TerminalStore } from './terminal'
 
 export interface ArtifactState {
   id: string
@@ -28,12 +25,9 @@ type Artifacts = MapStore<Record<string, ArtifactState>>
 export type WorkbenchViewType = 'code' | 'preview'
 
 export class WorkbenchStore {
-  #webcontainer: Promise<WebContainer>
-
-  #previewsStore = new PreviewsStore(webcontainer)
-  #filesStore = new FilesStore(webcontainer)
+  #previewsStore = new PreviewsStore()
+  #filesStore = new FilesStore()
   #editorStore = new EditorStore(this.#filesStore)
-  #terminalStore = new TerminalStore(webcontainer)
 
   artifacts: Artifacts = import.meta.hot?.data.artifacts ?? map({})
 
@@ -50,7 +44,6 @@ export class WorkbenchStore {
       import.meta.hot.data.showWorkbench = this.showWorkbench
       import.meta.hot.data.currentView = this.currentView
     }
-    this.#webcontainer = webcontainer
   }
 
   downloadProject() {
@@ -109,7 +102,7 @@ export class WorkbenchStore {
     }
     this.setDocuments(project)
 
-    const webcontainer = await this.#webcontainer
+    await initializeZenFS()
     for (const filePath of Object.keys(project)) {
       if (!project[filePath]) {
         continue
@@ -125,7 +118,7 @@ export class WorkbenchStore {
 
       if (folder !== '.') {
         try {
-          await webcontainer.fs.mkdir(folder, { recursive: true })
+          await fs.promises.mkdir(folder, { recursive: true })
           console.log('Created folder', folder)
         } catch (error) {
           console.error('Failed to create folder\n\n', error)
@@ -133,7 +126,7 @@ export class WorkbenchStore {
       }
 
       try {
-        await webcontainer.fs.writeFile(filePath, content)
+        await fs.promises.writeFile(filePath, content, 'utf8')
         console.log(`File written ${filePath}`)
       } catch (error) {
         console.error('Failed to write file\n\n', error)
@@ -164,38 +157,6 @@ export class WorkbenchStore {
 
   get filesCount(): number {
     return this.#filesStore.filesCount
-  }
-
-  get showTerminal() {
-    return this.#terminalStore.showTerminal
-  }
-
-  get boltTerminal() {
-    return this.#terminalStore.boltTerminal
-  }
-
-  attachBoltTerminalHandler(event: string, callback: (...args: any[]) => void) {
-    this.#terminalStore.boltTerminal.addEventHandler(event, callback)
-  }
-
-  unattachBoltTerminalHandler(event: string, callback: (...args: any[]) => void) {
-    this.#terminalStore.boltTerminal.removeEventHandler(event, callback)
-  }
-
-  attachBoltTerminal(terminal: ITerminal) {
-    this.#terminalStore.attachBoltTerminal(terminal)
-  }
-
-  toggleTerminal(value?: boolean) {
-    this.#terminalStore.toggleTerminal(value)
-  }
-
-  attachTerminal(terminal: ITerminal) {
-    this.#terminalStore.attachTerminal(terminal)
-  }
-
-  onTerminalResize(cols: number, rows: number) {
-    this.#terminalStore.onTerminalResize(cols, rows)
   }
 
   setDocuments(files: FileMap) {
@@ -341,7 +302,7 @@ export class WorkbenchStore {
       id,
       title,
       closed: false,
-      runner: new ActionRunner(webcontainer, this.boltTerminal)
+      runner: new ActionRunner()
     })
   }
 

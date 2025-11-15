@@ -27,7 +27,8 @@ export default defineConfig(config => ({
     config.mode === 'production' && optimizeCssModules({ apply: 'build' }),
     config.mode !== 'production' && devtoolsJson()
   ],
-  envPrefix: ['VITE_', 'TOGETHER_AI_API_KEY', 'OLLAMA_API_BASE_URL', 'LM_STUDIO_API_BASE_URL']
+  envPrefix: ['VITE_', 'TOGETHER_AI_API_KEY', 'OLLAMA_API_BASE_URL', 'LM_STUDIO_API_BASE_URL'],
+  server: { proxy: { '/api': 'http://localhost:8787' } }
 }))
 
 function chrome129IssuePlugin() {

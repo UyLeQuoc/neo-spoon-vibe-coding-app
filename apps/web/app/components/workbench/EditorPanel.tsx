@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
-import { type ImperativePanelHandle, Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
+import React, { memo, useMemo } from 'react'
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import {
   CodeMirrorEditor,
   type EditorDocument,
@@ -10,20 +10,16 @@ import {
   type OnSaveCallback as OnEditorSave,
   type OnScrollCallback as OnEditorScroll
 } from '~/components/editor/codemirror/CodeMirrorEditor'
-import { IconButton } from '~/components/ui/IconButton'
 import { PanelHeader } from '~/components/ui/PanelHeader'
 import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton'
-import { shortcutEventEmitter } from '~/lib/hooks'
 import type { FileMap } from '~/lib/stores/files'
 import { themeStore } from '~/lib/stores/theme'
-import { workbenchStore } from '~/lib/stores/workbench'
 import { classNames } from '~/utils/classNames'
 import { WORK_DIR } from '~/utils/constants'
 import { renderLogger } from '~/utils/logger'
 import { isMobile } from '~/utils/mobile'
 import { FileBreadcrumb } from './FileBreadcrumb'
 import { FileTree } from './FileTree'
-import { Terminal, type TerminalRef } from './terminal/Terminal'
 
 interface EditorPanelProps {
   files?: FileMap
@@ -37,10 +33,6 @@ interface EditorPanelProps {
   onFileSave?: OnEditorSave
   onFileReset?: () => void
 }
-
-const MAX_TERMINALS = 3
-const DEFAULT_TERMINAL_SIZE = 25
-const DEFAULT_EDITOR_SIZE = 100 - DEFAULT_TERMINAL_SIZE
 
 const editorSettings: EditorSettings = { tabSize: 2 }
 
@@ -60,14 +52,6 @@ export const EditorPanel = memo(
     renderLogger.trace('EditorPanel')
 
     const theme = useStore(themeStore)
-    const showTerminal = useStore(workbenchStore.showTerminal)
-
-    const terminalRefs = useRef<Array<TerminalRef | null>>([])
-    const terminalPanelRef = useRef<ImperativePanelHandle>(null)
-    const terminalToggledByShortcut = useRef(false)
-
-    const [activeTerminal, setActiveTerminal] = useState(0)
-    const [terminalCount, setTerminalCount] = useState(1)
 
     const activeFileSegments = useMemo(() => {
       if (!editorDocument) {
@@ -81,52 +65,8 @@ export const EditorPanel = memo(
       return editorDocument !== undefined && unsavedFiles?.has(editorDocument.filePath)
     }, [editorDocument, unsavedFiles])
 
-    useEffect(() => {
-      const unsubscribeFromEventEmitter = shortcutEventEmitter.on('toggleTerminal', () => {
-        terminalToggledByShortcut.current = true
-      })
-
-      const unsubscribeFromThemeStore = themeStore.subscribe(() => {
-        for (const ref of Object.values(terminalRefs.current)) {
-          ref?.reloadStyles()
-        }
-      })
-
-      return () => {
-        unsubscribeFromEventEmitter()
-        unsubscribeFromThemeStore()
-      }
-    }, [])
-
-    useEffect(() => {
-      const { current: terminal } = terminalPanelRef
-
-      if (!terminal) {
-        return
-      }
-
-      const isCollapsed = terminal.isCollapsed()
-
-      if (!showTerminal && !isCollapsed) {
-        terminal.collapse()
-      } else if (showTerminal && isCollapsed) {
-        terminal.resize(DEFAULT_TERMINAL_SIZE)
-      }
-
-      terminalToggledByShortcut.current = false
-    }, [showTerminal])
-
-    const addTerminal = () => {
-      if (terminalCount < MAX_TERMINALS) {
-        setTerminalCount(terminalCount + 1)
-        setActiveTerminal(terminalCount)
-      }
-    }
-
     return (
-      <PanelGroup direction="vertical">
-        <Panel defaultSize={showTerminal ? DEFAULT_EDITOR_SIZE : 100} minSize={20}>
-          <PanelGroup direction="horizontal">
+      <PanelGroup direction="horizontal">
             <Panel defaultSize={20} minSize={10} collapsible>
               <div className="flex flex-col border-r border-neozero-elements-borderColor h-full">
                 <PanelHeader>
@@ -196,131 +136,6 @@ export const EditorPanel = memo(
               </div>
             </Panel>
           </PanelGroup>
-        </Panel>
-        <PanelResizeHandle />
-        <Panel
-          ref={terminalPanelRef}
-          defaultSize={showTerminal ? DEFAULT_TERMINAL_SIZE : 0}
-          minSize={10}
-          collapsible
-          onExpand={() => {
-            if (!terminalToggledByShortcut.current) {
-              workbenchStore.toggleTerminal(true)
-            }
-          }}
-          onCollapse={() => {
-            if (!terminalToggledByShortcut.current) {
-              workbenchStore.toggleTerminal(false)
-            }
-          }}
-        >
-          <div className="h-full">
-            <div className="bg-neozero-elements-terminals-background h-full flex flex-col">
-              <div className="flex items-center bg-neozero-elements-background-depth-2 border-y border-neozero-elements-borderColor gap-1.5 min-h-[34px] p-2">
-                {Array.from({ length: terminalCount }, (_, index) => {
-                  const isActive = activeTerminal === index
-
-                  return (
-                    <React.Fragment key={index}>
-                      {index === 0 ? (
-                        <button
-                          key={index}
-                          className={classNames(
-                            'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
-                            {
-                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary':
-                                isActive,
-                              'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
-                                !isActive
-                            }
-                          )}
-                          onClick={() => setActiveTerminal(index)}
-                        >
-                          <div className="i-neozero:logo-text?mask text-lg" />
-                          NeoZero Terminal
-                        </button>
-                      ) : (
-                        <button
-                          key={index}
-                          className={classNames(
-                            'flex items-center text-sm cursor-pointer gap-1.5 px-3 py-2 h-full whitespace-nowrap rounded-full',
-                            {
-                              'bg-neozero-elements-terminals-buttonBackground text-neozero-elements-textPrimary':
-                                isActive,
-                              'bg-neozero-elements-background-depth-2 text-neozero-elements-textSecondary hover:bg-neozero-elements-terminals-buttonBackground':
-                                !isActive
-                            }
-                          )}
-                          onClick={() => setActiveTerminal(index)}
-                        >
-                          <div className="i-ph:terminal-window-duotone text-lg" />
-                          Terminal {terminalCount > 1 && index + 1}
-                        </button>
-                      )}
-                    </React.Fragment>
-                  )
-                })}
-                {terminalCount < MAX_TERMINALS && <IconButton icon="i-ph:plus" size="md" onClick={addTerminal} />}
-                <IconButton
-                  className="ml-auto"
-                  icon="i-ph:caret-down"
-                  title="Close"
-                  size="md"
-                  onClick={() => workbenchStore.toggleTerminal(false)}
-                />
-              </div>
-              <Terminal
-                key={-1}
-                className={classNames('h-full overflow-hidden', {
-                  hidden: activeTerminal !== -1
-                })}
-                ref={ref => {
-                  terminalRefs.current[-1] = ref
-                }}
-                readonly={true}
-                onTerminalReady={_terminal => true}
-                onTerminalResize={(_cols, _rows) => true}
-                theme={theme}
-              />
-              {Array.from({ length: terminalCount }, (_, index) => {
-                const isActive = activeTerminal === index
-
-                if (index === 0) {
-                  return (
-                    <Terminal
-                      key={index}
-                      className={classNames('h-full overflow-hidden', {
-                        hidden: !isActive
-                      })}
-                      ref={ref => {
-                        terminalRefs.current.push(ref)
-                      }}
-                      onTerminalReady={terminal => workbenchStore.attachBoltTerminal(terminal)}
-                      onTerminalResize={(cols, rows) => workbenchStore.onTerminalResize(cols, rows)}
-                      theme={theme}
-                    />
-                  )
-                } else {
-                  return (
-                    <Terminal
-                      key={index}
-                      className={classNames('h-full overflow-hidden', {
-                        hidden: !isActive
-                      })}
-                      ref={ref => {
-                        terminalRefs.current.push(ref)
-                      }}
-                      onTerminalReady={terminal => workbenchStore.attachTerminal(terminal)}
-                      onTerminalResize={(cols, rows) => workbenchStore.onTerminalResize(cols, rows)}
-                      theme={theme}
-                    />
-                  )
-                }
-              })}
-            </div>
-          </div>
-        </Panel>
-      </PanelGroup>
     )
   }
 )

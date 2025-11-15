@@ -7,12 +7,12 @@ export const modificationsRegex = new RegExp(
   'g'
 )
 
-interface ModifiedFile {
+export interface ModifiedFile {
   type: 'diff' | 'file'
   content: string
 }
 
-type FileModifications = Record<string, ModifiedFile>
+export type FileModifications = Record<string, ModifiedFile>
 
 export function computeFileModifications(files: FileMap, modifiedFiles: Map<string, string>) {
   const modifications: FileModifications = {}

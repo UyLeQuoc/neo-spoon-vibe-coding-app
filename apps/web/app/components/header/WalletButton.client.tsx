@@ -5,7 +5,6 @@ import { useNavigate } from '@remix-run/react'
 import { useCallback, useEffect, useState } from 'react'
 import { SignInDialog } from '~/components/auth/SignInDialog.client'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
-import { getApiBaseUrl } from '~/lib/hono-client'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
@@ -133,7 +132,7 @@ export function WalletButton() {
 
   // Show address if connected (even if not authenticated)
   if (account) {
-    const avatarUrl = `${getApiBaseUrl()}/api/avatar/${encodeURIComponent(account)}`
+    const avatarUrl = `/api/avatar/${encodeURIComponent(account)}`
 
     return (
       <>
