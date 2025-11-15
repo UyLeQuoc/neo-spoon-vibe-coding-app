@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import type { NeoLineN3, GetAccountResponse, GetBalanceResponse } from './types'
+import { useCallback, useEffect, useState } from 'react'
 import { initNeoLineN3, waitForNeoLine } from './init'
+import type { GetAccountResponse, GetBalanceResponse, NeoLineN3 } from './types'
 
 export interface UseNeoLineN3Return {
   neoline: NeoLineN3 | null
@@ -34,34 +34,37 @@ export function useNeoLineN3(): UseNeoLineN3Return {
     }
   }, [])
 
-  const setupEventListeners = useCallback((instance: NeoLineN3) => {
-    // Account changed
-    instance.addEventListener('NEOLine.N3.EVENT.ACCOUNT_CHANGED', (result: any) => {
-      const accountData = result.detail || result
-      if (accountData.address) {
-        setAccount(accountData.address)
-        setAccountInfo(accountData)
-        fetchBalance(instance, accountData.address)
-      }
-    })
+  const setupEventListeners = useCallback(
+    (instance: NeoLineN3) => {
+      // Account changed
+      instance.addEventListener('NEOLine.N3.EVENT.ACCOUNT_CHANGED', (result: any) => {
+        const accountData = result.detail || result
+        if (accountData.address) {
+          setAccount(accountData.address)
+          setAccountInfo(accountData)
+          fetchBalance(instance, accountData.address)
+        }
+      })
 
-    // Connected
-    instance.addEventListener('NEOLine.N3.EVENT.CONNECTED', (result: any) => {
-      const accountData = result.detail || result
-      if (accountData.address) {
-        setAccount(accountData.address)
-        setAccountInfo(accountData)
-        fetchBalance(instance, accountData.address)
-      }
-    })
+      // Connected
+      instance.addEventListener('NEOLine.N3.EVENT.CONNECTED', (result: any) => {
+        const accountData = result.detail || result
+        if (accountData.address) {
+          setAccount(accountData.address)
+          setAccountInfo(accountData)
+          fetchBalance(instance, accountData.address)
+        }
+      })
 
-    // Disconnected
-    instance.addEventListener('NEOLine.N3.EVENT.DISCONNECTED', () => {
-      setAccount(null)
-      setAccountInfo(null)
-      setBalance(null)
-    })
-  }, [fetchBalance])
+      // Disconnected
+      instance.addEventListener('NEOLine.N3.EVENT.DISCONNECTED', () => {
+        setAccount(null)
+        setAccountInfo(null)
+        setBalance(null)
+      })
+    },
+    [fetchBalance]
+  )
 
   // Initialize SDK
   useEffect(() => {
@@ -170,4 +173,3 @@ export function useNeoLineN3(): UseNeoLineN3Return {
     refreshBalance
   }
 }
-

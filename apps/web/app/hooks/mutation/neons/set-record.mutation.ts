@@ -1,8 +1,8 @@
+import { useStore } from '@nanostores/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { queryKeys } from '../../keys'
-import { useStore } from '@nanostores/react'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
+import { queryKeys } from '../../keys'
 
 export type RecordType = 1 | 5 | 16 | 28 // IPV4, CNAME, TXT, IPV6
 
@@ -17,7 +17,7 @@ interface SetRecordInput {
 // The actual setRecord happens via NeoLine invoke
 export function useSetRecord() {
   const queryClient = useQueryClient()
-  const authenticatedAddress = useStore(walletAuthStore.authenticatedAddress)
+  const _authenticatedAddress = useStore(walletAuthStore.authenticatedAddress)
 
   return useMutation({
     mutationFn: async (input: SetRecordInput) => {
@@ -33,10 +33,7 @@ export function useSetRecord() {
     },
     onError: error => {
       console.error('Set record failed:', error)
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to set record'
-      )
+      toast.error(error instanceof Error ? error.message : 'Failed to set record')
     }
   })
 }
-

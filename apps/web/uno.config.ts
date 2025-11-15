@@ -244,10 +244,10 @@ export default defineConfig({
     }),
     presetWebFonts({
       fonts: {
-        'roboto': 'Roboto',
+        roboto: 'Roboto',
         'open-sans': 'Open Sans',
-        'oswald': 'Oswald',
-      },
+        oswald: 'Oswald'
+      }
     })
   ]
 })

@@ -1,14 +1,14 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
-import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from '@remix-run/react'
-import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
+import { useCallback, useEffect, useState } from 'react'
+import { SignInDialog } from '~/components/auth/SignInDialog.client'
+import { hClientWithAuth } from '~/lib/hono-authenticated-client'
+import { getApiBaseUrl } from '~/lib/hono-client'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
-import { hClientWithAuth } from '~/lib/hono-authenticated-client'
-import { SignInDialog } from '~/components/auth/SignInDialog.client'
-import { getApiBaseUrl } from '~/lib/hono-client'
+import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 
 export function WalletButton() {
   const { neoline, isInitialized, account, balance, connect, disconnect: disconnectNeoLine } = useNeoLineN3()
@@ -122,8 +122,8 @@ export function WalletButton() {
 
   if (!isInitialized) {
     return (
-      <button 
-        className="px-4 py-2 rounded-md font-roboto bg-neozero-elements-bg-depth-3 text-neozero-elements-textTertiary cursor-not-allowed transition-theme" 
+      <button
+        className="px-4 py-2 rounded-md font-roboto bg-neozero-elements-bg-depth-3 text-neozero-elements-textTertiary cursor-not-allowed transition-theme"
         disabled
       >
         Loading...
@@ -134,7 +134,7 @@ export function WalletButton() {
   // Show address if connected (even if not authenticated)
   if (account) {
     const avatarUrl = `${getApiBaseUrl()}/api/avatar/${encodeURIComponent(account)}`
-    
+
     return (
       <>
         <div className="relative flex items-center gap-2">
@@ -144,11 +144,7 @@ export function WalletButton() {
               onClick={() => setShowDropdown(!showDropdown)}
               className="ml-2 rounded-md text-xs px-2 py-1.5 bg-neozero-elements-button-secondary-background text-neozero-elements-button-secondary-text hover:bg-neozero-elements-button-secondary-backgroundHover transition-theme flex items-center gap-2 justify-center shadow-sm"
             >
-              <img
-                src={avatarUrl}
-                alt="User avatar"
-                className="w-5 h-5 rounded-full"
-              />
+              <img src={avatarUrl} alt="User avatar" className="w-5 h-5 rounded-full" />
               {isWalletAuthenticated && balancePoints !== null ? (
                 // <span className="font-medium">{balancePoints.toFixed(0)}</span>
                 <span className="font-medium"></span>
@@ -169,20 +165,13 @@ export function WalletButton() {
 
             {showDropdown && (
               <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowDropdown(false)}
-                />
+                <div className="fixed inset-0 z-10" onClick={() => setShowDropdown(false)} />
                 <div className="absolute right-0 mt-2 w-64 bg-neozero-elements-background-depth-2 rounded-lg shadow-lg border border-neozero-elements-borderColor z-20 overflow-hidden">
                   <div className="py-1">
                     {/* User Info Header */}
                     <div className="px-4 py-3 border-b border-neozero-elements-borderColor">
                       <div className="flex items-center gap-3 mb-2">
-                        <img
-                          src={avatarUrl}
-                          alt="User avatar"
-                          className="w-10 h-10 rounded-full"
-                        />
+                        <img src={avatarUrl} alt="User avatar" className="w-10 h-10 rounded-full" />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-medium text-neozero-elements-textPrimary truncate">
                             {formatAddress(account)}
@@ -195,22 +184,22 @@ export function WalletButton() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Balance in dropdown - Only show if authenticated */}
                     {isWalletAuthenticated && balance !== null && (
                       <div className="px-4 py-3 border-b border-neozero-elements-borderColor">
-                        <div className="text-xs text-neozero-elements-textSecondary mb-2 font-medium">Wallet Balance (Testnet)</div>
+                        <div className="text-xs text-neozero-elements-textSecondary mb-2 font-medium">
+                          Wallet Balance (Testnet)
+                        </div>
                         <div className="space-y-1">
-                          {
-                            balance?.[account]?.map((b) => {
-                              if (b.symbol !== 'GAS' && b.symbol !== 'NEO') return null
-                              return (
-                                <div key={b.contract} className="text-sm text-neozero-elements-textPrimary font-medium">
-                                  {b.amount} {b.symbol}
-                                </div>
-                              )
-                            })
-                          }
+                          {balance?.[account]?.map(b => {
+                            if (b.symbol !== 'GAS' && b.symbol !== 'NEO') return null
+                            return (
+                              <div key={b.contract} className="text-sm text-neozero-elements-textPrimary font-medium">
+                                {b.amount} {b.symbol}
+                              </div>
+                            )
+                          })}
                         </div>
                       </div>
                     )}
@@ -241,7 +230,13 @@ export function WalletButton() {
                     >
                       {isCopied ? (
                         <>
-                          <svg className="w-4 h-4 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Checkmark icon">
+                          <svg
+                            className="w-4 h-4 text-accent-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-label="Checkmark icon"
+                          >
                             <title>Checkmark icon</title>
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
@@ -249,9 +244,20 @@ export function WalletButton() {
                         </>
                       ) : (
                         <>
-                          <svg className="w-4 h-4 text-neozero-elements-textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Copy icon">
+                          <svg
+                            className="w-4 h-4 text-neozero-elements-textSecondary"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            aria-label="Copy icon"
+                          >
                             <title>Copy icon</title>
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                            />
                           </svg>
                           Copy Address
                         </>

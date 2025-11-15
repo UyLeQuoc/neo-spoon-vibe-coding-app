@@ -304,7 +304,7 @@ const STATIC_MODELS: ModelInfo[] = [
 ]
 
 export const DEFAULT_MODEL = 'gemini-2.0-flash'
-export const DEFAULT_PROVIDER: Provider = 'Google'
+export const DEFAULT_PROVIDER: Provider = 'OpenRouter'
 
 export let MODEL_LIST: ModelInfo[] = [...STATIC_MODELS]
 

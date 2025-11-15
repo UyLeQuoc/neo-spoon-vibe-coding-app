@@ -27,14 +27,13 @@ export default function TestWalletPage() {
   const [lastBlock, setLastBlock] = useState<number | null>(null)
 
   // Format balance display
-  const balanceDisplay = balance && account
-    ? (() => {
-        const gasBalance = balance[account]?.find(
-          (b) => b.contract === '0xd2a4cff31913016155e38e474a2c06d08be276cf'
-        )
-        return gasBalance ? parseFloat(gasBalance.amount).toFixed(4) + ' GAS' : '0 GAS'
-      })()
-    : null
+  const balanceDisplay =
+    balance && account
+      ? (() => {
+          const gasBalance = balance[account]?.find(b => b.contract === '0xd2a4cff31913016155e38e474a2c06d08be276cf')
+          return gasBalance ? `${parseFloat(gasBalance.amount).toFixed(4)} GAS` : '0 GAS'
+        })()
+      : null
 
   // Connect wallet via NeoLine
   async function connectWallet() {
@@ -135,15 +134,18 @@ export default function TestWalletPage() {
                       const amountValue = values[2]
 
                       // Handle different value formats
-                      const from = typeof fromValue === 'object' && 'value' in fromValue 
-                        ? (fromValue.value as string) 
-                        : (fromValue as string) || ''
-                      const to = typeof toValue === 'object' && 'value' in toValue 
-                        ? (toValue.value as string) 
-                        : (toValue as string) || ''
-                      const amountStr = typeof amountValue === 'object' && 'value' in amountValue 
-                        ? (amountValue.value as string) 
-                        : (amountValue as string) || '0'
+                      const from =
+                        typeof fromValue === 'object' && 'value' in fromValue
+                          ? (fromValue.value as string)
+                          : (fromValue as string) || ''
+                      const to =
+                        typeof toValue === 'object' && 'value' in toValue
+                          ? (toValue.value as string)
+                          : (toValue as string) || ''
+                      const amountStr =
+                        typeof amountValue === 'object' && 'value' in amountValue
+                          ? (amountValue.value as string)
+                          : (amountValue as string) || '0'
                       const amount = parseInt(amountStr, 10)
 
                       foundEvents.push({
@@ -158,14 +160,10 @@ export default function TestWalletPage() {
                   }
                 }
               }
-            } catch {
-              // Skip transactions without logs (normal for non-contract transactions)
-              continue
-            }
+            } catch {}
           }
         } catch (error) {
           console.error(`Error reading block ${blockIndex}:`, error)
-          continue
         }
       }
 
@@ -329,7 +327,7 @@ export default function TestWalletPage() {
 
   // Format amount (GAS has 8 decimals)
   function formatAmount(amount: number) {
-    return (amount / 100000000).toFixed(8) + ' GAS'
+    return `${(amount / 100000000).toFixed(8)} GAS`
   }
 
   // Format timestamp
@@ -350,7 +348,15 @@ export default function TestWalletPage() {
       )}
 
       {error && (
-        <div style={{ padding: '10px', background: '#f8d7da', borderRadius: '4px', marginBottom: '20px', color: '#721c24' }}>
+        <div
+          style={{
+            padding: '10px',
+            background: '#f8d7da',
+            borderRadius: '4px',
+            marginBottom: '20px',
+            color: '#721c24'
+          }}
+        >
           ⚠️ {error}
         </div>
       )}
@@ -416,7 +422,9 @@ export default function TestWalletPage() {
           )}
         </div>
         {!isInitialized && (
-          <div style={{ marginTop: '10px', padding: '10px', background: '#fff3cd', borderRadius: '4px', fontSize: '12px' }}>
+          <div
+            style={{ marginTop: '10px', padding: '10px', background: '#fff3cd', borderRadius: '4px', fontSize: '12px' }}
+          >
             ⚠️ Please install{' '}
             <a href="https://neoline.io/" target="_blank" rel="noopener noreferrer" style={{ color: '#2196F3' }}>
               NeoLine Extension
@@ -499,9 +507,7 @@ export default function TestWalletPage() {
 
       {events.length > 0 && (
         <div style={{ marginBottom: '20px' }}>
-          <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>
-            PaymentReceived Events ({events.length})
-          </h2>
+          <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>PaymentReceived Events ({events.length})</h2>
           <div
             style={{
               background: '#fff',
@@ -513,24 +519,12 @@ export default function TestWalletPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
               <thead>
                 <tr style={{ background: '#f5f5f5' }}>
-                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    TX ID
-                  </th>
-                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    Block
-                  </th>
-                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    From
-                  </th>
-                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    To
-                  </th>
-                  <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #ddd' }}>
-                    Amount
-                  </th>
-                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                    Time
-                  </th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>TX ID</th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Block</th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>From</th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>To</th>
+                  <th style={{ padding: '10px', textAlign: 'right', borderBottom: '1px solid #ddd' }}>Amount</th>
+                  <th style={{ padding: '10px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Time</th>
                 </tr>
               </thead>
               <tbody>
@@ -552,9 +546,7 @@ export default function TestWalletPage() {
                     <td style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>
                       {formatAmount(event.amount)}
                     </td>
-                    <td style={{ padding: '10px', fontSize: '11px' }}>
-                      {formatTimestamp(event.timestamp)}
-                    </td>
+                    <td style={{ padding: '10px', fontSize: '11px' }}>{formatTimestamp(event.timestamp)}</td>
                   </tr>
                 ))}
               </tbody>

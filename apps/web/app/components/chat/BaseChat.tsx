@@ -110,7 +110,9 @@ const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) =>
     >
       <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-transparent hover:bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary">
         <Select.Value>
-          {isLoading && <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />}
+          {isLoading && (
+            <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
+          )}
           {!isLoading && currentModel && (
             <div className="flex items-center gap-1">
               <div className="i-ph:gear text-sm" />

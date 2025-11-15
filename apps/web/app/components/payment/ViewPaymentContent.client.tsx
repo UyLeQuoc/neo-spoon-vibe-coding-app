@@ -1,12 +1,12 @@
 'use client'
 
 import { useStore } from '@nanostores/react'
-import { useState, useEffect, useCallback } from 'react'
-import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
-import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
+import { useCallback, useEffect, useState } from 'react'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
+import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { paymentDialogActions } from '~/lib/stores/payment-dialog.store'
+import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 import { PaymentDialog } from './PaymentDialog.client'
 
 interface PendingPayment {
@@ -194,7 +194,9 @@ export function ViewPaymentContent() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
           <h2 className="text-xl font-semibold mb-2">Please connect your wallet</h2>
-          <p className="text-gray-600 dark:text-gray-400">You need to connect and authenticate your wallet to view payments.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            You need to connect and authenticate your wallet to view payments.
+          </p>
         </div>
       </div>
     )
@@ -235,30 +237,62 @@ export function ViewPaymentContent() {
           </div>
           <div className="flex items-center gap-4">
             <div className="p-3 bg-neozero-elements-bg-depth-2 rounded-lg">
-              <svg className="w-6 h-6 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Currency icon">
+              <svg
+                className="w-6 h-6 text-accent-500"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-label="Currency icon"
+              >
                 <title>Currency icon</title>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <div className="text-3xl font-bold text-neozero-elements-textPrimary">{balance !== null ? balance.toFixed(2) : '0.00'} Points</div>
+              <div className="text-3xl font-bold text-neozero-elements-textPrimary">
+                {balance !== null ? balance.toFixed(2) : '0.00'} Points
+              </div>
               {account && (
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-neozero-elements-textSecondary font-mono">{formatAddress(account)}</span>
+                  <span className="text-sm text-neozero-elements-textSecondary font-mono">
+                    {formatAddress(account)}
+                  </span>
                   <button
                     onClick={copyAddress}
                     className="p-1 hover:bg-neozero-elements-item-backgroundActive rounded transition-theme"
                     title="Copy address"
                   >
                     {isCopied ? (
-                      <svg className="w-4 h-4 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Checkmark icon">
+                      <svg
+                        className="w-4 h-4 text-accent-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-label="Checkmark icon"
+                      >
                         <title>Checkmark icon</title>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     ) : (
-                      <svg className="w-4 h-4 text-neozero-elements-textSecondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-label="Copy icon">
+                      <svg
+                        className="w-4 h-4 text-neozero-elements-textSecondary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-label="Copy icon"
+                      >
                         <title>Copy icon</title>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
                       </svg>
                     )}
                   </button>
@@ -308,18 +342,24 @@ export function ViewPaymentContent() {
               </div>
               <div className="flex items-center justify-between py-2 border-b border-neozero-elements-borderColor">
                 <span className="text-sm text-neozero-elements-textSecondary">Amount</span>
-                <span className="font-mono font-semibold text-neozero-elements-textPrimary">{formatAmount(pendingPayment.amount)} GAS</span>
+                <span className="font-mono font-semibold text-neozero-elements-textPrimary">
+                  {formatAmount(pendingPayment.amount)} GAS
+                </span>
               </div>
               {pendingPayment.txDigest && (
                 <div className="flex items-center justify-between py-2 border-b border-neozero-elements-borderColor">
                   <span className="text-sm text-neozero-elements-textSecondary">Transaction</span>
-                  <span className="font-mono text-xs text-neozero-elements-textPrimary">{formatAddress(pendingPayment.txDigest)}</span>
+                  <span className="font-mono text-xs text-neozero-elements-textPrimary">
+                    {formatAddress(pendingPayment.txDigest)}
+                  </span>
                 </div>
               )}
               {pendingPayment.createdAt && (
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-neozero-elements-textSecondary">Created</span>
-                  <span className="text-sm text-neozero-elements-textPrimary">{new Date(pendingPayment.createdAt * 1000).toLocaleString()}</span>
+                  <span className="text-sm text-neozero-elements-textPrimary">
+                    {new Date(pendingPayment.createdAt * 1000).toLocaleString()}
+                  </span>
                 </div>
               )}
             </div>
@@ -337,7 +377,7 @@ export function ViewPaymentContent() {
             <h2 className="text-lg font-semibold text-neozero-elements-textPrimary">Transaction History</h2>
             <p className="text-sm text-neozero-elements-textSecondary mt-1">View your payment history</p>
           </div>
-          
+
           {isLoadingTransactions ? (
             <div className="p-8 text-center text-neozero-elements-textSecondary">Loading transactions...</div>
           ) : transactions.length === 0 ? (
@@ -348,16 +388,26 @@ export function ViewPaymentContent() {
                 <table className="w-full">
                   <thead className="bg-neozero-elements-bg-depth-2">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">ID</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">Note</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">
+                        ID
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">
+                        Note
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-neozero-elements-textSecondary uppercase tracking-wider">
+                        Date
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neozero-elements-borderColor">
-                    {transactions.map((tx) => (
+                    {transactions.map(tx => (
                       <tr key={tx.id} className="hover:bg-neozero-elements-item-backgroundActive transition-theme">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neozero-elements-textPrimary">#{tx.id}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-neozero-elements-textPrimary">
+                          #{tx.id}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-accent-500">
                           +{tx.amount?.toLocaleString() || 0} Points
                         </td>
@@ -370,11 +420,12 @@ export function ViewPaymentContent() {
                   </tbody>
                 </table>
               </div>
-              
+
               {transactionsPagination && transactionsPagination.totalPages > 1 && (
                 <div className="p-4 border-t border-neozero-elements-borderColor flex items-center justify-between">
                   <div className="text-sm text-neozero-elements-textSecondary">
-                    Page {transactionsPagination.page} of {transactionsPagination.totalPages} ({transactionsPagination.total} total)
+                    Page {transactionsPagination.page} of {transactionsPagination.totalPages} (
+                    {transactionsPagination.total} total)
                   </div>
                   <div className="flex gap-2">
                     <button

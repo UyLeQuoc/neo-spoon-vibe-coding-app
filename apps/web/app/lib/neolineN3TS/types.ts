@@ -1,6 +1,6 @@
 /**
  * NeoLine N3 dAPI TypeScript Types
- * 
+ *
  * This module contains all TypeScript type definitions for the NeoLine N3 dAPI.
  * These types are based on the official NeoLine N3 Beta dAPI documentation.
  */
@@ -65,7 +65,7 @@ export interface Argument {
 
 /**
  * Signer scope values that define the effective range of a signature
- * 
+ *
  * - 0: Only transactions are signed and no contracts are allowed to use this signature
  * - 1: CalledByEntry - Only applies to the chain call entry (recommended default)
  * - 16: CustomContracts - Signature can be used in specified contracts
@@ -429,7 +429,7 @@ export interface TransactionConfirmedEventData {
 
 /**
  * NeoLine N3 dAPI SDK Interface
- * 
+ *
  * This interface provides all methods available in the NeoLine N3 dAPI.
  * The NeoLine browser extension injects the SDK directly into window.NEOLineN3.
  */
@@ -439,7 +439,7 @@ export interface NeoLineN3 {
   /**
    * Returns information about the dAPI provider, including who this provider is,
    * the version of their dAPI, and the NEP that the interface is compatible with.
-   * 
+   *
    * @returns Promise resolving to provider information
    * @throws {NeoLineError} NO_PROVIDER - No provider available
    * @throws {NeoLineError} CONNECTION_DENIED - User rejected the connection request
@@ -449,7 +449,7 @@ export interface NeoLineN3 {
   /**
    * Returns balance of a specific asset for the given account.
    * If the asset is omitted from a request to MainNet, all asset and token balances will be returned.
-   * 
+   *
    * @param params - Optional list of balance request objects specifying addresses and contracts to query
    * @returns Promise resolving to balance response object keyed by address
    * @throws {NeoLineError} NO_PROVIDER - No provider available
@@ -459,7 +459,7 @@ export interface NeoLineN3 {
 
   /**
    * Reads the raw value in smart contract storage.
-   * 
+   *
    * @param params - Object containing scriptHash and key
    * @param params.scriptHash - Script hash of the smart contract
    * @param params.key - Key of the storage value to retrieve
@@ -473,7 +473,7 @@ export interface NeoLineN3 {
   /**
    * Executes a contract invocation in read-only mode.
    * The wallet will return the direct response from the RPC node.
-   * 
+   *
    * @param params - Invocation parameters
    * @param params.scriptHash - Script hash of the smart contract to invoke
    * @param params.operation - Operation on the smart contract to call
@@ -494,7 +494,7 @@ export interface NeoLineN3 {
   /**
    * Executes multiple contract invocations in read-only mode within the same transaction.
    * Similar to invokeRead but accepts multiple invoke arguments.
-   * 
+   *
    * @param params - Multi-invocation parameters
    * @param params.invokeReadArgs - Array of invoke arguments
    * @param params.signers - Sender and effective scope of signature
@@ -517,7 +517,7 @@ export interface NeoLineN3 {
    * and was signed by the account of the provided public key.
    * A randomized salt prefix is added to the input string before it is signed,
    * and the specific string 010001f0 0000 is added to the hexString before signed.
-   * 
+   *
    * @param params - Verification parameters
    * @param params.message - Salt prefix + original message
    * @param params.data - Signed message
@@ -534,7 +534,7 @@ export interface NeoLineN3 {
    * A randomized salt prefix is added to the input string before it is signed,
    * and it is encased in a non-executable transaction before signed.
    * This ensures compatibility with Ledger devices.
-   * 
+   *
    * @param params - Verification parameters
    * @param params.message - Salt prefix + original message
    * @param params.data - Signed message
@@ -548,7 +548,7 @@ export interface NeoLineN3 {
   /**
    * Gets information about a specific block.
    * The wallet will return the direct response from the RPC node.
-   * 
+   *
    * @param params - Block query parameters
    * @param params.blockHeight - The height of the block to get information about
    * @returns Promise resolving to block information
@@ -560,7 +560,7 @@ export interface NeoLineN3 {
   /**
    * Gets information about a specific transaction.
    * The wallet will return the direct response from the RPC node.
-   * 
+   *
    * @param params - Transaction query parameters
    * @param params.txid - The id of the transaction to get information about
    * @returns Promise resolving to transaction details
@@ -572,7 +572,7 @@ export interface NeoLineN3 {
   /**
    * Gets the application log for a given transaction.
    * The wallet will return the direct response from the RPC node.
-   * 
+   *
    * @param params - Application log query parameters
    * @param params.txid - The id of the transaction to get application logs for
    * @returns Promise resolving to application log with executions and notifications
@@ -584,7 +584,7 @@ export interface NeoLineN3 {
   /**
    * Returns the NEO N3 account selected by the user.
    * Opens a dialog for the user to select an account.
-   * 
+   *
    * @returns Promise resolving to selected account with label and address
    * @throws {NeoLineError} NO_PROVIDER - No provider available
    * @throws {NeoLineError} CANCELED - User cancelled or refused the request
@@ -593,7 +593,7 @@ export interface NeoLineN3 {
 
   /**
    * Converts an N3 account address to script hash.
-   * 
+   *
    * @param params - Address conversion parameters
    * @param params.address - N3 account address
    * @returns Promise resolving to script hash
@@ -604,7 +604,7 @@ export interface NeoLineN3 {
 
   /**
    * Converts a script hash to N3 account address.
-   * 
+   *
    * @param params - Script hash conversion parameters
    * @param params.scriptHash - Script hash of the N3 account
    * @returns Promise resolving to N3 account address
@@ -617,7 +617,7 @@ export interface NeoLineN3 {
 
   /**
    * Invokes a transfer of a specified amount of a given asset from the connected account to another account.
-   * 
+   *
    * @param params - Send parameters
    * @param params.fromAddress - Address of the connected account to send assets from
    * @param params.toAddress - Address of the receiver
@@ -637,7 +637,7 @@ export interface NeoLineN3 {
   /**
    * Invokes a generic execution of smart contracts on behalf of the user.
    * Recommended to have a general understanding of the NEO blockchain before using.
-   * 
+   *
    * @param params - Invoke parameters
    * @param params.scriptHash - Script hash of the smart contract to invoke
    * @param params.operation - Operation on the smart contract to call
@@ -657,7 +657,7 @@ export interface NeoLineN3 {
   /**
    * Invokes multiple contract functions in the same transaction.
    * Same as invoke, but accepts inputs to execute multiple invokes in one transaction.
-   * 
+   *
    * @param params - Multiple invoke parameters
    * @param params.invokeArgs - Array of contract invoke inputs
    * @param params.signers - Sender and effective scope of signature
@@ -676,7 +676,7 @@ export interface NeoLineN3 {
    * Signs a provided message with an account selected by user.
    * A randomized salt prefix is added to the input string before it is signed,
    * and the specific string 010001f0 0000 is added to the hexString before signed.
-   * 
+   *
    * @param params - Sign message parameters
    * @param params.message - The message to sign
    * @param params.isJsonObject - Optional flag indicating if message is a JSON object
@@ -690,7 +690,7 @@ export interface NeoLineN3 {
    * A randomized salt prefix is added to the input string before it is signed,
    * and it is encased in a non-executable transaction before signed.
    * This ensures compatibility with Ledger devices.
-   * 
+   *
    * @param params - Sign message parameters
    * @param params.message - The message to sign
    * @param params.isJsonObject - Optional flag indicating if message is a JSON object
@@ -703,7 +703,7 @@ export interface NeoLineN3 {
    * Signs a provided message with an account selected by user.
    * The specific string 010001f0 0000 is added to the hexString before signed.
    * No salt prefix is added.
-   * 
+   *
    * @param params - Sign message parameters
    * @param params.message - The message to sign
    * @param params.isJsonObject - Optional flag indicating if message is a JSON object
@@ -717,7 +717,7 @@ export interface NeoLineN3 {
    * It is encased in a non-executable transaction before signed.
    * This ensures compatibility with Ledger devices.
    * No salt prefix is added.
-   * 
+   *
    * @param params - Sign message parameters
    * @param params.message - The message to sign
    * @param params.isJsonObject - Optional flag indicating if message is a JSON object
@@ -728,7 +728,7 @@ export interface NeoLineN3 {
 
   /**
    * Signs the provided transaction with the account selected by the user.
-   * 
+   *
    * @param params - Sign transaction parameters
    * @param params.transaction - The transaction to sign
    * @param params.magicNumber - Optional magic number of network found in protocol.json
@@ -739,14 +739,14 @@ export interface NeoLineN3 {
 
   /**
    * Allows NeoLine applications ('dapps') to request that the wallet switches its active Neo network.
-   * 
+   *
    * Chain IDs:
    * - 1: Neo2 MainNet
    * - 2: Neo2 TestNet
    * - 3: N3 MainNet
    * - 6: N3 TestNet
    * - 0: N3 Private Network
-   * 
+   *
    * @param params - Network switch parameters
    * @param params.chainId - Chain ID of the network to switch to
    * @returns Promise resolving to null on success
@@ -757,7 +757,7 @@ export interface NeoLineN3 {
   /**
    * Allows NeoLine applications ('dapps') to request that the wallet switches its active account.
    * Opens a dialog for the user to select a different account.
-   * 
+   *
    * @returns Promise resolving to selected account information
    * @throws {NeoLineError} UNKNOWN_ERROR - Unknown error occurred
    */
@@ -768,7 +768,7 @@ export interface NeoLineN3 {
   /**
    * Returns the networks the wallet provider has available to connect to,
    * along with the default network the wallet is currently set to.
-   * 
+   *
    * @returns Promise resolving to network information
    * @throws {NeoLineError} NO_PROVIDER - No provider available
    * @throws {NeoLineError} CONNECTION_DENIED - User rejected the request
@@ -778,7 +778,7 @@ export interface NeoLineN3 {
 
   /**
    * Returns the Account that is currently connected to the dApp.
-   * 
+   *
    * @returns Promise resolving to account information
    * @throws {NeoLineError} NO_PROVIDER - No provider available
    * @throws {NeoLineError} CONNECTION_DENIED - User rejected the request
@@ -788,7 +788,7 @@ export interface NeoLineN3 {
 
   /**
    * Returns the public key of the Account that is currently connected to the dApp.
-   * 
+   *
    * @returns Promise resolving to public key information
    * @throws {NeoLineError} NO_PROVIDER - No provider available
    * @throws {NeoLineError} CONNECTION_DENIED - User rejected the request
@@ -799,7 +799,7 @@ export interface NeoLineN3 {
 
   /**
    * Adds a callback method to be triggered on a specified event.
-   * 
+   *
    * Available events:
    * - NEOLine.N3.EVENT.READY - SDK ready
    * - NEOLine.N3.EVENT.ACCOUNT_CHANGED - Account changed
@@ -808,7 +808,7 @@ export interface NeoLineN3 {
    * - NEOLine.N3.EVENT.NETWORK_CHANGED - Network changed
    * - NEOLine.N3.EVENT.BLOCK_HEIGHT_CHANGED - New block mined
    * - NEOLine.N3.EVENT.TRANSACTION_CONFIRMED - Transaction confirmed
-   * 
+   *
    * @param event - Event name to listen for
    * @param callback - Callback function to execute when event fires
    */
@@ -816,7 +816,7 @@ export interface NeoLineN3 {
 
   /**
    * Removes an existing callback event listener.
-   * 
+   *
    * @param event - Event name to remove listener from
    * @param callback - Callback function to remove
    */
@@ -824,4 +824,3 @@ export interface NeoLineN3 {
 }
 
 // Window Extension - declared in init.ts to avoid conflicts
-

@@ -14,6 +14,8 @@ declare namespace Cloudflare {
     // Secrets
     // ===============================================================
     JWT_SECRET: string
+    CLOUDFLARE_ACCOUNT_ID: string
+    AI_GATEWAY_NAME: string
     REFRESH_TOKEN_SECRET: string
     ANTHROPIC_API_KEY?: string
     OPENAI_API_KEY?: string
@@ -26,4 +28,9 @@ declare namespace Cloudflare {
     OLLAMA_API_BASE_URL?: string
     LM_STUDIO_API_BASE_URL?: string
   }
+}
+
+declare module '*.md' {
+  const value: string
+  export default value
 }

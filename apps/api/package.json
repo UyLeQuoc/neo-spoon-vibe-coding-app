@@ -15,9 +15,13 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.44",
+    "@ai-sdk/mcp": "^0.0.8",
     "@cityofzion/neon-dappkit": "^1.0.0",
     "@hono/zod-validator": "^0.7.4",
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "@openrouter/ai-sdk-provider": "^1.2.0",
+    "ai": "^5.0.92",
     "drizzle-orm": "^0.44.7",
     "hono": "catalog:",
     "shared": "workspace:^",

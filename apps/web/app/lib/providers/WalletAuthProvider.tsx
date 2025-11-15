@@ -1,7 +1,7 @@
 import { useStore } from '@nanostores/react'
-import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
-import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
+import { createContext, type ReactNode, useContext, useEffect, useMemo } from 'react'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
+import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 
 interface Unauthenticated {
   isWalletAuthenticated: false

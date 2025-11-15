@@ -1,8 +1,8 @@
 import { json, type MetaFunction } from '@remix-run/cloudflare'
 import { ClientOnly } from 'remix-utils/client-only'
 import { Header } from '~/components/header/Header'
-import { WalletAuthProvider } from '~/lib/providers/WalletAuthProvider'
 import { NeoNSManagementContent } from '~/components/neons/NeoNSManagementContent.client'
+import { WalletAuthProvider } from '~/lib/providers/WalletAuthProvider'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'NeoNS Management - NeoZero' }]
@@ -22,4 +22,3 @@ export default function NeoNSManagementPage() {
     </WalletAuthProvider>
   )
 }
-

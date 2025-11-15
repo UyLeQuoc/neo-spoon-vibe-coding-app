@@ -13,11 +13,11 @@ export const loader = () => json({})
 
 export default function Index() {
   return (
-      <WalletAuthProvider>
-        <div className="flex flex-col h-full w-full">
-          <Header />
-          <ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
-        </div>
-      </WalletAuthProvider>
+    <WalletAuthProvider>
+      <div className="flex flex-col h-full w-full">
+        <Header />
+        <ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
+      </div>
+    </WalletAuthProvider>
   )
 }

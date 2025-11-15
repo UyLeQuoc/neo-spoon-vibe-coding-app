@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '~/hooks/keys'
-import { getProperties, type DomainProperties } from '~/lib/neons/rpc'
+import { type DomainProperties, getProperties } from '~/lib/neons/rpc'
 
 export type { DomainProperties }
 
@@ -21,4 +21,3 @@ export function usePropertiesQuery(domain: string | null) {
     retry: 1
   })
 }
-

@@ -1,15 +1,15 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { AlertCircle, Check, Clock, Globe, Plus, Search, Settings, X } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { Search, X, Clock, Globe, Settings, Plus, Check, AlertCircle } from 'lucide-react'
-import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
-import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import type { RecordType } from '~/hooks/mutation/neons/set-record.mutation'
-import { useIsAvailableQuery } from '~/hooks/queries/neons/is-available.query'
-import { usePropertiesQuery } from '~/hooks/queries/neons/properties.query'
 import { useBalanceOfQuery } from '~/hooks/queries/neons/balance-of.query'
 import { useDomainsQuery } from '~/hooks/queries/neons/domains.query'
+import { useIsAvailableQuery } from '~/hooks/queries/neons/is-available.query'
+import { usePropertiesQuery } from '~/hooks/queries/neons/properties.query'
+import { useNeoLineN3 } from '~/lib/neolineN3TS'
+import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { formatDate } from '~/utils/date'
 
 const NEO_NS_CONTRACT_HASH = '0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb'
@@ -24,7 +24,7 @@ interface SearchHistoryItem {
 export function NeoNSManagementContent() {
   const { isWalletAuthenticated } = useWalletAuth()
   const { neoline, account } = useNeoLineN3()
-  
+
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null)
   const [searchingDomain, setSearchingDomain] = useState<string | null>(null) // Domain đang được search
@@ -73,11 +73,11 @@ export function NeoNSManagementContent() {
   // Handle search - chỉ set searchingDomain khi bấm nút
   const handleSearch = useCallback(() => {
     if (!searchQuery.trim()) return
-    
+
     const normalized = searchQuery.trim().toLowerCase()
     // Ensure it ends with .neo
-    const domainToSearch = normalized.endsWith('.neo') ? normalized : normalized + '.neo'
-    
+    const domainToSearch = normalized.endsWith('.neo') ? normalized : `${normalized}.neo`
+
     setSearchingDomain(domainToSearch)
     setSelectedDomain(domainToSearch)
     saveToHistory(domainToSearch)
@@ -99,7 +99,7 @@ export function NeoNSManagementContent() {
     try {
       // Convert address to scriptHash
       const scriptHashResult = await neoline.AddressToScriptHash({ address: account })
-      
+
       // Format contract hash (remove 0x prefix and lowercase for Hash160)
       let formattedContractHash = NEO_NS_CONTRACT_HASH
       if (formattedContractHash.startsWith('0x')) {
@@ -134,7 +134,7 @@ export function NeoNSManagementContent() {
       setShowRegisterDialog(false)
       setSearchQuery('')
       setSelectedDomain(null)
-      
+
       // Invalidate queries
       isAvailableQuery.refetch()
       balanceOfQuery.refetch()
@@ -199,7 +199,7 @@ export function NeoNSManagementContent() {
       setShowRecordDialog(false)
       setRecordData('')
       setRecordDomain(null)
-      
+
       // Invalidate queries
       if (recordDomain === selectedDomain) {
         propertiesQuery.refetch()
@@ -233,12 +233,8 @@ export function NeoNSManagementContent() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-            Wallet Not Connected
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Please connect your wallet to manage NeoNS domains
-          </p>
+          <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Wallet Not Connected</h2>
+          <p className="text-gray-600 dark:text-gray-400">Please connect your wallet to manage NeoNS domains</p>
         </div>
       </div>
     )
@@ -247,12 +243,8 @@ export function NeoNSManagementContent() {
   return (
     <div className="flex-1 p-8 max-w-7xl mx-auto w-full">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">
-          NeoNS Management
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Search, register, and manage your NeoNS domains
-        </p>
+        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">NeoNS Management</h1>
+        <p className="text-gray-600 dark:text-gray-400">Search, register, and manage your NeoNS domains</p>
       </div>
 
       {/* Search Section */}
@@ -307,9 +299,7 @@ export function NeoNSManagementContent() {
       {selectedDomain && (
         <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              {selectedDomain}
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{selectedDomain}</h2>
             {isAvailableQuery.data?.available && (
               <button
                 onClick={() => setShowRegisterDialog(true)}
@@ -350,8 +340,7 @@ export function NeoNSManagementContent() {
                   </div>
                   {propertiesQuery.data.properties.admin && (
                     <div>
-                      <span className="font-medium">Admin:</span>{' '}
-                      {propertiesQuery.data.properties.admin}
+                      <span className="font-medium">Admin:</span> {propertiesQuery.data.properties.admin}
                     </div>
                   )}
                 </div>
@@ -364,19 +353,13 @@ export function NeoNSManagementContent() {
       {/* Owned Domains */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-            My Domains
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">My Domains</h2>
           {balanceOfQuery.data && (
-            <span className="text-gray-600 dark:text-gray-400">
-              Total: {balanceOfQuery.data.balance}
-            </span>
+            <span className="text-gray-600 dark:text-gray-400">Total: {balanceOfQuery.data.balance}</span>
           )}
         </div>
 
-        {domainsQuery.isLoading && (
-          <div className="text-gray-500 dark:text-gray-400">Loading domains...</div>
-        )}
+        {domainsQuery.isLoading && <div className="text-gray-500 dark:text-gray-400">Loading domains...</div>}
 
         {domainsQuery.data && domainsQuery.data.domains.length === 0 && (
           <div className="p-8 text-center bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -395,9 +378,7 @@ export function NeoNSManagementContent() {
                 className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-between"
               >
                 <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                    {domain.name}
-                  </h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{domain.name}</h3>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     Expires: {formatDate({ date: domain.expiration })}
                   </div>
@@ -422,14 +403,10 @@ export function NeoNSManagementContent() {
       {showRegisterDialog && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              Register {searchingDomain}
-            </h3>
+            <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Register {searchingDomain}</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Years
-                </label>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Years</label>
                 <input
                   type="number"
                   min="1"
@@ -474,9 +451,7 @@ export function NeoNSManagementContent() {
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Record Type
-                </label>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Record Type</label>
                 <select
                   value={recordType}
                   onChange={e => setRecordType(Number(e.target.value) as RecordType)}
@@ -489,9 +464,7 @@ export function NeoNSManagementContent() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">
-                  Record Data
-                </label>
+                <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Record Data</label>
                 <input
                   type="text"
                   value={recordData}
@@ -534,4 +507,3 @@ export function NeoNSManagementContent() {
     </div>
   )
 }
-

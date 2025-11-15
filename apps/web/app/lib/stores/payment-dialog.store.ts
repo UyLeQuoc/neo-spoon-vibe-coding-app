@@ -43,7 +43,7 @@ const initialState: PaymentDialogState = {
 export const paymentDialogStore = map<PaymentDialogState>(initialState)
 
 // Generate random nonce
-function generateNonce(): string {
+function _generateNonce(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 15)}`
 }
 
@@ -52,7 +52,7 @@ export const paymentDialogActions = {
   open() {
     paymentDialogStore.set({
       ...initialState,
-      isOpen: true,
+      isOpen: true
     })
   },
 
@@ -124,13 +124,7 @@ export const paymentDialogActions = {
     paymentDialogStore.set({ ...current, txDigest: digest })
   },
 
-  loadIncompletePayment(payment: {
-    id: string
-    amount: number
-    status: string
-    txDigest?: string
-    nonce: string
-  }) {
+  loadIncompletePayment(payment: { id: string; amount: number; status: string; txDigest?: string; nonce: string }) {
     const current = paymentDialogStore.get()
     const amountInGas = (payment.amount / 100000000).toFixed(8)
     paymentDialogStore.set({
@@ -138,17 +132,14 @@ export const paymentDialogActions = {
       amount: amountInGas,
       pendingPaymentId: payment.id,
       txDigest: payment.txDigest || null,
-      currentStep:
-        payment.status === 'signed'
-          ? PaymentStep.VerifyTransaction
-          : PaymentStep.SignTransaction,
+      currentStep: payment.status === 'signed' ? PaymentStep.VerifyTransaction : PaymentStep.SignTransaction,
       mustComplete: payment.status === 'signed'
     })
   },
 
   reset() {
     paymentDialogStore.set({
-      ...initialState,
+      ...initialState
     })
   },
 
@@ -162,4 +153,3 @@ export const paymentDialogActions = {
     return true
   }
 }
-

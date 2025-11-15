@@ -12,10 +12,7 @@ interface RPCResponse<T = unknown> {
   error?: { message: string; code: number }
 }
 
-async function invokeFunction(
-  operation: string,
-  args: Array<{ type: string; value: unknown }>
-): Promise<RPCResponse> {
+async function invokeFunction(operation: string, args: Array<{ type: string; value: unknown }>): Promise<RPCResponse> {
   const result = await hClient.api.neons['rpc-proxy']
     .$post({
       json: { operation, args }
@@ -88,9 +85,7 @@ export interface DomainProperties {
   admin: string | null
 }
 
-export async function getProperties(
-  domain: string
-): Promise<{ properties: DomainProperties | null; error?: string }> {
+export async function getProperties(domain: string): Promise<{ properties: DomainProperties | null; error?: string }> {
   try {
     const data = await invokeFunction('properties', [{ type: 'String', value: domain }])
 
@@ -121,7 +116,7 @@ export async function getProperties(
             }
             if (entryObj.key?.type === 'ByteString' && entryObj.value) {
               const key = atob(entryObj.key.value)
-              
+
               if (key === 'name' && entryObj.value.type === 'ByteString') {
                 properties.name = atob(entryObj.value.value as string)
               } else if (key === 'expiration' && entryObj.value.type === 'Integer') {
@@ -177,9 +172,11 @@ export async function getOwnerOf(domain: string): Promise<{ owner: string | null
       if (firstItem.type === 'ByteString' && typeof firstItem.value === 'string') {
         const ownerBytes = atob(firstItem.value)
         // Convert bytes to hex string
-        const owner = '0x' + Array.from(ownerBytes)
-          .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
-          .join('')
+        const owner =
+          '0x' +
+          Array.from(ownerBytes)
+            .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('')
         return { owner }
       }
     }
@@ -213,11 +210,12 @@ export async function getBalanceOf(owner: string): Promise<{ balance: number; er
     if (stack && stack.length > 0) {
       const firstItem = stack[0] as { type: string; value: string | number }
       if (firstItem.type === 'Integer') {
-        const balance = typeof firstItem.value === 'string' 
-          ? Number(firstItem.value) 
-          : typeof firstItem.value === 'number' 
-            ? firstItem.value 
-            : 0
+        const balance =
+          typeof firstItem.value === 'string'
+            ? Number(firstItem.value)
+            : typeof firstItem.value === 'number'
+              ? firstItem.value
+              : 0
         return { balance }
       }
     }
@@ -267,7 +265,7 @@ export async function getTokensOf(owner: string): Promise<{ domains: string[]; e
       while (hasMore) {
         try {
           const items = await traverseIterator(session, iteratorId, 100)
-          
+
           if (items.length === 0) {
             hasMore = false
             break
@@ -317,4 +315,3 @@ export async function getTokensOf(owner: string): Promise<{ domains: string[]; e
     }
   }
 }
-
