@@ -11,6 +11,7 @@ import { SubMenu } from '~/components/sidebar/SubMenu.client'
 import { IconButton } from '~/components/ui/IconButton'
 import { PopoverHover } from '~/components/ui/PopoverHover'
 import { Workbench } from '~/components/workbench/Workbench.client'
+import { useModelsQuery } from '~/hooks/queries/models.query'
 import { classNames } from '~/utils/classNames'
 import { debounce } from '~/utils/debounce'
 import type { ModelConfig, ModelInfo } from '~/utils/modelConstants'
@@ -70,29 +71,20 @@ interface ModelSelectProps {
 }
 const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) => {
   const [search, setSearch] = React.useState('')
-  const [filteredModels, setFilteredModels] = React.useState<ModelInfo[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
+  const [debouncedSearch, setDebouncedSearch] = React.useState('')
 
-  const fetchModels = React.useCallback(
-    debounce(async (searchTerm: string) => {
-      setIsLoading(true)
-      try {
-        const params = new URLSearchParams({ search: searchTerm })
-        const response = await fetch(`/api/models?${params}`)
-        const data: ModelInfo[] = await response.json()
-        setFilteredModels(data)
-      } catch (error) {
-        console.error('Model search error:', error)
-      } finally {
-        setIsLoading(false)
-      }
+  const debouncedSetSearch = React.useCallback(
+    debounce((searchTerm: string) => {
+      setDebouncedSearch(searchTerm)
     }, 300),
     []
   )
 
   React.useEffect(() => {
-    fetchModels(search)
-  }, [search, fetchModels])
+    debouncedSetSearch(search)
+  }, [search, debouncedSetSearch])
+
+  const { data: filteredModels = [], isLoading } = useModelsQuery(debouncedSearch)
 
   const providers = Array.from(new Set(filteredModels.map((model: any) => model.provider)))
   const currentModel: ModelInfo | undefined = filteredModels.find(
