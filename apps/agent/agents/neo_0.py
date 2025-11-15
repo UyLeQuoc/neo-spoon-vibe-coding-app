@@ -32,6 +32,7 @@ class Neo0Agent(SpoonReactAI):
 
         # Initialize site generator tool
         self.system_prompt = self._load_system_prompt()
+        self._default_timeout = 600  # 10 minutes
         self.available_tools = ToolManager([GenerateSiteTool()])
         logging.info(f"Available tools: {list(self.available_tools.tool_map.keys())}")
 

@@ -48,7 +48,7 @@ class GenerateSiteTool(BaseTool):
         # Create a ChatBot instance for site generation
         llm = ChatBot(
             llm_provider="openrouter",
-            model_name="anthropic/claude-sonnet-4",  # Use more powerful model for generation
+            model_name="anthropic/claude-sonnet-4.5",
             max_tokens=64000,  # Need larger output for complete HTML files
         )
 
