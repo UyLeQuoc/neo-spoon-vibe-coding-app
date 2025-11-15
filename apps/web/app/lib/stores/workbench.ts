@@ -347,3 +347,11 @@ export class WorkbenchStore {
 }
 
 export const workbenchStore = new WorkbenchStore()
+
+declare global {
+  interface Window {
+    workbenchStore: WorkbenchStore
+  }
+}
+// Debugging
+window.workbenchStore = workbenchStore
