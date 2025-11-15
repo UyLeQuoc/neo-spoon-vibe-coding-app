@@ -25,6 +25,20 @@ export function Header() {
         <a href="/" className="text-2xl font-black text-accent flex items-center font-oswald">
           NeoZero
         </a>
+        <ClientOnly>
+          {() => (
+            <Link
+              to="/neo-ns-management"
+              className="buy-neons-button relative rounded-md text-xs px-3 py-1.5 bg-neozero-elements-background-depth-2 text-neozero-elements-button-secondary-text flex gap-1.7 items-center justify-center overflow-hidden group transition-theme hover:text-neozero-elements-button-secondary-textHover hover:bg-neozero-elements-background-depth-3"
+            >
+              <div className="relative flex items-center gap-1.7 z-10">
+                <Sparkles className="w-4 h-4" />
+                <span>Buy Neo NS</span>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%]"></div>
+            </Link>
+          )}
+        </ClientOnly>
       </div>
       <span className="flex-1 px-4 truncate text-center text-neozero-elements-textPrimary">
         <ClientOnly>{() => <ChatDescription />}</ClientOnly>
@@ -38,21 +52,7 @@ export function Header() {
           )}
         </ClientOnly>
       )}
-      <div className="flex items-center gap-3">
-        <ClientOnly>
-          {() => (
-            <Link
-              to="/neo-ns-management"
-              className="buy-neons-button relative px-4 py-2 rounded-lg font-medium text-white overflow-hidden group transition-all duration-300"
-            >
-              <div className="relative flex items-center gap-2 z-10">
-                <Sparkles className="w-4 h-4" />
-                <span>Buy Neo NS</span>
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%]"></div>
-            </Link>
-          )}
-        </ClientOnly>
+      <div className="flex items-center gap-2">
         <ClientOnly>
           {() => <WalletButton />}
         </ClientOnly>

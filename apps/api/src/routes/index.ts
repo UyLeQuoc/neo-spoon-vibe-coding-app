@@ -7,6 +7,7 @@ import { getTransactionsRoute } from './payment/api.get-transactions'
 import { updatePendingPaymentStatusRoute } from './payment/api.update-pending-payment-status'
 import { verifyPaymentTransactionRoute } from './payment/api.verify-payment-transaction'
 import { rpcProxyRoute } from './neons/api.rpc-proxy'
+import { avatarProxyRoute } from './avatar/api.avatar-proxy'
 
 export const routes = factory
   .createApp()
@@ -18,3 +19,4 @@ export const routes = factory
   .route('/', updatePendingPaymentStatusRoute)
   .route('/', verifyPaymentTransactionRoute)
   .route('/', rpcProxyRoute)
+  .route('/', avatarProxyRoute)

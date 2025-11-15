@@ -10,6 +10,7 @@ import { useIsAvailableQuery } from '~/hooks/queries/neons/is-available.query'
 import { usePropertiesQuery } from '~/hooks/queries/neons/properties.query'
 import { useBalanceOfQuery } from '~/hooks/queries/neons/balance-of.query'
 import { useDomainsQuery } from '~/hooks/queries/neons/domains.query'
+import { formatDate } from '~/utils/date'
 
 const NEO_NS_CONTRACT_HASH = '0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb'
 const SEARCH_HISTORY_KEY = 'neons_search_history'
@@ -398,7 +399,7 @@ export function NeoNSManagementContent() {
                     {domain.name}
                   </h3>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Expires: {formatExpiration(domain.expiration)}
+                    Expires: {formatDate({ date: domain.expiration })}
                   </div>
                 </div>
                 <button
