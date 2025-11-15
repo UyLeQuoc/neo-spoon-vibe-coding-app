@@ -29,39 +29,50 @@ Landing pages, portfolios, interactive games, web apps, calculators, demos, prot
 
 ## File Structure Template
 
+The site generation workflow uses a pre-built template (`template.html`) that includes:
+
+- Complete HTML structure with head section
+- Meta tags and viewport settings
+- Required CDN links for React 18+, TailwindCSS, Babel, and Marked
+- A React App component structure with root div
+
+**Your task is to replace the placeholder `<!--========[APP_CONTENT_HERE]========-->`** with your React components and content.
+
+The template structure is:
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="...">
-    <title>...</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>[Already set based on requirements]</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body class="bg-gray-100 p-6">
     <div id="root"></div>
-    
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        // React components here
-        const App = () => {
+      const { useState, useEffect } = React;
+      
+      const App = () => {
           return (
-            <div className="min-h-screen bg-gray-50">
-              {/* TailwindCSS classes for styling */}
-            </div>
+              <div className="min-h-screen bg-gray-50">
+                  <!--========[APP_CONTENT_HERE]========-->
+              </div>
           );
-        };
-        
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+      }
+      
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
-</body>
+  </body>
 </html>
 ```
+
+**Important**: The template already includes all CDN links and the basic React structure. You only need to replace `<!--========[APP_CONTENT_HERE]========-->` with your components.
 
 ## Code Quality Standards
 
@@ -104,29 +115,72 @@ Generate a complete, self-contained `index.html` file that:
 
 ## Using the manage_site_files Tool
 
-When generating sites with the manage_site_files tool, follow this approach for large files:
+The site generation workflow has already created `index.html` from a template. Your task is to replace the placeholder with your React components.
 
-1. **For large HTML files**: Create the file in steps:
-   - First, create a basic structure with `create_file` (just the HTML skeleton)
-   - Then use `edit_file` to add sections incrementally (head, body sections, scripts)
-   - This prevents JSON truncation issues with very large content
+### Workflow
 
-2. **CRITICAL - edit_file old_string must be SHORT**:
+1. **Template is already created**: The `index.html` file exists with the complete structure, CDN links, and a placeholder:
+
+   ```html
+   <!--========[APP_CONTENT_HERE]========-->
+   ```
+
+2. **Replace the placeholder**: Use `edit_file` operation to replace `<!--========[APP_CONTENT_HERE]========-->` with your React components and content.
+
+3. **CRITICAL - edit_file old_string must be SHORT**:
    - Keep `old_string` under 200 characters to prevent JSON truncation
-   - Use short, unique identifiers:
-     - HTML comments: `<!-- PLACEHOLDER -->`
-     - Single unique lines: `<div id="root"></div>`
-     - Short closing tags: `</body>`, `</div>`, etc.
-   - For large additions, insert a short placeholder first, then replace it
-   - Example workflow:
-     1. Create file with: `<body><div id="root"></div><!-- CONTENT --></body>`
-     2. Edit: Replace `<!-- CONTENT -->` with actual React components
-   - Break large edits into multiple smaller edits
+   - The template provides the perfect short placeholder: `<!--========[APP_CONTENT_HERE]========-->`
+   - For large content, you can break it into multiple edits:
+     1. First, replace the placeholder with a basic structure
+     2. Then use additional `edit_file` calls with short `old_string` values to build up the content incrementally
+   - Use short, unique identifiers for subsequent edits:
+     - HTML comments: `<!-- SECTION_NAME -->`
+     - Single unique lines: `<div className="...">`
+     - Short closing tags: `</div>`, `</section>`, etc.
 
-3. **JSON Formatting**: When calling the tool, ensure:
+4. **Example workflow**:
+
+   ```json
+   {
+     "operation": "edit_file",
+     "site_id": "[site_id]",
+     "file_path": "index.html",
+     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
+     "new_string": "<header>...</header><main>...</main><footer>...</footer>"
+   }
+   ```
+
+   If the content is very large, break it into steps:
+
+   ```json
+   // Step 1: Replace placeholder with header
+   {
+     "operation": "edit_file",
+     "site_id": "[site_id]",
+     "file_path": "index.html",
+     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
+     "new_string": "<header>...</header><!-- MAIN_CONTENT -->"
+   }
+   
+   // Step 2: Add main content
+   {
+     "operation": "edit_file",
+     "site_id": "[site_id]",
+     "file_path": "index.html",
+     "old_string": "<!-- MAIN_CONTENT -->",
+     "new_string": "<main>...</main>"
+   }
+   ```
+
+5. **JSON Formatting**: When calling the tool, ensure:
    - All JSON arguments are properly formatted and complete
-   - Special characters in content are properly escaped
+   - Special characters in content are properly escaped (especially quotes, backslashes)
    - The JSON string is closed properly with all required fields
-     - `old_string` is kept SHORT (this is the most common cause of truncation)
+   - `old_string` is kept SHORT (under 200 chars) - this is critical to prevent truncation
+   - Always include `operation`, `site_id`, and `file_path` in every call
 
-4. **Best Practice**: For index.html files, create the basic structure first, then build it up using multiple `edit_file` operations with SHORT old_string values.
+6. **Best Practice**:
+   - Read the current file first to see the exact structure: `{"operation": "read_file", "site_id": "[site_id]", "file_path": "index.html"}`
+   - Start by replacing the main placeholder `<!--========[APP_CONTENT_HERE]========-->`
+   - Build up content incrementally if needed, using short placeholder comments for intermediate steps
+   - Ensure your React components are complete and functional before finishing

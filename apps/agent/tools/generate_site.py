@@ -16,8 +16,9 @@ class GenerateSiteTool(BaseTool):
     name: str = "generate_site"
     description: str = (
         "Generate a complete, production-ready single-page website and save it to disk. "
-        "Returns a URL where the site can be viewed. Use this to create landing pages, "
-        "portfolios, games, dashboards, or web apps from scratch."
+        "Returns structured JSON with site information including site_id (for use with manage_site_files), "
+        "URL, requirements, and metadata. Use this to create landing pages, portfolios, games, "
+        "dashboards, or web apps from scratch."
     )
     parameters: dict = {
         "type": "object",
@@ -73,11 +74,19 @@ class GenerateSiteTool(BaseTool):
     ) -> str:
         """
         Generate a complete HTML website based on the requirements.
-        Saves the site to disk and returns a URL where it can be viewed.
+        Saves the site to disk and returns structured JSON with site information.
 
         Returns:
-            URL string (e.g., "http://localhost:8000/sites/20251115_143022")
-            or error message on failure
+            JSON string with structured site information including:
+            - success: bool
+            - site_id: str (timestamp format, can be used with manage_site_files)
+            - url: str (viewing URL)
+            - requirements: str (original requirements)
+            - site_type: str
+            - style_preferences: str
+            - created_at: str (ISO timestamp)
+            - verification_passed: bool
+            - error: str (if any)
         """
         # Generate unique site_id with timestamp
         site_id = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -114,8 +123,9 @@ class GenerateSiteTool(BaseTool):
                 "style_preferences": style_preferences,
                 "current_step": "initialized",
                 "html_skeleton_created": False,
-                "head_section_added": False,
                 "content_generated": False,
+                "content_ready": False,
+                "generation_attempts": 0,
                 "verification_passed": False,
                 "error": None,
                 "result": None,
@@ -130,12 +140,24 @@ class GenerateSiteTool(BaseTool):
             if not html_file.exists():
                 error_msg = final_state.get("error", "Unknown error")
                 current_step = final_state.get("current_step", "unknown")
-                return f"Error generating site: {error_msg} (step: {current_step})"
+                return json.dumps({
+                    "success": False,
+                    "site_id": site_id,
+                    "url": None,
+                    "requirements": requirements,
+                    "site_type": site_type,
+                    "style_preferences": style_preferences,
+                    "created_at": datetime.now().isoformat(),
+                    "verification_passed": False,
+                    "error": f"{error_msg} (step: {current_step})",
+                    "message": f"Site generation failed at step: {current_step}",
+                }, indent=2)
 
             # Check if verification passed
-            if not final_state.get("verification_passed", False):
+            verification_passed = final_state.get("verification_passed", False)
+            if not verification_passed:
                 # Site was created but verification failed - still return URL but log warning
-                pass  # We'll still return the URL as the file exists
+                pass  # We'll still return the structured data as the file exists
 
             # Save metadata
             metadata = {
@@ -146,13 +168,35 @@ class GenerateSiteTool(BaseTool):
                 "style_preferences": style_preferences,
                 "generation_method": "graph_system",
                 "final_step": final_state.get("current_step", "unknown"),
-                "verification_passed": final_state.get("verification_passed", False),
+                "verification_passed": verification_passed,
             }
             metadata_file = site_dir / "metadata.json"
             metadata_file.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
-            # Return URL
-            return f"http://localhost:8000/sites/{site_id}"
+            # Return structured JSON response
+            return json.dumps({
+                "success": True,
+                "site_id": site_id,
+                "url": f"http://localhost:8000/sites/{site_id}",
+                "requirements": requirements,
+                "site_type": site_type,
+                "style_preferences": style_preferences,
+                "created_at": datetime.now().isoformat(),
+                "verification_passed": verification_passed,
+                "error": None,
+                "message": f"Site generated successfully. Use site_id '{site_id}' with manage_site_files tool to update this site.",
+            }, indent=2)
 
         except Exception as e:
-            return f"Error generating site: {str(e)}"
+            return json.dumps({
+                "success": False,
+                "site_id": None,
+                "url": None,
+                "requirements": requirements,
+                "site_type": site_type,
+                "style_preferences": style_preferences,
+                "created_at": datetime.now().isoformat(),
+                "verification_passed": False,
+                "error": str(e),
+                "message": f"Error generating site: {str(e)}",
+            }, indent=2)

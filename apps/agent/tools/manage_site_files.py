@@ -11,7 +11,9 @@ class ManageSiteFilesTool(BaseTool):
     description: str = (
         "Manage files in generated sites. Create new files, edit existing files (replace strings), "
         "read file content, or delete files. Use this to update or modify existing generated sites. "
-        "IMPORTANT: When creating files with large content, ensure the JSON arguments are properly formatted and complete. "
+        "CRITICAL: ALL tool calls MUST include these three required parameters: operation, site_id, and file_path. "
+        "Example: {\"operation\": \"edit_file\", \"site_id\": \"20251115_123456\", \"file_path\": \"index.html\", \"old_string\": \"<!-- PLACEHOLDER -->\", \"new_string\": \"<div>content</div>\"}. "
+        "When creating files with large content, ensure the JSON arguments are properly formatted and complete. "
         "For very large files, consider creating a basic structure first, then using edit_file to add content incrementally."
     )
     parameters: dict = {
@@ -20,15 +22,15 @@ class ManageSiteFilesTool(BaseTool):
             "operation": {
                 "type": "string",
                 "enum": ["create_file", "edit_file", "read_file", "delete_file"],
-                "description": "File operation to perform: create_file, edit_file (replace strings), read_file, or delete_file",
+                "description": "REQUIRED: File operation to perform: create_file, edit_file (replace strings), read_file, or delete_file. Must be included in every tool call.",
             },
             "site_id": {
                 "type": "string",
-                "description": "Unique site identifier (timestamp format: YYYYMMDD_HHMMSS)",
+                "description": "REQUIRED: Unique site identifier (timestamp format: YYYYMMDD_HHMMSS). Must be included in every tool call. Get this value from the context/prompt.",
             },
             "file_path": {
                 "type": "string",
-                "description": "Relative path to file within site directory (e.g., 'index.html', 'styles.css')",
+                "description": "REQUIRED: Relative path to file within site directory (e.g., 'index.html', 'styles.css'). Must be included in every tool call.",
             },
             "content": {
                 "type": "string",
@@ -81,21 +83,44 @@ class ManageSiteFilesTool(BaseTool):
             old_string = kwargs.get("old_string")
         if new_string is None:
             new_string = kwargs.get("new_string")
-        
+
         # Validate required arguments
         if not operation or not site_id or not file_path:
+            # Build detailed error message with example
+            received_args = {
+                "operation": operation,
+                "site_id": site_id,
+                "file_path": file_path,
+                "content": "..." if content else None,
+                "old_string": "..." if old_string else None,
+                "new_string": "..." if new_string else None,
+            }
+
+            example_call = {
+                "operation": "edit_file",
+                "site_id": "20251115_123456",
+                "file_path": "index.html",
+                "old_string": "<!-- CONTENT_PLACEHOLDER -->",
+                "new_string": "<div>Your content here</div>"
+            }
+
             error_msg = (
                 f"Missing required arguments. "
-                f"operation={operation}, site_id={site_id}, file_path={file_path}. "
-                f"This usually means the JSON arguments were incomplete or malformed. "
+                f"Received: operation={operation}, site_id={site_id}, file_path={file_path}. "
+                f"This usually means the JSON arguments were incomplete, malformed, or missing. "
+                f"\n\nCORRECT FORMAT EXAMPLE:\n"
+                f"{json.dumps(example_call, indent=2)}\n\n"
+                f"All tool calls MUST include: operation, site_id, and file_path as JSON object. "
                 f"Try creating files incrementally: first create a small skeleton, then use edit_file to add content."
             )
             return json.dumps({
                 "success": False,
                 "error": error_msg,
-                "received_kwargs": str(kwargs) if kwargs else "No kwargs received"
+                "received_args": received_args,
+                "received_kwargs": str(kwargs) if kwargs else "No kwargs received",
+                "example_format": example_call
             }, indent=2)
-        
+
         try:
             sites_dir = self._get_sites_dir()
             site_dir = sites_dir / site_id
