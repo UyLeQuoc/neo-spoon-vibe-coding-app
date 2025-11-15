@@ -25,8 +25,8 @@ export const PromptsLibrary = () => {
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="flex items-center justify-between">
-        <h3 className="font-medium text-bolt-elements-textPrimary">System Prompt Selection</h3>
-        <span className="text-sm text-bolt-elements-textSecondary">
+        <h3 className="font-medium text-neozero-elements-textPrimary">System Prompt Selection</h3>
+        <span className="text-sm text-neozero-elements-textSecondary">
           Select the base prompt configuration for AI responses
         </span>
       </div>
@@ -37,8 +37,8 @@ export const PromptsLibrary = () => {
             key={prompt.id}
             className={`p-4 rounded-lg border transition-all ${
               selectedPrompt === prompt.id
-                ? 'border-bolt-elements-accentPrimary bg-bolt-elements-background-depth-1'
-                : 'border-bolt-elements-borderColor'
+                ? 'border-neozero-elements-accentPrimary bg-neozero-elements-background-depth-1'
+                : 'border-neozero-elements-borderColor'
             }`}
           >
             <label className="flex items-start gap-3 cursor-pointer">
@@ -47,11 +47,11 @@ export const PromptsLibrary = () => {
                 name="systemPrompt"
                 checked={selectedPrompt === prompt.id}
                 onChange={() => setSelectedPrompt(prompt.id)}
-                className="mt-1 accent-bolt-elements-accentPrimary"
+                className="mt-1 accent-neozero-elements-accentPrimary"
               />
               <div className="flex-1">
-                <h4 className="font-medium text-bolt-elements-textPrimary">{prompt.name}</h4>
-                <p className="text-sm text-bolt-elements-textSecondary mt-1">{prompt.description}</p>
+                <h4 className="font-medium text-neozero-elements-textPrimary">{prompt.name}</h4>
+                <p className="text-sm text-neozero-elements-textSecondary mt-1">{prompt.description}</p>
               </div>
             </label>
           </div>

@@ -108,9 +108,9 @@ const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) =>
         setProviderModel?.(provider, model)
       }}
     >
-      <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-transparent hover:bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary">
+      <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-transparent hover:bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary">
         <Select.Value>
-          {isLoading && <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-sm" />}
+          {isLoading && <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />}
           {!isLoading && currentModel && (
             <div className="flex items-center gap-1">
               <div className="i-ph:gear text-sm" />
@@ -128,12 +128,12 @@ const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) =>
           position={'popper'}
           side={'top'}
           sideOffset={5}
-          className="overflow-hidden bg-bolt-elements-background-depth-1 rounded-md border border-bolt-elements-borderColor shadow-md z-50 w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
+          className="overflow-hidden bg-neozero-elements-background-depth-1 rounded-md border border-neozero-elements-borderColor shadow-md z-50 w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
         >
-          <div className="p-2 border-b border-bolt-elements-borderColor" onClick={e => e.stopPropagation()}>
+          <div className="p-2 border-b border-neozero-elements-borderColor" onClick={e => e.stopPropagation()}>
             <div className="relative">
               <input
-                className="w-full px-2 py-1 text-sm bg-bolt-elements-background-depth-2 rounded border border-bolt-elements-borderColor focus:outline-none"
+                className="w-full px-2 py-1 text-sm bg-neozero-elements-background-depth-2 rounded border border-neozero-elements-borderColor focus:outline-none"
                 placeholder="Search models..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -141,7 +141,7 @@ const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) =>
               />
               {isLoading && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-sm" />
+                  <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
                 </div>
               )}
             </div>
@@ -155,18 +155,18 @@ const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) =>
 
               return (
                 <Select.Group key={providerName}>
-                  <Select.Label className="px-6 py-2 text-xs font-medium text-bolt-elements-textTertiary">
+                  <Select.Label className="px-6 py-2 text-xs font-medium text-neozero-elements-textTertiary">
                     {providerName}
                   </Select.Label>
                   {providerModels.map((modelItem: any) => (
                     <Select.Item
                       key={`${modelItem.provider}-${modelItem.name}`}
                       value={`${modelItem.provider}-${modelItem.name}`}
-                      className="relative flex items-center px-6 py-2 text-sm text-bolt-elements-textPrimary rounded select-none
-                        hover:bg-bolt-elements-item-backgroundAccent
+                      className="relative flex items-center px-6 py-2 text-sm text-neozero-elements-textPrimary rounded select-none
+                        hover:bg-neozero-elements-item-backgroundAccent
                         data-[disabled]:opacity-50
                         data-[disabled]:pointer-events-none
-                        data-[highlighted]:bg-bolt-elements-item-backgroundAccent
+                        data-[highlighted]:bg-neozero-elements-item-backgroundAccent
                         data-[highlighted]:outline-none
                         cursor-default
                         focus:outline-none"
@@ -199,7 +199,7 @@ const ModelConfigDropdown = ({
   if (!modelConfig) {
     return (
       <button
-        className="flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-1 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed"
+        className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
         disabled
       >
         <div className="i-mdi:settings text-sm text-red"></div>
@@ -211,7 +211,7 @@ const ModelConfigDropdown = ({
       <DropdownMenuPrimitive.Trigger asChild>
         <button
           title="Model configuration"
-          className="flex items-center text-bolt-elements-item-contentDefault bg-transparent enabled:hover:text-bolt-elements-item-contentActive rounded-md p-1 enabled:hover:bg-bolt-elements-item-backgroundActive disabled:cursor-not-allowed"
+          className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
         >
           <div className="i-mdi:settings text-sm"></div>
         </button>
@@ -221,7 +221,7 @@ const ModelConfigDropdown = ({
           side={'right'}
           align={'start'}
           alignOffset={5}
-          className="z-max min-w-[8rem] p-2 overflow-hidden color-white rounded-md border border-bolt-elements-borderColor shadow-md bg-bolt-elements-background-depth-1"
+          className="z-max min-w-[8rem] p-2 overflow-hidden color-white rounded-md border border-neozero-elements-borderColor shadow-md bg-neozero-elements-background-depth-1"
         >
           <div className="flex flex-col gap-2 px-2 py-2">
             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -238,10 +238,10 @@ const ModelConfigDropdown = ({
                   apiKey: e.target.value.length > 0 ? e.target.value : undefined
                 })
               }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-bolt-elements-borderColor bg-transparent text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary focus:outline-none focus:border-bolt-elements-item-backgroundAccent"
+              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
             />
 
-            <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-bolt-elements-borderColor" />
+            <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-neozero-elements-borderColor" />
 
             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Temperature
@@ -259,7 +259,7 @@ const ModelConfigDropdown = ({
                   temperature: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
                 })
               }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-bolt-elements-borderColor bg-transparent text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary focus:outline-none focus:border-bolt-elements-item-backgroundAccent"
+              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
             />
 
             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -278,7 +278,7 @@ const ModelConfigDropdown = ({
                   topP: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
                 })
               }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-bolt-elements-borderColor bg-transparent text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary focus:outline-none focus:border-bolt-elements-item-backgroundAccent"
+              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
             />
 
             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -295,7 +295,7 @@ const ModelConfigDropdown = ({
                   topK: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
                 })
               }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-bolt-elements-borderColor bg-transparent text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary focus:outline-none focus:border-bolt-elements-item-backgroundAccent"
+              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
             />
           </div>
         </DropdownMenuPrimitive.Content>
@@ -348,7 +348,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         ref={ref}
         className={classNames(
           styles.BaseChat,
-          'relative flex h-full w-full overflow-hidden bg-bolt-elements-background-depth-1'
+          'relative flex h-full w-full overflow-hidden bg-neozero-elements-background-depth-1'
         )}
         data-chat-visible={showChat}
         onDragOver={onDragOver}
@@ -358,13 +358,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         <AnimatePresence>
           {isDragging && (
             <motion.div
-              className="fixed pointer-events-none top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-bolt-elements-background-depth-1 z-50 backdrop-filter backdrop-blur-[32px]"
+              className="fixed pointer-events-none top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-neozero-elements-background-depth-1 z-50 backdrop-filter backdrop-blur-[32px]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
               exit={{ opacity: 0 }}
             >
-              <div className="i-ph:file text-4xl text-bolt-elements-textPrimary"></div>
-              <div className="text-bolt-elements-textPrimary">Drop files here</div>
+              <div className="i-ph:file text-4xl text-neozero-elements-textPrimary"></div>
+              <div className="text-neozero-elements-textPrimary">Drop files here</div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -374,10 +374,10 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
               <div id="intro" className="mt-[26vh] max-w-chat mx-auto">
-                <h1 className="text-5xl text-center font-bold text-bolt-elements-textPrimary mb-2">
+                <h1 className="text-5xl text-center font-bold text-neozero-elements-textPrimary mb-2">
                   Where ideas begin
                 </h1>
-                <p className="mb-4 text-center text-bolt-elements-textSecondary">
+                <p className="mb-4 text-center text-neozero-elements-textSecondary">
                   Bring ideas to life in seconds or get help on existing projects.
                 </p>
               </div>
@@ -406,16 +406,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               >
                 <div
                   className={classNames(
-                    'shadow-sm border border-bolt-elements-borderColor bg-bolt-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden'
+                    'shadow-sm border border-neozero-elements-borderColor bg-neozero-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden'
                   )}
                 >
                   {fileInputs && (
-                    <div className="flex flex-col gap-5 bg-bolt-elements-background-depth-1 p-4">
+                    <div className="flex flex-col gap-5 bg-neozero-elements-background-depth-1 p-4">
                       <div className="px-5 flex gap-5">
                         {Array.from(fileInputs).map((file, index) => {
                           return (
                             <div className="relative" key={index}>
-                              <div className="relative flex rounded-lg border border-bolt-elements-borderColor overflow-hidden">
+                              <div className="relative flex rounded-lg border border-neozero-elements-borderColor overflow-hidden">
                                 <PopoverHover>
                                   <PopoverHover.Trigger>
                                     <button className="h-20 w-20 bg-transparent outline-none">
@@ -426,19 +426,19 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                           alt={file.name}
                                         />
                                       ) : (
-                                        <div className="flex items-center justify-center w-full h-full text-bolt-elements-textTertiary">
+                                        <div className="flex items-center justify-center w-full h-full text-neozero-elements-textTertiary">
                                           <div className="i-ph:file" />
                                         </div>
                                       )}
                                     </button>
                                   </PopoverHover.Trigger>
                                   <PopoverHover.Content>
-                                    <span className="text-xs text-bolt-elements-textTertiary">{file.name}</span>
+                                    <span className="text-xs text-neozero-elements-textTertiary">{file.name}</span>
                                   </PopoverHover.Content>
                                 </PopoverHover>
                               </div>
                               <button
-                                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 rounded-full w-[18px] h-[18px] flex items-center justify-center z-1 bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-3 border border-bolt-elements-borderColor text-bolt-elements-button-secondary-text"
+                                className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 rounded-full w-[18px] h-[18px] flex items-center justify-center z-1 bg-neozero-elements-background-depth-1 hover:bg-neozero-elements-background-depth-3 border border-neozero-elements-borderColor text-neozero-elements-button-secondary-text"
                                 onClick={() => removeFile?.(index)}
                               >
                                 <div className="i-ph:x scale-70"></div>
@@ -463,7 +463,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                   </div>
                   <textarea
                     ref={textareaRef}
-                    className={`w-full pl-4 pt-4 pr-16 focus:outline-none resize-none text-md text-bolt-elements-textPrimary placeholder-bolt-elements-textTertiary bg-transparent`}
+                    className={`w-full pl-4 pt-4 pr-16 focus:outline-none resize-none text-md text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary bg-transparent`}
                     onKeyDown={event => {
                       if (event.key === 'Enter') {
                         if (event.shiftKey) {
@@ -483,7 +483,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       minHeight: TEXTAREA_MIN_HEIGHT,
                       maxHeight: TEXTAREA_MAX_HEIGHT
                     }}
-                    placeholder="How can Bolt help you today?"
+                    placeholder="How can NeoZero help you today?"
                     translate="no"
                   />
                   <ClientOnly>
@@ -515,7 +515,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       <IconButton
                         title="Upload files"
                         disabled={isStreaming}
-                        className="pr-1.5 enabled:hover:bg-bolt-elements-item-backgroundAccent!"
+                        className="pr-1.5 enabled:hover:bg-neozero-elements-item-backgroundAccent!"
                         onClick={() => fileInputRef?.current?.click()}
                       >
                         <div className="i-ph:link text-xl"></div>
@@ -525,32 +525,32 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         disabled={input.length === 0 || enhancingPrompt}
                         className={classNames({
                           'opacity-100!': enhancingPrompt,
-                          'text-bolt-elements-item-contentAccent! pr-1.5 enabled:hover:bg-bolt-elements-item-backgroundAccent!':
+                          'text-neozero-elements-item-contentAccent! pr-1.5 enabled:hover:bg-neozero-elements-item-backgroundAccent!':
                             promptEnhanced
                         })}
                         onClick={() => enhancePrompt?.()}
                       >
                         {enhancingPrompt ? (
                           <>
-                            <div className="i-svg-spinners:90-ring-with-bg text-bolt-elements-loader-progress text-xl"></div>
+                            <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-xl"></div>
                             <div className="ml-1.5">Enhancing prompt...</div>
                           </>
                         ) : (
                           <>
-                            <div className="i-bolt:stars text-xl"></div>
+                            <div className="i-neozero:stars text-xl"></div>
                             {promptEnhanced && <div className="ml-1.5">Prompt enhanced</div>}
                           </>
                         )}
                       </IconButton>
                     </div>
                     {input.length > 3 ? (
-                      <div className="text-xs text-bolt-elements-textTertiary">
+                      <div className="text-xs text-neozero-elements-textTertiary">
                         Use <kbd className="kdb">Shift</kbd> + <kbd className="kdb">Return</kbd> for a new line
                       </div>
                     ) : null}
                   </div>
                 </div>
-                <div className="bg-bolt-elements-background-depth-1 pb-6">{/* Ghost Element */}</div>
+                <div className="bg-neozero-elements-background-depth-1 pb-6">{/* Ghost Element */}</div>
               </div>
             </div>
             {!chatStarted && (
@@ -563,7 +563,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         onClick={event => {
                           sendMessage?.(event, examplePrompt.text)
                         }}
-                        className="group flex items-center w-full gap-2 justify-center bg-transparent text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary transition-theme"
+                        className="group flex items-center w-full gap-2 justify-center bg-transparent text-neozero-elements-textTertiary hover:text-neozero-elements-textPrimary transition-theme"
                       >
                         {examplePrompt.text}
                         <div className="i-ph:arrow-bend-down-left" />

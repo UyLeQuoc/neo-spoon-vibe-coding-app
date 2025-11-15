@@ -2,6 +2,7 @@ defaults:
     contract-source-network: testnet
     contract-destination: ""
     contract-generate-sdk: true
+    contract-download: true
     off-chain:
         languages:
             - ts
@@ -10,6 +11,11 @@ defaults:
 contracts:
     - label: NEO Token
       script-hash: 0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5
+      source-network: testnet
+      generate-sdk: true
+      download: false
+    - label: VibeCodingAppPaymentContract
+      script-hash: 0x3b548112507aad8ab8a1a2d7da62b163d97c27d7
       source-network: testnet
       generate-sdk: true
       download: false

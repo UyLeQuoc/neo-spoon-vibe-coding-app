@@ -13,7 +13,7 @@ export function HeaderActionButtons() {
   return (
     <div className="flex gap-2">
       <button
-        className="rounded-md text-xs px-4 py-2 bg-bolt-elements-button-secondary-background text-bolt-elements-button-secondary-text flex gap-1.7 items-center justify-center px-3 py-1.5 hover:text-bolt-elements-button-secondary-textHover hover:bg-bolt-elements-button-secondary-backgroundHover"
+        className="rounded-md text-xs px-4 py-2 bg-neozero-elements-button-secondary-background text-neozero-elements-button-secondary-text flex gap-1.7 items-center justify-center px-3 py-1.5 hover:text-neozero-elements-button-secondary-textHover hover:bg-neozero-elements-button-secondary-backgroundHover"
         onClick={() => {
           workbenchStore.downloadProject()
         }}
@@ -24,7 +24,7 @@ export function HeaderActionButtons() {
 
       <DeployButton />
 
-      <div className="flex border border-bolt-elements-borderColor rounded-md overflow-hidden">
+      <div className="flex border border-neozero-elements-borderColor rounded-md overflow-hidden">
         <Button
           active={showChat}
           disabled={!canHideChat}
@@ -34,9 +34,9 @@ export function HeaderActionButtons() {
             }
           }}
         >
-          <div className="i-bolt:chat text-sm" />
+          <div className="i-neozero:chat text-sm" />
         </Button>
-        <div className="w-[1px] bg-bolt-elements-borderColor" />
+        <div className="w-[1px] bg-neozero-elements-borderColor" />
         <Button
           active={showWorkbench}
           onClick={() => {
@@ -65,10 +65,10 @@ function Button({ active = false, disabled = false, children, onClick }: ButtonP
   return (
     <button
       className={classNames('flex items-center p-1.5', {
-        'bg-bolt-elements-item-backgroundDefault hover:bg-bolt-elements-item-backgroundActive text-bolt-elements-textTertiary hover:text-bolt-elements-textPrimary':
+        'bg-neozero-elements-item-backgroundDefault hover:bg-neozero-elements-item-backgroundActive text-neozero-elements-textTertiary hover:text-neozero-elements-textPrimary':
           !active,
-        'bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent': active && !disabled,
-        'bg-bolt-elements-item-backgroundDefault text-alpha-gray-20 dark:text-alpha-white-20 cursor-not-allowed':
+        'bg-neozero-elements-item-backgroundAccent text-neozero-elements-item-contentAccent': active && !disabled,
+        'bg-neozero-elements-item-backgroundDefault text-alpha-gray-20 dark:text-alpha-white-20 cursor-not-allowed':
           disabled
       })}
       onClick={onClick}

@@ -39,7 +39,7 @@ export default function TestPage() {
           projectId: 'a9ff54e3d56a52230ed8767db4d4a810', // From plan.md
           relayUrl: 'wss://relay.walletconnect.com', // WalletConnect's official relay server
           metadata: {
-            name: 'Bolt.new Extended',
+            name: 'NeoZero.new Extended',
             description: 'NEO Token Test Application',
             url: typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
             icons: ['https://avatars.githubusercontent.com/u/37784886']
@@ -343,7 +343,7 @@ export default function TestPage() {
     setIsLoading(true)
     try {
       const signResp = await wcSdk.signMessage({
-        message: 'Hello from Bolt.new Extended!',
+        message: 'Hello from NeoZero.new Extended!',
         version: Version.DEFAULT
       })
 
@@ -371,7 +371,7 @@ export default function TestPage() {
     setIsLoading(true)
     try {
       const signResp = await wcSdk.signMessage({
-        message: 'Hello from Bolt.new Extended!',
+        message: 'Hello from NeoZero.new Extended!',
         version: Version.WITHOUT_SALT
       })
 

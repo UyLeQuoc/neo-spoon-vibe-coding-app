@@ -32,7 +32,7 @@ const PopoverContent: React.FC<PopoverContentProps> = ({ children, onMouseEnter,
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         sideOffset={5}
-        className="z-max text-xs bg-gray-950 text-white border border-bolt-elements-borderColor rounded-lg px-2 py-1.5 truncate"
+        className="z-max text-xs bg-gray-950 text-white border border-neozero-elements-borderColor rounded-lg px-2 py-1.5 truncate"
       >
         {children}
         <Popover.Arrow />

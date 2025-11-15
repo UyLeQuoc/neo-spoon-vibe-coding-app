@@ -28,14 +28,14 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
         </Dialog.Overlay>
         <Dialog.Content asChild>
           <motion.div
-            className="fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[800px] max-w-[95vw] translate-x-[-50%] translate-y-[-50%] rounded-xl border border-bolt-elements-borderColor bg-bolt-elements-background-depth-2 shadow-2xl focus:outline-none"
+            className="fixed top-[50%] left-[50%] z-max max-h-[85vh] w-[800px] max-w-[95vw] translate-x-[-50%] translate-y-[-50%] rounded-xl border border-neozero-elements-borderColor bg-neozero-elements-background-depth-2 shadow-2xl focus:outline-none"
             initial="closed"
             animate="open"
             exit="closed"
             variants={dialogVariants}
           >
             <div className="flex flex-col h-full max-h-[85vh]">
-              <Dialog.Title className="flex items-center border-b border-bolt-elements-borderColor px-6 py-4">
+              <Dialog.Title className="flex items-center border-b border-neozero-elements-borderColor px-6 py-4">
                 {activePage ? (
                   <div className="flex items-center w-full relative">
                     <IconButton
@@ -43,7 +43,7 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
                       className="absolute left-0"
                       onClick={() => setActivePage(null)}
                     />
-                    <span className="flex-1 text-lg font-semibold text-bolt-elements-textPrimary text-center">
+                    <span className="flex-1 text-lg font-semibold text-neozero-elements-textPrimary text-center">
                       {activePage.name}
                     </span>
                     <Dialog.Close asChild>
@@ -52,7 +52,7 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
                   </div>
                 ) : (
                   <>
-                    <span className="text-lg font-semibold text-bolt-elements-textPrimary">Settings</span>
+                    <span className="text-lg font-semibold text-neozero-elements-textPrimary">Settings</span>
                     <Dialog.Close asChild>
                       <IconButton icon="i-ph:x" className="ml-auto -mr-2" onClick={() => setOpen(false)} />
                     </Dialog.Close>
@@ -71,12 +71,12 @@ export const SettingsDialog = ({ open, setOpen }: SettingsDialogProps) => {
                       <IconButton
                         key={page.id}
                         onClick={() => setActivePage(page)}
-                        className="group flex flex-col items-center p-8 rounded-lg border border-bolt-elements-borderColor hover:border-bolt-elements-borderColorHover bg-bolt-elements-background-depth-1 hover:bg-bolt-elements-background-depth-2 transition-colors text-center min-h-[240px]"
+                        className="group flex flex-col items-center p-8 rounded-lg border border-neozero-elements-borderColor hover:border-neozero-elements-borderColorHover bg-neozero-elements-background-depth-1 hover:bg-neozero-elements-background-depth-2 transition-colors text-center min-h-[240px]"
                       >
                         <IconButton icon={page.icon} size="xxl" className="mb-6 scale-150" />
                         <div className="space-y-3">
-                          <div className="font-medium text-lg text-bolt-elements-textPrimary">{page.name}</div>
-                          <div className="text-sm text-bolt-elements-textSecondary">{page.description}</div>
+                          <div className="font-medium text-lg text-neozero-elements-textPrimary">{page.name}</div>
+                          <div className="text-sm text-neozero-elements-textSecondary">{page.description}</div>
                         </div>
                       </IconButton>
                     ))}
