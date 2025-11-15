@@ -77,7 +77,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                             const attachmentUrl = attachmentData?.url || attachmentData?.src
                             const attachmentName = attachmentData?.name || attachmentData?.filename || 'Attachment'
                             const contentType = attachmentData?.contentType || attachmentData?.type || ''
-                            const isImage = contentType.includes('image') || attachmentUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
+                            const isImage =
+                              contentType.includes('image') || attachmentUrl?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
 
                             return (
                               <div className="relative" key={`attachment-${index}-${attachmentIndex}`}>

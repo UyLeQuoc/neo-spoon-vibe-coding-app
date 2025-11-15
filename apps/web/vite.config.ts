@@ -7,10 +7,7 @@ import { optimizeCssModules } from 'vite-plugin-optimize-css-modules'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig(config => ({
-  build: { target: 'esnext' },
-  define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
-  },
+  build: { target: 'es2024' },
   plugins: [
     nodePolyfills({ include: ['path', 'buffer'] }),
     config.mode !== 'test' && remixCloudflareDevProxy(),

@@ -3,6 +3,7 @@
   "extends": "../../configs/tsconfig.react.json",
   "compilerOptions": {
     "types": ["@remix-run/cloudflare", "vite/client", "@cloudflare/workers-types/experimental"],
+    "experimentalDecorators": true,
     "baseUrl": ".",
     "paths": { "~/*": ["./app/*"] }
   },

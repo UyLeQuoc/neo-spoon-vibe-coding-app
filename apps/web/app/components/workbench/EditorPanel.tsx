@@ -67,75 +67,75 @@ export const EditorPanel = memo(
 
     return (
       <PanelGroup direction="horizontal">
-            <Panel defaultSize={20} minSize={10} collapsible>
-              <div className="flex flex-col border-r border-neozero-elements-borderColor h-full">
-                <PanelHeader>
-                  <div className="i-ph:tree-structure-duotone shrink-0" />
-                  Files
-                </PanelHeader>
-                <ScrollArea.Root type="always" className="h-full">
-                  <ScrollArea.Viewport className="h-full">
-                    <FileTree
-                      className="h-full"
-                      files={files}
-                      hideRoot
-                      unsavedFiles={unsavedFiles}
-                      rootFolder={WORK_DIR}
-                      selectedFile={selectedFile}
-                      onFileSelect={onFileSelect}
-                    />
-                  </ScrollArea.Viewport>
-                  <ScrollArea.Scrollbar
-                    className="flex select-none touch-none p-0.5 w-2 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
-                    orientation="vertical"
-                  >
-                    <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-2 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
-                  </ScrollArea.Scrollbar>
-                  <ScrollArea.Scrollbar
-                    className="flex select-none touch-none p-0.5 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
-                    orientation="horizontal"
-                  >
-                    <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-1 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
-                  </ScrollArea.Scrollbar>
-                  <ScrollArea.Corner className="bg-neozero-elements-background-depth-3" />
-                </ScrollArea.Root>
-              </div>
-            </Panel>
-            <PanelResizeHandle />
-            <Panel className="flex flex-col" defaultSize={80} minSize={20}>
-              <PanelHeader className="overflow-x-auto">
-                {activeFileSegments?.length && (
-                  <div className="flex items-center flex-1 text-sm">
-                    <FileBreadcrumb pathSegments={activeFileSegments} files={files} onFileSelect={onFileSelect} />
-                    {activeFileUnsaved && (
-                      <div className="flex gap-1 ml-auto -mr-1.5">
-                        <PanelHeaderButton onClick={onFileSave}>
-                          <div className="i-ph:floppy-disk-duotone" />
-                          Save
-                        </PanelHeaderButton>
-                        <PanelHeaderButton onClick={onFileReset}>
-                          <div className="i-ph:clock-counter-clockwise-duotone" />
-                          Reset
-                        </PanelHeaderButton>
-                      </div>
-                    )}
+        <Panel defaultSize={20} minSize={10} collapsible>
+          <div className="flex flex-col border-r border-neozero-elements-borderColor h-full">
+            <PanelHeader>
+              <div className="i-ph:tree-structure-duotone shrink-0" />
+              Files
+            </PanelHeader>
+            <ScrollArea.Root type="always" className="h-full">
+              <ScrollArea.Viewport className="h-full">
+                <FileTree
+                  className="h-full"
+                  files={files}
+                  hideRoot
+                  unsavedFiles={unsavedFiles}
+                  rootFolder={WORK_DIR}
+                  selectedFile={selectedFile}
+                  onFileSelect={onFileSelect}
+                />
+              </ScrollArea.Viewport>
+              <ScrollArea.Scrollbar
+                className="flex select-none touch-none p-0.5 w-2 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
+                orientation="vertical"
+              >
+                <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-2 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+              </ScrollArea.Scrollbar>
+              <ScrollArea.Scrollbar
+                className="flex select-none touch-none p-0.5 bg-neozero-elements-background-depth-3 transition-colors hover:bg-neozero-elements-background-depth-3"
+                orientation="horizontal"
+              >
+                <ScrollArea.Thumb className="flex-1 bg-neozero-elements-background-depth-1 rounded-lg relative before:content-[''] before:absolute before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-full before:h-full before:min-w-[44px] before:min-h-[44px]" />
+              </ScrollArea.Scrollbar>
+              <ScrollArea.Corner className="bg-neozero-elements-background-depth-3" />
+            </ScrollArea.Root>
+          </div>
+        </Panel>
+        <PanelResizeHandle />
+        <Panel className="flex flex-col" defaultSize={80} minSize={20}>
+          <PanelHeader className="overflow-x-auto">
+            {activeFileSegments?.length && (
+              <div className="flex items-center flex-1 text-sm">
+                <FileBreadcrumb pathSegments={activeFileSegments} files={files} onFileSelect={onFileSelect} />
+                {activeFileUnsaved && (
+                  <div className="flex gap-1 ml-auto -mr-1.5">
+                    <PanelHeaderButton onClick={onFileSave}>
+                      <div className="i-ph:floppy-disk-duotone" />
+                      Save
+                    </PanelHeaderButton>
+                    <PanelHeaderButton onClick={onFileReset}>
+                      <div className="i-ph:clock-counter-clockwise-duotone" />
+                      Reset
+                    </PanelHeaderButton>
                   </div>
                 )}
-              </PanelHeader>
-              <div className="h-full flex-1 overflow-hidden">
-                <CodeMirrorEditor
-                  theme={theme}
-                  editable={!isStreaming && editorDocument !== undefined}
-                  settings={editorSettings}
-                  doc={editorDocument}
-                  autoFocusOnDocumentChange={!isMobile()}
-                  onScroll={onEditorScroll}
-                  onChange={onEditorChange}
-                  onSave={onFileSave}
-                />
               </div>
-            </Panel>
-          </PanelGroup>
+            )}
+          </PanelHeader>
+          <div className="h-full flex-1 overflow-hidden">
+            <CodeMirrorEditor
+              theme={theme}
+              editable={!isStreaming && editorDocument !== undefined}
+              settings={editorSettings}
+              doc={editorDocument}
+              autoFocusOnDocumentChange={!isMobile()}
+              onScroll={onEditorScroll}
+              onChange={onEditorChange}
+              onSave={onFileSave}
+            />
+          </div>
+        </Panel>
+      </PanelGroup>
     )
   }
 )

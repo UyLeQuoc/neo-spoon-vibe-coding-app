@@ -1,9 +1,9 @@
 import * as nodePath from 'node:path'
 import { atom, type MapStore, map } from 'nanostores'
+import { fs, initializeZenFS } from '~/lib/zenfs'
 import type { BoltAction } from '~/types/actions'
 import { createScopedLogger } from '~/utils/logger'
 import { unreachable } from '~/utils/unreachable'
-import { fs, initializeZenFS } from '~/lib/zenfs'
 import type { ActionCallbackData } from './message-parser'
 
 const logger = createScopedLogger('ActionRunner')
