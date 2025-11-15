@@ -1,10 +1,9 @@
 import * as nodePath from 'node:path'
-import type { WebContainer } from '@webcontainer/api'
 import { atom, type MapStore, map } from 'nanostores'
 import type { BoltAction } from '~/types/actions'
 import { createScopedLogger } from '~/utils/logger'
-import type { BoltTerminal } from '~/utils/shell'
 import { unreachable } from '~/utils/unreachable'
+import { fs, initializeZenFS } from '~/lib/zenfs'
 import type { ActionCallbackData } from './message-parser'
 
 const logger = createScopedLogger('ActionRunner')
@@ -35,16 +34,13 @@ export type ActionStateUpdate =
 type ActionsMap = MapStore<Record<string, ActionState>>
 
 export class ActionRunner {
-  #webcontainer: Promise<WebContainer>
-  #boltTerminal: BoltTerminal
   runnerId = atom<string>(`${Date.now()}`)
   #currentExecutionPromise: Promise<void> = Promise.resolve()
 
   actions: ActionsMap = map({})
 
-  constructor(webcontainerPromise: Promise<WebContainer>, boltTerminal: BoltTerminal) {
-    this.#webcontainer = webcontainerPromise
-    this.#boltTerminal = boltTerminal
+  constructor() {
+    // Terminal functionality removed
   }
 
   addAction(data: ActionCallbackData) {
@@ -130,22 +126,10 @@ export class ActionRunner {
       unreachable('Expected shell action')
     }
 
-    const boltTerminal = this.#boltTerminal
-    await boltTerminal.ready()
-
-    if (!boltTerminal || !boltTerminal.getTerminal() || !boltTerminal.getProcess()) {
-      unreachable('NeoZero terminal not found')
-    }
-
-    const response = await boltTerminal.runCommand(this.runnerId.get(), action.content, () => {
-      logger.debug(`[${action.type}]: Aborting Action`, action)
-      action.abort()
-    })
-    logger.debug(`${action.type} Shell Response: [exit code:${response?.exitCode}]`)
-
-    if (response?.exitCode !== 0) {
-      throw new Error(`Failed to run command: ${response?.exitCode}`)
-    }
+    // Terminal functionality has been removed
+    // Shell actions are no longer supported
+    logger.warn('Shell actions are not supported - terminal functionality has been removed')
+    throw new Error('Shell actions are not supported - terminal functionality has been removed')
   }
 
   async #runFileAction(action: ActionState) {
@@ -153,7 +137,7 @@ export class ActionRunner {
       unreachable('Expected file action')
     }
 
-    const webcontainer = await this.#webcontainer
+    await initializeZenFS()
 
     let folder = nodePath.dirname(action.filePath)
 
@@ -162,7 +146,7 @@ export class ActionRunner {
 
     if (folder !== '.') {
       try {
-        await webcontainer.fs.mkdir(folder, { recursive: true })
+        await fs.promises.mkdir(folder, { recursive: true })
         logger.debug('Created folder', folder)
       } catch (error) {
         logger.error('Failed to create folder\n\n', error)
@@ -170,7 +154,7 @@ export class ActionRunner {
     }
 
     try {
-      await webcontainer.fs.writeFile(action.filePath, action.content)
+      await fs.promises.writeFile(action.filePath, action.content, 'utf8')
       logger.debug(`File written ${action.filePath}`)
     } catch (error) {
       logger.error('Failed to write file\n\n', error)
