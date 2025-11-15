@@ -11,7 +11,13 @@ export function useModelsQuery(search: string = '') {
       if (!response.ok) {
         throw new Error('Failed to fetch models')
       }
-      return response.json()
+      const result = await response.json()
+      // Handle backend TResult format: { ok: true, data: ModelInfo[] }
+      if (result && typeof result === 'object' && 'ok' in result && 'data' in result && result.ok) {
+        return result.data as ModelInfo[]
+      }
+      // Fallback for unexpected format
+      return (result as ModelInfo[]) || []
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 2
