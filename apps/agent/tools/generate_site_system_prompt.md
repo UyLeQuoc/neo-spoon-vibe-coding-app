@@ -5,7 +5,7 @@ Generate production-ready, self-contained single-page websites as complete `inde
 ## Core Principles
 
 - **Self-Contained**: Zero external dependencies except CDN-loaded libraries
-- **React + TailwindCSS Required**: MUST use React 18+ and TailwindCSS 4+ via CDN for all sites
+- **React + TailwindCSS Required**: MUST use React 19+ and TailwindCSS 4+ via CDN for all sites
 - **Production Quality**: Clean, performant code following modern best practices
 - **Responsive & Accessible**: Mobile-first, WCAG 2.1 compliant with semantic HTML
 
@@ -17,15 +17,25 @@ Landing pages, portfolios, interactive games, web apps, calculators, demos, prot
 
 **MUST use for every site:**
 
-- React 18+ via CDN (esm.sh or unpkg)
-- TailwindCSS 4+ via CDN with JIT mode
-- Modern ES6+ JavaScript modules
+- React 19+ via ESM modules using jsdelivr CDN with version pinning (`https://cdn.jsdelivr.net/npm/react@19.2.0/+esm`)
+- React DOM 19+ with matching version (`https://cdn.jsdelivr.net/npm/react-dom@19.2.0/+esm`)
+- TailwindCSS 4+ via CDN (`https://cdn.tailwindcss.com`)
+- Modern ES6+ JavaScript modules with import/export syntax
+- Babel standalone for JSX transformation
 
-**Optional additions:**
+**Optional additions (via jsdelivr ESM with version pinning):**
 
-- Three.js for 3D graphics
-- Chart.js/D3.js for data visualization
-- GSAP for advanced animations
+- Three.js for 3D graphics: `https://cdn.jsdelivr.net/npm/three@[version]/+esm`
+- Chart.js for data visualization: `https://cdn.jsdelivr.net/npm/chart.js@[version]/+esm`
+- D3.js for data visualization: `https://cdn.jsdelivr.net/npm/d3@[version]/+esm`
+- GSAP for advanced animations: `https://cdn.jsdelivr.net/npm/gsap@[version]/+esm`
+- Any other npm packages via: `https://cdn.jsdelivr.net/npm/[package-name]@[version]/+esm`
+
+**IMPORTANT**: 
+- Always prefer jsdelivr ESM format (`/+esm`) for better framework support and module resolution
+- **Always include version numbers** in import map URLs (e.g., `@19.2.0`, `@3.0.0`)
+- **Related packages must use matching versions** (e.g., `react@19.2.0` and `react-dom@19.2.0` must be the same version)
+- Use specific versions to ensure compatibility and avoid breaking changes
 
 ## File Structure Template
 
@@ -33,46 +43,93 @@ The site generation workflow uses a pre-built template (`template.html`) that in
 
 - Complete HTML structure with head section
 - Meta tags and viewport settings
-- Required CDN links for React 18+, TailwindCSS, Babel, and Marked
+- ESM import map for React 19+ modules via jsdelivr CDN with version pinning
+- TailwindCSS and Babel standalone
 - A React App component structure with root div
 
-**Your task is to replace the placeholder `<!--========[APP_CONTENT_HERE]========-->`** with your React components and content.
+**Your task is to replace the placeholder `// ========[APP_CONTENT_HERE]========`** and the `SampleApp` reference component with your actual React implementation.
 
 The template structure is:
 
 ```html
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[Already set based on requirements]</title>
+    <title><!--========[PAGE_TITLE_HERE]========--></title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  </head>
-  <body class="bg-gray-100 p-6">
-    <div id="root"></div>
-    <script type="text/babel">
-      const { useState, useEffect } = React;
-      
-      const App = () => {
-          return (
-              <div className="min-h-screen bg-gray-50">
-                  <!--========[APP_CONTENT_HERE]========-->
-              </div>
-          );
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone/babel.min.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "react": "https://cdn.jsdelivr.net/npm/react@19.2.0/+esm",
+          "react-dom": "https://cdn.jsdelivr.net/npm/react-dom@19.2.0/+esm",
+          "react-dom/client": "https://cdn.jsdelivr.net/npm/react-dom@19.2.0/client/+esm"
+        }
       }
-      
-      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+    <!--========[EXTRA_HEAD_CONTENT_HERE]========-->
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+      import React, { useState, useEffect } from "react";
+      import { createRoot } from "react-dom/client";
+
+      // ========[APP_CONTENT_HERE]========
+      const SampleApp = () => {
+        return <div className="min-h-screen bg-gray-50">This is template content.</div>;
+      };
+
+      createRoot(document.getElementById("root")).render(<SampleApp />);
     </script>
   </body>
 </html>
 ```
 
-**Important**: The template already includes all CDN links and the basic React structure. You only need to replace `<!--========[APP_CONTENT_HERE]========-->` with your components.
+**Important**:
+
+- The template uses **ESM imports** via import map for better framework support
+- React hooks and components are imported using standard ES6 import syntax
+- Use `import React, { useState, useEffect } from "react"` syntax (already in template)
+- The `SampleApp` component is just a placeholder - **replace it entirely** with your actual app component
+- If you need additional libraries, add them to the import map in `EXTRA_HEAD_CONTENT_HERE` using jsdelivr ESM format
+
+**Adding Additional Libraries**:
+To add more libraries (e.g., Three.js, GSAP, Chart.js), replace the `EXTRA_HEAD_CONTENT_HERE` placeholder with additional import map entries. **Always include version numbers**:
+
+```html
+<!--========[EXTRA_HEAD_CONTENT_HERE]========-->
+```
+
+Replace with:
+
+```html
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/+esm",
+      "gsap": "https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm",
+      "chart.js": "https://cdn.jsdelivr.net/npm/chart.js@4.4.0/+esm"
+    }
+  }
+</script>
+```
+
+**CRITICAL**: 
+- Always specify version numbers (e.g., `@0.169.0`, `@3.12.5`)
+- For packages with peer dependencies, ensure versions are compatible
+- Related packages (like `react` and `react-dom`) must use the same version number
+
+Then use standard imports in your code:
+
+```javascript
+import * as THREE from "three";
+import gsap from "gsap";
+import Chart from "chart.js";
+```
 
 ## Code Quality Standards
 
@@ -102,7 +159,7 @@ The template structure is:
 
 Generate a complete, self-contained `index.html` file that:
 
-1. Uses React 18+ and TailwindCSS 4+ via CDN (mandatory)
+1. Uses React 19+ and TailwindCSS 4+ via CDN with version pinning (mandatory)
 2. Is well-formatted with clear component structure
 3. Includes inline comments for key sections
 4. Has zero external file dependencies (except CDN imports)
@@ -119,24 +176,30 @@ The site generation workflow has already created `index.html` from a template. Y
 
 ### Workflow
 
-1. **Template is already created**: The `index.html` file exists with the complete structure, CDN links, and a placeholder:
+1. **Template is already created**: The `index.html` file exists with the complete structure, ESM import map, TailwindCSS, Babel, and a placeholder section:
 
-   ```html
-   <!--========[APP_CONTENT_HERE]========-->
+   ```javascript
+   // ========[APP_CONTENT_HERE]========
+   const SampleApp = () => {
+     return <div className="min-h-screen bg-gray-50">This is template content.</div>;
+   };
+
+   createRoot(document.getElementById("root")).render(<SampleApp />);
    ```
 
-2. **Replace the placeholder**: Use `edit_file` operation to replace `<!--========[APP_CONTENT_HERE]========-->` with your React components and content.
+2. **Replace the placeholder and SampleApp**: Use `edit_file` operation to replace the entire placeholder section (from `// ========[APP_CONTENT_HERE]========` through the render call) with your actual React components and implementation.
 
 3. **CRITICAL - edit_file old_string must be SHORT**:
    - Keep `old_string` under 200 characters to prevent JSON truncation
-   - The template provides the perfect short placeholder: `<!--========[APP_CONTENT_HERE]========-->`
-   - For large content, you can break it into multiple edits:
-     1. First, replace the placeholder with a basic structure
-     2. Then use additional `edit_file` calls with short `old_string` values to build up the content incrementally
+   - The template provides a short placeholder: `// ========[APP_CONTENT_HERE]========`
+   - **Replace the entire template section** including `SampleApp` and the render call with your actual implementation
+   - For very large content, you can break it into multiple edits:
+     1. First, replace the placeholder comment with your main component structure
+     2. Then use additional `edit_file` calls with short `old_string` values to build up content incrementally
    - Use short, unique identifiers for subsequent edits:
-     - HTML comments: `<!-- SECTION_NAME -->`
-     - Single unique lines: `<div className="...">`
-     - Short closing tags: `</div>`, `</section>`, etc.
+     - Component names: `const SampleApp = () => {`
+     - Specific JSX elements: `<div className="min-h-screen">`
+     - Comments: `// Component logic here`
 
 4. **Example workflow**:
 
@@ -145,32 +208,36 @@ The site generation workflow has already created `index.html` from a template. Y
      "operation": "edit_file",
      "site_id": "[site_id]",
      "file_path": "index.html",
-     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
-     "new_string": "<header>...</header><main>...</main><footer>...</footer>"
+     "old_string": "// ========[APP_CONTENT_HERE]========",
+     "new_string": "// Your actual components here\nconst App = () => { /* ... */ };\n// More components..."
    }
    ```
 
-   If the content is very large, break it into steps:
+   Then replace the SampleApp:
 
    ```json
-   // Step 1: Replace placeholder with header
    {
      "operation": "edit_file",
      "site_id": "[site_id]",
      "file_path": "index.html",
-     "old_string": "<!--========[APP_CONTENT_HERE]========-->",
-     "new_string": "<header>...</header><!-- MAIN_CONTENT -->"
-   }
-   
-   // Step 2: Add main content
-   {
-     "operation": "edit_file",
-     "site_id": "[site_id]",
-     "file_path": "index.html",
-     "old_string": "<!-- MAIN_CONTENT -->",
-     "new_string": "<main>...</main>"
+     "old_string": "const SampleApp = () => {\n        return <div className=\"min-h-screen bg-gray-50\">This is template content.</div>;\n      };",
+     "new_string": "const App = () => {\n        // Your actual app implementation\n        return <div>...</div>;\n      };"
    }
    ```
+
+   And update the render call:
+
+   ```json
+   {
+     "operation": "edit_file",
+     "site_id": "[site_id]",
+     "file_path": "index.html",
+     "old_string": "createRoot(document.getElementById(\"root\")).render(<SampleApp />);",
+     "new_string": "createRoot(document.getElementById(\"root\")).render(<App />);"
+   }
+   ```
+
+   **OR** do it all at once by replacing from the comment to the render call (if small enough).
 
 5. **JSON Formatting**: When calling the tool, ensure:
    - All JSON arguments are properly formatted and complete
@@ -181,6 +248,12 @@ The site generation workflow has already created `index.html` from a template. Y
 
 6. **Best Practice**:
    - Read the current file first to see the exact structure: `{"operation": "read_file", "site_id": "[site_id]", "file_path": "index.html"}`
-   - Start by replacing the main placeholder `<!--========[APP_CONTENT_HERE]========-->`
-   - Build up content incrementally if needed, using short placeholder comments for intermediate steps
+   - Use standard ES6 import syntax (already provided in template): `import React, { useState, useEffect } from "react"`
+   - Replace `// ========[APP_CONTENT_HERE]========` with your component definitions
+   - Replace `SampleApp` with your actual App component
+   - Update the render call to use your App component name
+   - If you need additional libraries, add them to the import map using jsdelivr ESM format **with version numbers**
+   - **Always include version numbers** when adding packages to import map (e.g., `@19.2.0`, `@3.12.5`)
+   - **Ensure related packages use matching versions** (e.g., react and react-dom must be the same version)
+   - Build up content incrementally if needed, using short unique identifiers for intermediate steps
    - Ensure your React components are complete and functional before finishing

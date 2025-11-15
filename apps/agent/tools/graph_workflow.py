@@ -168,10 +168,12 @@ class SiteGenerationGraph:
 Site Type: {state.get('site_type', '')}
 Style Preferences: {state.get('style_preferences', '')}
 
-The HTML template has been created with the basic structure. Your task is to:
-1. Replace <!--========[APP_CONTENT_HERE]========--> with complete React components
-2. Add all necessary styling, components, and functionality
-3. Ensure the site is production-ready
+The HTML template has been created with ESM module support. Your task is to:
+1. Replace // ========[APP_CONTENT_HERE]======== with complete React components
+2. Replace the SampleApp placeholder component with your actual App component
+3. Use ES6 import syntax (already set up: import React, {{ useState, useEffect }} from "react")
+4. Add all necessary styling with TailwindCSS, components, and functionality
+5. Ensure the site is production-ready
 {retry_instruction}
 CRITICAL - When calling manage_site_files tool, you MUST include ALL required parameters:
 - operation: "create_file", "edit_file", "read_file", or "delete_file" (REQUIRED)
@@ -185,18 +187,24 @@ Example tool call format:
   "operation": "edit_file",
   "site_id": "{state['site_id']}",
   "file_path": "index.html",
-  "old_string": "<!--========[APP_CONTENT_HERE]========-->",
-  "new_string": "...your content here..."
+  "old_string": "// ========[APP_CONTENT_HERE]========",
+  "new_string": "// Your actual components\\nconst App = () => {{ /* ... */ }};"
 }}
 
 IMPORTANT RULES:
+- Template uses ESM imports via import map with version pinning - use standard import/export syntax
 - ALWAYS include operation, site_id, and file_path in EVERY tool call
 - Keep old_string SHORT (under 200 chars) to avoid JSON truncation
-- Use <!--========[APP_CONTENT_HERE]========--> as the old_string for the first edit
-- Build incrementally if needed (create, read, edit in steps)
-- Ensure React 18+ and TailwindCSS 4+ are used (already in head)
+- Use // ========[APP_CONTENT_HERE]======== as the old_string for the first edit
+- Replace SampleApp with your actual App component
+- Update the render call to use your component name
+- If you need additional libraries, add them to import map using jsdelivr ESM format WITH VERSION: https://cdn.jsdelivr.net/npm/[package]@[version]/+esm
+- CRITICAL: Always include version numbers in import map URLs (e.g., @19.2.0, @3.12.5)
+- CRITICAL: Related packages must use matching versions (e.g., react@19.2.0 and react-dom@19.2.0 must match)
+- Build incrementally if needed (read file first, then edit in steps)
+- React 19.2.0 and TailwindCSS are already loaded via ESM and CDN with proper versioning
 
-Generate a complete, production-ready website."""
+Generate a complete, production-ready website using modern ESM syntax with version-pinned dependencies."""
 
             try:
                 result = await agent.run(prompt)
@@ -243,17 +251,19 @@ Generate a complete, production-ready website."""
             content = result_data.get("content", "")
 
             # Check if placeholder is still present (content not fully generated)
-            placeholder_present = "<!--========[APP_CONTENT_HERE]========-->" in content
-            has_react = "React" in content or "react" in content or "ReactDOM" in content
+            placeholder_present = "// ========[APP_CONTENT_HERE]========" in content
+            sample_app_present = "SampleApp" in content and "This is template content" in content
+            has_react = "import React" in content or "from \"react\"" in content or "from 'react'" in content
             has_content = len(content) > 500  # Reasonable minimum size
 
             # Content is ready if:
             # 1. Placeholder is gone (replaced with actual content)
-            # 2. Has React components
-            # 3. Has sufficient content
-            # 4. OR we've reached max attempts
+            # 2. SampleApp placeholder is gone (replaced with actual app)
+            # 3. Has React ESM imports
+            # 4. Has sufficient content
+            # 5. OR we've reached max attempts
             content_ready = (
-                not placeholder_present and has_react and has_content
+                not placeholder_present and not sample_app_present and has_react and has_content
             ) or generation_attempts >= max_attempts
 
             # Route decision: "continue_generation" or "proceed_to_verify"
@@ -280,16 +290,19 @@ Generate a complete, production-ready website."""
             result_data = json.loads(result) if isinstance(result, str) else result
             content = result_data.get("content", "")
 
-            # Check requirements
-            has_react = (
-                "React" in content or "react" in content or "ReactDOM" in content
-            )
+            # Check requirements for ESM-based template
+            has_react_imports = "import React" in content or "from \"react\"" in content or "from 'react'" in content
+            has_createroot = "createRoot" in content
             has_tailwind = "tailwindcss" in content.lower() or "@tailwindcss" in content
             has_root = '<div id="root">' in content or '<div id="root">' in content
+            has_importmap = "importmap" in content or "type=\"importmap\"" in content
             has_content = len(content) > 500  # Reasonable minimum size
+            no_placeholder = "// ========[APP_CONTENT_HERE]========" not in content
+            no_sample_app = not ("SampleApp" in content and "This is template content" in content)
 
             verification_passed = bool(
-                content and has_react and has_tailwind and has_root and has_content
+                content and has_react_imports and has_createroot and has_tailwind
+                and has_root and has_importmap and has_content and no_placeholder and no_sample_app
             )
 
             return {
