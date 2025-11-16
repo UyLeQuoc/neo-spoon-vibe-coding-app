@@ -56,14 +56,41 @@
     background-position: 100% 50%;
   }
 }
-
+//light green
 .buy-neons-button {
-  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+  background: linear-gradient(135deg, #59daaf 0%, #39dba5 50%, #3ee1ab 100%);
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
   
   &:hover {
-    transform: scale(1.05);
     box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
 }

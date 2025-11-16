@@ -55,10 +55,9 @@ interface BaseChatProps {
 
 const EXAMPLE_PROMPTS = [
   { text: 'Build a todo app in React using Tailwind' },
-  { text: 'Build a simple blog using Astro' },
-  { text: 'Create a cookie consent form using Material UI' },
-  { text: 'Make a space invaders game' },
-  { text: 'How do I center a div?' }
+  { text: 'Create a simple landing page for a SaaS product' },
+  { text: 'Create a simple portfolio website' },
+  { text: 'Create a simple blog website' },
 ]
 
 const TEXTAREA_MIN_HEIGHT = 76
@@ -342,7 +341,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         ref={ref}
         className={classNames(
           styles.BaseChat,
-          'relative flex h-full w-full overflow-hidden bg-neozero-elements-background-depth-1'
+          'relative flex h-full w-full overflow-hidden'
         )}
         data-chat-visible={showChat}
         onDragOver={onDragOver}
@@ -352,7 +351,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         <AnimatePresence>
           {isDragging && (
             <motion.div
-              className="fixed pointer-events-none top-0 left-0 w-full h-full flex flex-col items-center justify-center bg-neozero-elements-background-depth-1 z-50 backdrop-filter backdrop-blur-[32px]"
+              className="fixed pointer-events-none top-0 left-0 w-full h-full flex flex-col items-center justify-center z-50 backdrop-filter backdrop-blur-[32px]"
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.8 }}
               exit={{ opacity: 0 }}
@@ -368,12 +367,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
               <div id="intro" className="mt-[26vh] max-w-chat mx-auto">
-                <h1 className="text-5xl text-center font-bold text-neozero-elements-textPrimary mb-2">
-                  Where ideas begin
-                </h1>
-                <p className="mb-4 text-center text-neozero-elements-textSecondary">
-                  Bring ideas to life in seconds or get help on existing projects.
-                </p>
+                <div className="mb-2 animate-fade-in">
+                  <h1 className="text-xl md:text-2xl lg:text-5xl font-bold tracking-tight mb-2">
+                    <span className="text-slate-900">What can </span>
+                    <span className="bg-gradient-to-r from-green-500 to-green-600 bg-clip-text text-transparent">
+                      NeoZero
+                    </span>
+                    <span className="text-slate-900"> build for you?</span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-slate-500 leading-relaxed">
+                    Build stunning apps and websites by chatting with AI
+                  </p>
+                </div>
               </div>
             )}
             <div
@@ -400,7 +405,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               >
                 <div
                   className={classNames(
-                    'shadow-sm border border-neozero-elements-borderColor bg-neozero-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden'
+                    'shadow-sm border border-neozero-elements-borderColor backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden'
                   )}
                 >
                   {fileInputs && (
@@ -443,18 +448,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       </div>
                     </div>
                   )}
-                  <div className="flex justify-between text-sm p-4 pt-2 pb-0">
-                    <div className="flex gap-1 items-center">
-                      <ModelSelect
-                        chatStarted={chatStarted}
-                        model={model}
-                        provider={provider}
-                        setProviderModel={setProviderModel}
-                      />
-
-                      <ModelConfigDropdown modelConfig={modelConfig} setModelConfig={setModelConfig} />
-                    </div>
-                  </div>
                   <textarea
                     ref={textareaRef}
                     className={`w-full pl-4 pt-4 pr-16 focus:outline-none resize-none text-md text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary bg-transparent`}

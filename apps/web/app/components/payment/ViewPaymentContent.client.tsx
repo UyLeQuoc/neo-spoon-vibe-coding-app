@@ -409,7 +409,7 @@ export function ViewPaymentContent() {
                           #{tx.id}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-accent-500">
-                          +{tx.amount?.toLocaleString() || 0} Points
+                          {(tx.amount && tx.amount > 0) ? '+' + tx.amount?.toLocaleString() : tx.amount?.toLocaleString()} Points
                         </td>
                         <td className="px-6 py-4 text-sm text-neozero-elements-textSecondary">{tx.note || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-neozero-elements-textSecondary">
