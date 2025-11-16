@@ -76,6 +76,12 @@ apps/web/.vercel
 apps/web/*.tsbuildinfo
 apps/web/next-env.d.ts
 
+# Service Worker
+apps/web/public/site-preview-sw.js
+apps/web/public/site-preview-sw.js.map
+apps/web/public/site-preview-sw.mjs
+apps/web/public/site-preview-sw.mjs.map
+
 ###############################################
 # Backend API (apps/api): Cloudflare Worker ignores
 ###############################################

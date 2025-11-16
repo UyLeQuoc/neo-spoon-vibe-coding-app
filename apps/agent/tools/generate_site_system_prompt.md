@@ -31,7 +31,8 @@ Landing pages, portfolios, interactive games, web apps, calculators, demos, prot
 - GSAP for advanced animations: `https://cdn.jsdelivr.net/npm/gsap@[version]/+esm`
 - Any other npm packages via: `https://cdn.jsdelivr.net/npm/[package-name]@[version]/+esm`
 
-**IMPORTANT**: 
+**IMPORTANT**:
+
 - Always prefer jsdelivr ESM format (`/+esm`) for better framework support and module resolution
 - **Always include version numbers** in import map URLs (e.g., `@19.2.0`, `@3.0.0`)
 - **Related packages must use matching versions** (e.g., `react@19.2.0` and `react-dom@19.2.0` must be the same version)
@@ -118,7 +119,8 @@ Replace with:
 </script>
 ```
 
-**CRITICAL**: 
+**CRITICAL**:
+
 - Always specify version numbers (e.g., `@0.169.0`, `@3.12.5`)
 - For packages with peer dependencies, ensure versions are compatible
 - Related packages (like `react` and `react-dom`) must use the same version number
@@ -190,7 +192,7 @@ The site generation workflow has already created `index.html` from a template. Y
 2. **Replace the placeholder and SampleApp**: Use `edit_file` operation to replace the entire placeholder section (from `// ========[APP_CONTENT_HERE]========` through the render call) with your actual React components and implementation.
 
 3. **CRITICAL - edit_file old_string must be SHORT**:
-   - Keep `old_string` under 200 characters to prevent JSON truncation
+   - Keep `old_string` under 500 characters to prevent JSON truncation
    - The template provides a short placeholder: `// ========[APP_CONTENT_HERE]========`
    - **Replace the entire template section** including `SampleApp` and the render call with your actual implementation
    - For very large content, you can break it into multiple edits:
@@ -243,7 +245,7 @@ The site generation workflow has already created `index.html` from a template. Y
    - All JSON arguments are properly formatted and complete
    - Special characters in content are properly escaped (especially quotes, backslashes)
    - The JSON string is closed properly with all required fields
-   - `old_string` is kept SHORT (under 200 chars) - this is critical to prevent truncation
+   - `old_string` is kept SHORT (under 500 chars) - this is critical to prevent truncation
    - Always include `operation`, `site_id`, and `file_path` in every call
 
 6. **Best Practice**:

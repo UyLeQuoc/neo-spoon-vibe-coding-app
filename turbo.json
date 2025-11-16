@@ -7,8 +7,13 @@
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**", "out/**"]
     },
+    "build:sw": {
+      "inputs": ["web-workers/**"],
+      "outputs": ["public/site-preview-sw.mjs"]
+    },
     "build:watch": { "persistent": true, "cache": false },
-    "dev": { "persistent": true, "cache": false, "with": ["build:watch"] },
+    "dev": { "persistent": true, "cache": false, "with": ["build:watch", "dev:sw"] },
+    "dev:sw": { "persistent": true, "cache": false },
     "test": { "cache": false },
     "deploy": { "dependsOn": ["build"] },
     "check:types": { "dependsOn": ["^check:types"] },

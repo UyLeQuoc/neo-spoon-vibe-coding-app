@@ -38,7 +38,7 @@ class ManageSiteFilesTool(BaseTool):
             },
             "old_string": {
                 "type": "string",
-                "description": "String to find and replace in edit_file operation. Required for edit_file. CRITICAL: Keep this SHORT (under 200 characters) to avoid JSON truncation. Use a unique, small identifier like a comment, a single line, or a short unique string. For large replacements, break into multiple smaller edits.",
+                "description": "String to find and replace in edit_file operation. Required for edit_file. CRITICAL: Keep this SHORT (under 500 characters) to avoid JSON truncation. Use a unique, small identifier like a comment, a single line, or a short unique string. For large replacements, break into multiple smaller edits.",
             },
             "new_string": {
                 "type": "string",
@@ -142,10 +142,10 @@ class ManageSiteFilesTool(BaseTool):
 
             elif operation == "edit_file":
                 # Validate old_string length to prevent JSON truncation
-                if old_string and len(old_string) > 200:
+                if old_string and len(old_string) > 500:
                     result["error"] = (
                         f"old_string is too long ({len(old_string)} characters). "
-                        f"Keep it under 200 characters to prevent JSON truncation. "
+                        f"Keep it under 500 characters to prevent JSON truncation. "
                         f"Use a shorter unique identifier like a comment or single line, "
                         f"or break the edit into multiple smaller edits."
                     )
