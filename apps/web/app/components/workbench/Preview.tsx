@@ -25,6 +25,10 @@ export const Preview = memo(() => {
     setIframeUrl(previewUrl)
   }, [previewUrl])
 
+  useEffect(() => {
+    console.log('🌐 Preview iframe URL:', iframeUrl)
+  }, [iframeUrl])
+
   const validateUrl = useCallback(
     (value: string) => {
       if (!previewUrl) {
@@ -118,7 +122,17 @@ export const Preview = memo(() => {
       </div>
       <div className="flex-1 border-t border-neozero-elements-borderColor">
         {previewUrl && iframeUrl ? (
-          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={iframeUrl} />
+          <iframe
+            ref={iframeRef}
+            className="border-none w-full h-full bg-white"
+            src={iframeUrl}
+            onError={() => {
+              console.error('❌ Iframe failed to load:', iframeUrl)
+            }}
+            onLoad={() => {
+              console.log('✅ Iframe loaded successfully:', iframeUrl)
+            }}
+          />
         ) : (
           <div className="flex w-full h-full justify-center items-center bg-white">No preview available</div>
         )}

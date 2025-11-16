@@ -20,7 +20,12 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
       console.error('[SW] No site ID found in path:', pathname)
       return new Response(getFallbackHTML('', 'Invalid preview URL - site ID required'), {
         status: 400,
-        headers: { 'Content-Type': 'text/html' }
+        headers: {
+          'Content-Type': 'text/html',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Content-Security-Policy': "frame-ancestors 'self'",
+          'Cross-Origin-Resource-Policy': 'same-origin'
+        }
       })
     }
 
@@ -60,12 +65,19 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
     const contentType = getContentType(filePath)
 
     // Create response with proper headers (convert to regular Uint8Array for Response)
+    // Note: X-Frame-Options: SAMEORIGIN allows iframe embedding from the same origin
+    // Content-Security-Policy frame-ancestors 'self' also allows same-origin embedding
+    // Cross-Origin-Resource-Policy: same-origin is required when parent page has COEP: require-corp
     const response = new Response(new Uint8Array(content), {
       status: 200,
       headers: {
         'Content-Type': contentType,
         'Cache-Control': 'public, max-age=3600',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'X-Frame-Options': 'SAMEORIGIN',
+        'Content-Security-Policy': "frame-ancestors 'self'",
+        'Cross-Origin-Resource-Policy': 'same-origin',
+        'Cross-Origin-Embedder-Policy': 'credentialless'
       }
     })
 
@@ -83,14 +95,23 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
           getFallbackHTML(siteId || 'unknown', 'File not found. Make sure files are uploaded to this site.'),
           {
             status: 404,
-            headers: { 'Content-Type': 'text/html' }
+            headers: {
+              'Content-Type': 'text/html',
+              'X-Frame-Options': 'SAMEORIGIN',
+              'Content-Security-Policy': "frame-ancestors 'self'",
+              'Cross-Origin-Resource-Policy': 'same-origin',
+              'Cross-Origin-Embedder-Policy': 'credentialless'
+            }
           }
         )
       }
 
       return new Response('File not found', {
         status: 404,
-        headers: { 'Content-Type': 'text/plain' }
+        headers: {
+          'Content-Type': 'text/plain',
+          'Cross-Origin-Resource-Policy': 'same-origin'
+        }
       })
     }
 
@@ -100,14 +121,22 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
         getFallbackHTML(siteId || 'unknown', err instanceof Error ? err.message : 'Internal Server Error'),
         {
           status: 500,
-          headers: { 'Content-Type': 'text/html' }
+          headers: {
+            'Content-Type': 'text/html',
+            'X-Frame-Options': 'SAMEORIGIN',
+            'Content-Security-Policy': "frame-ancestors 'self'",
+            'Cross-Origin-Resource-Policy': 'same-origin'
+          }
         }
       )
     }
 
     return new Response('Internal Server Error', {
       status: 500,
-      headers: { 'Content-Type': 'text/plain' }
+      headers: {
+        'Content-Type': 'text/plain',
+        'Cross-Origin-Resource-Policy': 'same-origin'
+      }
     })
   }
 }
