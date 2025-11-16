@@ -141,7 +141,7 @@ export function WalletButton() {
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="ml-2 rounded-md text-xs px-2 py-1.5 bg-neozero-elements-button-secondary-background text-neozero-elements-button-secondary-text hover:bg-neozero-elements-button-secondary-backgroundHover transition-theme flex items-center gap-2 justify-center shadow-sm"
+              className="rounded-md text-xs px-2 py-1.5 bg-neozero-elements-button-secondary-background text-neozero-elements-button-secondary-text hover:bg-neozero-elements-button-secondary-backgroundHover transition-theme flex items-center gap-2 justify-center shadow-sm"
             >
               <img src={avatarUrl} alt="User avatar" className="w-5 h-5 rounded-full" />
               {isWalletAuthenticated && balancePoints !== null ? (
@@ -176,7 +176,7 @@ export function WalletButton() {
                             {formatAddress(account)}
                           </div>
                           {isWalletAuthenticated && balancePoints !== null && (
-                            <div className="text-xs text-neozero-elements-textSecondary mt-0.5">
+                            <div className="text-green-500 font-medium mt-0.5">
                               {balancePoints.toFixed(2)} Points
                             </div>
                           )}
