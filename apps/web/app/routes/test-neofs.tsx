@@ -263,7 +263,7 @@ async function uploadFileToNeoFS(
   attributes?: Record<string, string>
 ): Promise<{ objectId: string; url: string }> {
   try {
-    const url = `${NEOFS_REST_GATEWAY}/v1/objects/${containerId}`
+    const url = `${NEOFS_REST_GATEWAY}/v1/objects/${containerId}?walletConnect=true`
     const headers: HeadersInit = {
       'Content-Type': 'application/octet-stream'
     }
@@ -641,15 +641,17 @@ async function uploadFileToNeoFSViaNeoLine(
   }
 
   try {
-    const { signature, signatureKey } = await createAndSignObjectBearerToken(
-      neoline,
-      account,
-      containerId,
-      ['PUT'],
-      100
-    )
+    // const { signature, signatureKey } = await createAndSignObjectBearerToken(
+    //   neoline,
+    //   account,
+    //   containerId,
+    //   ['PUT'],
+    //   100
+    // )
 
-    return await uploadFileToNeoFS(file, containerId, fileName, undefined, signature, signatureKey, attributes)
+    const { token, signature, signatureKey } = await createAndSignContainerBearerToken(neoline, account)
+
+    return await uploadFileToNeoFS(file, containerId, fileName, token, signature, signatureKey, attributes)
   } catch (error: any) {
     if (
       error.message?.includes('signature') ||
