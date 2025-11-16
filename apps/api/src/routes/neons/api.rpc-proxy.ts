@@ -4,7 +4,7 @@ import z from 'zod'
 import { factory } from '~/factory'
 
 const NEO_NS_CONTRACT_HASH = '0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb'
-const RPC_URL = 'http://seed1t5.neo.org:20332'
+const RPC_URL = 'http://seed2t5.neo.org:20332'
 
 const rpcProxyInputSchema = z.object({
   operation: z.string().min(1, 'Operation is required'),
