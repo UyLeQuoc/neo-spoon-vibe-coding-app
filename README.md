@@ -1,7 +1,5 @@
 # NeoZero: AI-Powered Website Generation on NEO Blockchain
 
-[![Bolt.new: AI-Powered Full-Stack Web Development in the Browser](./public/social_preview_index.jpg)](https://bolt.new)
-
 **NeoZero** is a blockchain-powered platform that enables users to generate complete, production-ready websites using AI. Built on the NEO blockchain, users deposit GAS tokens into a smart contract to pay for AI-powered website generation, then seamlessly integrate with NeoNS (NEO Name Service) to assign domain names to their generated sites.
 
 ## 🎯 Project Overview
@@ -15,11 +13,14 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
 ### Key Features
 
 - **Blockchain Payments**: Deposit GAS tokens via NEO smart contract for AI services
-- **AI Website Generation**: Powered by SpoonOS framework with Claude Sonnet models
+- **Points System**: Convert GAS to points, deduct based on AI token usage
+- **AI Website Generation**: Powered by SpoonOS framework with Claude Sonnet 4.5 via MCP
 - **NeoNS Integration**: Assign and manage domain names for generated websites
 - **Real-time Streaming**: Server-Sent Events (SSE) for live generation progress
-- **Wallet Integration**: Support for NeoLine and other NEO wallets
+- **Wallet Integration**: Support for NeoLine wallet with JWT-based authentication
 - **Type-safe SDKs**: Auto-generated TypeScript SDKs from smart contracts using CPM
+- **Multi-Model Support**: Choose from various AI models via OpenRouter
+- **Chat Interface**: Interactive chat UI for website generation requests
 
 ## 🏗️ Architecture
 
@@ -59,19 +60,27 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
 #### 2. **API Server** (`apps/api`)
 - **Framework**: Hono (Cloudflare Workers)
 - **Endpoints**:
+  - `/api/auth/*` - Authentication endpoints (sign in, refresh token)
   - `/api/balance` - User balance management
   - `/api/create-pending-payment` - Create payment requests
+  - `/api/get-pending-payment` - Get pending payment details
+  - `/api/update-pending-payment-status` - Update payment status
   - `/api/verify-payment-transaction` - Verify blockchain transactions
+  - `/api/get-transactions` - Get transaction history
   - `/api/neons/rpc-proxy` - NeoNS contract interactions
+  - `/api/chat` - AI chat endpoint with MCP integration
+  - `/api/models` - Available AI models
   - `/api/avatar/:seed` - Avatar proxy for DiceBear API
 
 #### 3. **AI Agent** (`apps/agent`)
-- **Framework**: SpoonOS (Python)
+- **Framework**: SpoonOS (Python) with MCP (Model Context Protocol)
 - **Capabilities**:
-  - Website generation using Claude Sonnet models
-  - Real-time SSE streaming
-  - Template-based workflow
+  - Website generation using Claude Sonnet 4.5 (via OpenRouter)
+  - MCP SSE server for web client integration
+  - Real-time streaming via Server-Sent Events
+  - Graph-based workflow for structured site generation
   - File management for generated sites
+  - Tools: `generate_site`, `manage_site_files`
 
 #### 4. **Shared** (`apps/shared`)
 - Common types and utilities shared across apps
@@ -84,11 +93,12 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
 User → Connect Wallet → Deposit GAS → Smart Contract → Balance Updated
 ```
 
-1. User connects their NEO wallet (NeoLine,)
-2. User initiates a deposit by transferring GAS tokens to the payment contract
-3. Smart contract receives the deposit and emits events
-4. Backend verifies the transaction and updates user balance
-5. User receives "points" that can be used for AI generation
+1. User connects their NEO wallet (NeoLine)
+2. User creates a pending payment request via API
+3. User signs and executes GAS token transfer to payment contract
+4. Backend verifies transaction via RPC `getapplicationlog`
+5. User balance is updated with points (1 GAS = 1 point)
+6. Points are deducted for AI generation usage (based on token consumption)
 
 ### 2. Website Generation Flow
 
@@ -96,12 +106,14 @@ User → Connect Wallet → Deposit GAS → Smart Contract → Balance Updated
 User Prompt → API → SpoonOS Agent → Generate Site → Return HTML → Store Site
 ```
 
-1. User enters requirements for website generation
-2. Web app calls API server with user prompt
-3. API server forwards request to SpoonOS AI Agent
-4. Agent generates complete HTML website using Claude Sonnet
-5. Generated site is stored with unique `site_id`
-6. HTML is returned to user via SSE streaming
+1. User enters requirements in chat interface
+2. Web app calls `/api/chat` endpoint with messages and user address
+3. API server creates MCP client connection to agent SSE server
+4. API uses Vercel AI SDK with MCP tools (`generate_site`, `manage_site_files`)
+5. Agent generates complete HTML website using Claude Sonnet 4.5
+6. Generated site is stored with unique `site_id` (timestamp format)
+7. HTML and progress are streamed back via SSE
+8. Token usage is calculated and deducted from user balance
 
 ### 3. NeoNS Domain Integration Flow
 
@@ -285,21 +297,50 @@ const symbol = await neo.symbol();
 
 ### Website Generation
 
-**Call AI Agent**:
+**Chat API with MCP Integration**:
 ```typescript
-const response = await fetch('http://localhost:8000/generate', {
+// The chat endpoint automatically uses MCP tools
+const response = await fetch('/api/chat', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${jwtToken}`
+  },
   body: JSON.stringify({
-    requirements: 'Create a landing page for a tech startup',
-    site_type: 'landing page',
-    style_preferences: 'Modern, purple to blue gradient'
+    messages: [
+      {
+        role: 'user',
+        content: 'Create a landing page for a tech startup'
+      }
+    ],
+    userAddress: 'NbnjKGMBJzJ6j5PHeYhjJDaQ5Vy5UYu4Fv',
+    sessionId: 'unique-session-id',
+    modelId: 'anthropic/claude-sonnet-4.5'
   }),
 });
 
-// Handle SSE stream
+// Handle SSE stream for UI messages
 const reader = response.body.getReader();
 // ... process SSE events
+```
+
+**Direct MCP Client** (for advanced use):
+```typescript
+import { experimental_createMCPClient } from '@ai-sdk/mcp'
+
+const client = await experimental_createMCPClient({
+  transport: {
+    type: 'sse',
+    url: 'http://localhost:8000/sse'
+  }
+})
+
+const tools = await client.tools()
+const result = await tools.generate_site.execute({
+  requirements: 'Create a landing page',
+  site_type: 'landing page',
+  style_preferences: 'Modern, purple to blue gradient'
+})
 ```
 
 ### NeoNS Domain Management
@@ -380,18 +421,22 @@ await neoline.invoke({
 
 ### AI
 - **SpoonOS** - AI agent framework
-- **Claude Sonnet** - Language model (via OpenRouter)
+- **MCP (Model Context Protocol)** - Protocol for AI tool integration
+- **Claude Sonnet 4.5** - Language model (via OpenRouter)
+- **Vercel AI SDK** - AI integration library
 - **FastAPI** - Python web framework
 - **Server-Sent Events** - Real-time streaming
+- **OpenRouter** - AI model provider gateway
 
 ## 🌐 Networks
 
 ### TestNet
-- **RPC**: `https://testnet1.neo.coz.io:443`
-- **Payment Contract**: `0x...` (configure in code)
+- **RPC**: `https://testnet1.neo.coz.io:443` or `http://seed3t5.neo.org:20332`
+- **Payment Contract**: `0x3b548112507aad8ab8a1a2d7da62b163d97c27d7` (VibeCodingAppPaymentContract)
 - **NeoNS Contract**: `0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb`
 - **GAS Token**: `0xd2a4cff31913016155e38e474a2c06d08be276cf`
 - **NEO Token**: `0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5`
+- **Explorer**: https://testnet.neotube.io/
 
 ## 🤝 Contributing
 
@@ -399,10 +444,6 @@ await neoline.invoke({
 2. Create a feature branch
 3. Make your changes
 4. Submit a pull request
-
-## 📝 License
-
-This project is based on [bolt.new](https://github.com/stackblitz/bolt.new) and follows its license terms.
 
 ## 🙏 Acknowledgments
 

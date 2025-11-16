@@ -87,10 +87,13 @@ graph LR
 - No intermediaries
 
 #### 2. **AI Website Generation**
-- Powered by Claude Sonnet 4.5
-- Real-time streaming progress
-- Template-based generation
-- Multiple site types supported
+- Powered by Claude Sonnet 4.5 (via OpenRouter)
+- MCP (Model Context Protocol) integration
+- Real-time SSE streaming progress
+- Graph-based workflow for structured generation
+- Chat interface for natural language interaction
+- Multiple AI models supported
+- Points-based usage tracking
 
 #### 3. **NeoNS Domain Integration**
 - Search available domains
@@ -106,24 +109,37 @@ sequenceDiagram
     participant W as Web App
     participant API as API Server
     participant BC as Blockchain
+    participant MCP as MCP Server
     participant AI as AI Agent
     participant NS as NeoNS
     
-    U->>W: Connect Wallet
+    U->>W: Connect Wallet (NeoLine)
     W->>BC: Authenticate
     BC-->>W: Wallet Connected
+    W->>API: Sign In (JWT)
+    API-->>W: Auth Token
     
-    U->>W: Deposit GAS
-    W->>BC: Transfer to Contract
-    BC-->>API: Emit Deposit Event
-    API->>API: Update Balance
+    U->>W: Create Payment Request
+    W->>API: Create Pending Payment
+    API-->>W: Payment ID
+    U->>W: Sign Transaction
+    W->>BC: Transfer GAS to Contract
+    BC-->>API: Transaction Event
+    W->>API: Verify Transaction
+    API->>BC: Check Transaction Log
+    BC-->>API: Transaction Verified
+    API->>API: Update Balance (Points)
     
-    U->>W: Enter Website Requirements
-    W->>API: Request Generation
-    API->>AI: Forward Prompt
-    AI->>AI: Generate Website
-    AI-->>API: Return HTML
-    API-->>W: Stream Progress
+    U->>W: Enter Website Requirements (Chat)
+    W->>API: POST /chat (with messages)
+    API->>MCP: Create MCP Client (SSE)
+    MCP->>AI: Execute generate_site tool
+    AI->>AI: Generate Website (Claude)
+    AI-->>MCP: Return HTML + site_id
+    MCP-->>API: Stream Progress
+    API->>API: Calculate Token Usage
+    API->>API: Deduct Points
+    API-->>W: Stream UI Messages
     W-->>U: Display Generated Site
     
     U->>W: Search Domain
@@ -158,7 +174,9 @@ graph TB
     end
     
     subgraph "AI Layer"
-        AGENT[AI Agent<br/>SpoonOS + Claude]
+        AGENT[AI Agent<br/>SpoonOS + MCP]
+        MCP[MCP SSE Server]
+        CLAUDE[Claude Sonnet 4.5<br/>via OpenRouter]
         SSE[SSE Streaming]
     end
     
@@ -186,7 +204,9 @@ graph TB
     NEO --> NS_CONTRACT
     NEO --> GAS
     
-    API -->|Generate Request| AGENT
+    API -->|MCP Client| MCP
+    MCP --> AGENT
+    AGENT --> CLAUDE
     AGENT --> SSE
     SSE --> WEB
     AGENT --> FILES
@@ -221,7 +241,10 @@ mindmap
       WalletConnect
     AI
       SpoonOS Framework
-      Claude Sonnet
+      MCP Protocol
+      Claude Sonnet 4.5
+      OpenRouter
+      Vercel AI SDK
       FastAPI
       SSE Streaming
 ```
@@ -308,11 +331,13 @@ graph LR
 
 ## 📈 Go-to-Market Strategy
 
-### Phase 1: Launch (Months 1-3)
+### Phase 1: Launch (Months 1-3) ✅
 - ✅ Beta launch on NEO TestNet
-- ✅ Target: 100 early adopters
-- ✅ Focus: Developer community
-- ✅ Channels: NEO Discord, GitHub, Twitter
+- ✅ Core features implemented (payment, AI generation, NeoNS)
+- ✅ MCP integration complete
+- 🎯 Target: 100 early adopters
+- 🎯 Focus: Developer community
+- 🎯 Channels: NEO Discord, GitHub, Twitter
 
 ### Phase 2: Growth (Months 4-6)
 - 🎯 MainNet launch
@@ -357,15 +382,20 @@ graph TD
 ## 🗺️ Roadmap
 
 ### Q1 2024: Foundation ✅
-- [x] Smart contract development
+- [x] Smart contract development (VibeCodingAppPaymentContract)
 - [x] Payment system integration
-- [x] AI agent setup
-- [x] Basic UI/UX
+- [x] AI agent setup (SpoonOS + MCP)
+- [x] Basic UI/UX (Remix + React)
+- [x] Wallet integration (NeoLine)
+- [x] CPM SDK generation
 
-### Q2 2024: Beta Launch 🚧
-- [ ] TestNet deployment
-- [ ] Wallet integrations
-- [ ] NeoNS integration
+### Q2 2024: Beta Launch ✅
+- [x] TestNet deployment
+- [x] Wallet integrations (NeoLine)
+- [x] NeoNS integration
+- [x] MCP protocol implementation
+- [x] Chat interface
+- [x] Points system
 - [ ] Beta user testing
 
 ### Q3 2024: MainNet Launch 🎯
@@ -373,18 +403,21 @@ graph TD
 - [ ] Security audit
 - [ ] Public launch
 - [ ] Marketing campaign
+- [ ] Performance optimization
 
 ### Q4 2024: Growth 📈
 - [ ] Enterprise features
-- [ ] API access
+- [ ] API access (public endpoints)
 - [ ] Mobile app
 - [ ] International expansion
+- [ ] Advanced analytics
 
 ### 2025: Scale 🌍
 - [ ] Multi-chain support
 - [ ] Advanced AI models
-- [ ] Marketplace
+- [ ] Marketplace for templates
 - [ ] White-label solution
+- [ ] Decentralized hosting
 
 ### Timeline Visualization
 
@@ -397,9 +430,10 @@ gantt
     Payment System           :done, 2024-02-01, 2024-03-31
     AI Agent                 :done, 2024-02-01, 2024-04-30
     section Beta
-    TestNet Deployment       :active, 2024-04-01, 2024-06-30
-    Wallet Integration       :2024-04-01, 2024-05-31
-    NeoNS Integration        :2024-05-01, 2024-06-30
+    TestNet Deployment       :done, 2024-04-01, 2024-06-30
+    Wallet Integration       :done, 2024-04-01, 2024-05-31
+    NeoNS Integration        :done, 2024-05-01, 2024-06-30
+    MCP Integration          :done, 2024-05-01, 2024-06-30
     section Launch
     MainNet Deployment       :2024-07-01, 2024-09-30
     Security Audit           :2024-08-01, 2024-09-30
@@ -579,9 +613,15 @@ pie title Use of Funds
 
 - **Blockchain**: NEO N3 TestNet → MainNet
 - **Smart Contracts**: TypeScript (neo-devpack-ts)
+- **Payment Contract**: `0x3b548112507aad8ab8a1a2d7da62b163d97c27d7` (TestNet)
+- **GAS Token**: `0xd2a4cff31913016155e38e474a2c06d08be276cf`
+- **NeoNS Contract**: `0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb`
 - **AI Model**: Claude Sonnet 4.5 (via OpenRouter)
-- **Infrastructure**: Cloudflare Workers + D1
-- **Frontend**: Remix + React + TypeScript
+- **AI Protocol**: MCP (Model Context Protocol)
+- **Infrastructure**: Cloudflare Workers + D1 Database
+- **Frontend**: Remix + React + TypeScript + UnoCSS
+- **Backend**: Hono + Cloudflare Workers
+- **AI Framework**: SpoonOS (Python) + FastAPI
 
 ### Security
 
