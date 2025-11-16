@@ -97,22 +97,27 @@ async function handleApiError(response: Response): Promise<never> {
   let errorMessage = `API request failed: ${response.statusText}`
   let errorCode: number | undefined
   let errorType: string | undefined
-  
+
   try {
     const errorData: ErrorResponse = await response.json()
     errorMessage = errorData.message || errorMessage
     errorCode = errorData.code
     errorType = errorData.type
-    
-    if (errorMessage.toLowerCase().includes('empty bearer token') || 
-        errorMessage.toLowerCase().includes('bearer token') && errorMessage.toLowerCase().includes('empty')) {
-      errorMessage = 'This operation requires authentication. Please connect your wallet and ensure you have signed the transaction with a bearer token.'
+
+    if (
+      errorMessage.toLowerCase().includes('empty bearer token') ||
+      (errorMessage.toLowerCase().includes('bearer token') && errorMessage.toLowerCase().includes('empty'))
+    ) {
+      errorMessage =
+        'This operation requires authentication. Please connect your wallet and ensure you have signed the transaction with a bearer token.'
     } else if (errorMessage.includes('signature') || errorMessage.includes('key header')) {
-      errorMessage = 'This operation requires wallet authentication. Please ensure your wallet is connected and try again.'
+      errorMessage =
+        'This operation requires wallet authentication. Please ensure your wallet is connected and try again.'
     } else if (errorMessage.includes('balance') || errorMessage.includes('insufficient')) {
       errorMessage = 'Insufficient balance. Please deposit GAS to the NeoFS contract.'
     } else if (response.status === 403) {
-      errorMessage = 'Access denied. You may not have permission to perform this operation. This may require wallet authentication.'
+      errorMessage =
+        'Access denied. You may not have permission to perform this operation. This may require wallet authentication.'
     } else if (response.status === 404) {
       errorMessage = 'Resource not found. The container or object may not exist.'
     }
@@ -123,7 +128,7 @@ async function handleApiError(response: Response): Promise<never> {
       errorMessage = 'Resource not found.'
     }
   }
-  
+
   const error = new Error(errorMessage) as Error & { code?: number; type?: string }
   if (errorCode !== undefined) {
     error.code = errorCode
@@ -134,11 +139,7 @@ async function handleApiError(response: Response): Promise<never> {
   throw error
 }
 
-async function neofsRequest<T>(
-  endpoint: string,
-  options: RequestInit = {},
-  bearerToken?: string
-): Promise<T> {
+async function neofsRequest<T>(endpoint: string, options: RequestInit = {}, bearerToken?: string): Promise<T> {
   const url = `${NEOFS_REST_GATEWAY}${endpoint}`
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ async function neofsRequest<T>(
   }
 
   if (bearerToken) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, {
@@ -174,7 +175,7 @@ async function createBearerToken(
   const headers: HeadersInit = {
     'X-Bearer-Owner-Id': ownerId,
     'X-Bearer-Lifetime': lifetime.toString(),
-    'X-Bearer-For-All-Users': forAllUsers.toString()
+    'X-Bearer-For-All-Users': forAllUsers.toString().toLowerCase()
   }
 
   return neofsRequest<TokenResponse[]>('/v1/auth', {
@@ -186,56 +187,61 @@ async function createBearerToken(
 
 async function createContainer(
   containerInfo: ContainerPostInfo,
-  signature?: string,
-  signatureKey?: string,
-  bearerToken?: string,
+  ownerId: string,
+  signature: string,
+  signatureKey: string,
+  bearerToken: string,
   walletConnect: boolean = false,
   nameScopeGlobal: boolean = false
 ): Promise<string> {
-  const headers: HeadersInit = {}
-  
-  if (!bearerToken) {
-    throw new Error('Bearer token is required for container creation')
-  }
-  if (!signature) {
-    throw new Error('Signature is required for container creation')
-  }
-  if (!signatureKey) {
-    throw new Error('Signature key is required for container creation')
+  const headers: HeadersInit = {
+    Authorization: `Bearer ${bearerToken}`,
+    'X-Bearer-Owner-Id': ownerId,
+    'X-Bearer-Signature': signature,
+    'X-Bearer-Signature-Key': signatureKey
   }
 
-  const headerRecord = headers as Record<string, string>
-  headers['Authorization'] = bearerToken.startsWith('Bearer ') ? bearerToken : `Bearer ${bearerToken}`
-  headerRecord['X-Bearer-Signature'] = `${signature}`
-  headerRecord['X-Bearer-Signature-Key'] = `${signatureKey}`
+  console.log('⚡️ headers', headers)
+  console.log('⚡️ bearerToken', bearerToken)
+  console.log('⚡️ ownerId', ownerId)
+  console.log('⚡️ signature', signature)
+  console.log('⚡️ signatureKey', signatureKey)
 
   const params = new URLSearchParams()
   if (walletConnect) {
     params.append('walletConnect', 'true')
-  }else {
+  } else {
     params.append('walletConnect', 'false')
   }
-    if (nameScopeGlobal) {
-      params.append('name-scope-global', 'true')
-    }else {
-      params.append('name-scope-global', 'false')
-    }
+  if (nameScopeGlobal) {
+    params.append('name-scope-global', 'true')
+  } else {
+    params.append('name-scope-global', 'false')
+  }
 
   const queryString = params.toString()
   const endpoint = `/v1/containers${queryString ? `?${queryString}` : ''}`
 
   try {
+    console.log('🪲 Making request to', endpoint, 'with headers', headers, 'and body', containerInfo)
     const result = await neofsRequest<PostContainerOK>(endpoint, {
-      method: 'POST',
+      method: 'PUT',
       headers,
       body: JSON.stringify(containerInfo)
     })
 
     return result.containerId
   } catch (error: any) {
-    if (error.message?.includes('signature') || error.message?.includes('key header') || error.message?.includes('session token') || error.message?.includes('verb')) {
+    if (
+      error.message?.includes('signature') ||
+      error.message?.includes('key header') ||
+      error.message?.includes('session token') ||
+      error.message?.includes('verb')
+    ) {
       const originalError = error.message || 'Unknown error'
-      throw new Error(`Container creation requires wallet authentication. Please connect your wallet and ensure you have signed the transaction with the correct container token (verb: PUT). Original error: ${originalError}`)
+      throw new Error(
+        `Container creation requires wallet authentication. Please connect your wallet and ensure you have signed the transaction with the correct container token (verb: PUT). Original error: ${originalError}`
+      )
     }
     throw error
   }
@@ -284,20 +290,27 @@ async function uploadFileToNeoFS(
       await handleApiError(response)
     }
 
-    const result = await response.json() as AddressForUpload
+    const result = (await response.json()) as AddressForUpload
     const objectId = result.object_id
     const fileUrl = `${NEOFS_REST_GATEWAY}/v1/objects/${containerId}/by_id/${objectId}`
 
     return { objectId, url: fileUrl }
   } catch (error: any) {
-    if (error.message?.includes('signature') || error.message?.includes('key header') || error.message?.includes('session token') || error.message?.includes('verb')) {
-      throw new Error('Upload requires authentication. Please ensure you have signed the transaction with the correct token type.')
+    if (
+      error.message?.includes('signature') ||
+      error.message?.includes('key header') ||
+      error.message?.includes('session token') ||
+      error.message?.includes('verb')
+    ) {
+      throw new Error(
+        'Upload requires authentication. Please ensure you have signed the transaction with the correct token type.'
+      )
     } else if (error.message?.includes('403') || error.message?.includes('Access denied')) {
       throw new Error('Access denied. You may not have permission to upload to this container.')
     } else if (error.message?.includes('size') || error.message?.includes('too large')) {
       throw new Error('File is too large. Please check the maximum file size limit.')
     }
-    
+
     throw error
   }
 }
@@ -327,13 +340,15 @@ async function searchObjects(
 async function listFilesInContainer(
   containerId: string,
   bearerToken?: string
-): Promise<Array<{
-  id: string
-  name: string
-  size: number
-  uploadedAt: string
-  url: string
-}>> {
+): Promise<
+  Array<{
+    id: string
+    name: string
+    size: number
+    uploadedAt: string
+    url: string
+  }>
+> {
   try {
     const searchRequest: SearchRequest = {
       attributes: ['FileName', 'Timestamp', 'Content-Type', 'Content-Length'],
@@ -341,13 +356,13 @@ async function listFilesInContainer(
     }
 
     const result = await searchObjects(containerId, searchRequest, bearerToken)
-    
-    return result.objects.map((obj) => {
+
+    return result.objects.map(obj => {
       const attributes = obj.attributes as Record<string, string>
       const fileName = attributes.FileName || attributes['FileName'] || 'unnamed'
       const timestamp = attributes.Timestamp || attributes['Timestamp'] || Date.now().toString()
       const contentLength = attributes['Content-Length'] || attributes['Content-Length'] || '0'
-      
+
       return {
         id: obj.objectId,
         name: fileName,
@@ -357,9 +372,13 @@ async function listFilesInContainer(
       }
     })
   } catch (error: any) {
-    if (error?.message?.toLowerCase().includes('empty bearer token') || 
-        error?.message?.toLowerCase().includes('bearer token')) {
-      throw new Error('This container requires authentication. Please use listFilesInContainerViaNeoLine() with your wallet connected.')
+    if (
+      error?.message?.toLowerCase().includes('empty bearer token') ||
+      error?.message?.toLowerCase().includes('bearer token')
+    ) {
+      throw new Error(
+        'This container requires authentication. Please use listFilesInContainerViaNeoLine() with your wallet connected.'
+      )
     }
     throw error
   }
@@ -381,11 +400,11 @@ async function getObject(
 
   const headers: HeadersInit = {}
   if (bearerToken) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, { headers })
-  
+
   if (!response.ok) {
     await handleApiError(response)
   }
@@ -393,23 +412,19 @@ async function getObject(
   return await response.blob()
 }
 
-async function getObjectHead(
-  containerId: string,
-  objectId: string,
-  bearerToken?: string
-): Promise<Headers> {
+async function getObjectHead(containerId: string, objectId: string, bearerToken?: string): Promise<Headers> {
   const url = `${NEOFS_REST_GATEWAY}/v1/objects/${containerId}/by_id/${objectId}`
 
   const headers: HeadersInit = {}
   if (bearerToken) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, {
     method: 'HEAD',
     headers
   })
-  
+
   if (!response.ok) {
     await handleApiError(response)
   }
@@ -419,7 +434,13 @@ async function getObjectHead(
 
 function createObjectBearerTokenDefinition(
   containerId?: string,
-  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = ['GET', 'HEAD', 'PUT', 'DELETE', 'SEARCH'],
+  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = [
+    'GET',
+    'HEAD',
+    'PUT',
+    'DELETE',
+    'SEARCH'
+  ],
   forOthers: boolean = true
 ): BearerToken {
   return {
@@ -433,10 +454,14 @@ function createObjectBearerTokenDefinition(
           role: 'USER' as const,
           keys: []
         },
-        ...(forOthers ? [{
-          role: 'OTHERS' as const,
-          keys: []
-        }] : [])
+        ...(forOthers
+          ? [
+              {
+                role: 'OTHERS' as const,
+                keys: []
+              }
+            ]
+          : [])
       ]
     }))
   }
@@ -449,7 +474,7 @@ async function formBinaryBearerToken(
   walletConnect: boolean = false
 ): Promise<string> {
   const url = `${NEOFS_REST_GATEWAY}/v1/auth/bearer`
-  
+
   const headers: HeadersInit = {
     'X-Bearer-Signature': signature,
     'X-Bearer-Signature-Key': signatureKey
@@ -472,7 +497,7 @@ async function formBinaryBearerToken(
     await handleApiError(response)
   }
 
-  const result = await response.json() as { token: string }
+  const result = (await response.json()) as { token: string }
   return result.token
 }
 
@@ -490,19 +515,19 @@ async function createAndSignBearerToken(
 
   try {
     const tokenResponses = await createBearerToken(ownerId, tokens, lifetime, forAllUsers)
-    
+
     let selectedToken: TokenResponse | undefined
     if (tokenType) {
       selectedToken = tokenResponses.find(t => t.type === tokenType)
     } else {
       selectedToken = tokenResponses[0]
     }
-    
+
     if (!selectedToken) {
       throw new Error(`Failed to create ${tokenType || 'bearer'} token`)
     }
 
-    const signResult = await neoline.signMessageWithoutSalt({
+    const signResult = await neoline.signMessage({
       message: selectedToken.token,
       isJsonObject: false
     })
@@ -511,21 +536,24 @@ async function createAndSignBearerToken(
       throw new Error('Failed to sign bearer token. Please ensure your wallet is connected.')
     }
 
+    // Reference implementation concatenates data + salt for signature
+    const signature = signResult.data + (signResult.salt || '')
+
     return {
       token: selectedToken.token,
-      signature: signResult.data,
+      signature: signature,
       signatureKey: signResult.publicKey,
       type: selectedToken.type
     }
   } catch (error: any) {
     const errorMsg = error?.description || error?.message || 'Failed to create and sign bearer token'
-    
+
     if (errorMsg.includes('cancel') || errorMsg.includes('Cancel')) {
       throw new Error('Token signing was cancelled. Please try again.')
     } else if (errorMsg.includes('signature') || errorMsg.includes('key')) {
       throw new Error('Failed to sign token. Please ensure your wallet is connected and try again.')
     }
-    
+
     throw new Error(errorMsg)
   }
 }
@@ -533,50 +561,60 @@ async function createAndSignBearerToken(
 async function createAndSignContainerBearerToken(
   neoline: NeoLineN3,
   ownerId: string
-): Promise<{ token?: string; signature: string; signatureKey: string }> {
+): Promise<{ token: string; signature: string; signatureKey: string }> {
   const containerTokenDef: BearerToken = {
     container: {
       verb: 'PUT'
     }
   }
-  
-  const tokenResponses = await createBearerToken(ownerId, [containerTokenDef], 500, false)
+
+  const tokenResponses = await createBearerToken(ownerId, [containerTokenDef], 50000, false)
+  console.log('⚡️ tokenResponses', tokenResponses)
   const containerToken = tokenResponses.find(t => t.type === 'container')
-  
+
   if (!containerToken) {
     throw new Error('Failed to create container bearer token. No container token found in response.')
   }
 
-  const signResult = await neoline.signMessageWithoutSalt({
-    message: `${containerToken.token}`,
+  console.log('⚡️ containerToken.token', containerToken.token, ', signing...')
+  const signResult = await neoline.signMessage({
+    message: containerToken.token,
     isJsonObject: false
   })
+  console.log('⚡️ signResult', signResult)
 
   if (!signResult || !signResult.data || !signResult.publicKey) {
     throw new Error('Failed to sign bearer token. Please ensure your wallet is connected.')
   }
 
-  console.log('signResult', signResult)
-  //length 128
-  console.log('signResult.data', signResult.data.length)
+  // Reference implementation concatenates data + salt for signature
+  const signature = signResult.data + (signResult.salt || '')
 
-  return {
-    token: signResult.message,
-    signature: signResult.data,
+  const result = {
+    token: containerToken.token,
+    signature: signature,
     signatureKey: signResult.publicKey
   }
+  console.log('⚡️ result', result)
+  return result
 }
 
 async function createAndSignObjectBearerToken(
   neoline: any,
   ownerId: string,
   containerId?: string,
-  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = ['GET', 'HEAD', 'PUT', 'DELETE', 'SEARCH'],
+  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = [
+    'GET',
+    'HEAD',
+    'PUT',
+    'DELETE',
+    'SEARCH'
+  ],
   lifetime: number = 100
 ): Promise<{ token: string; signature: string; signatureKey: string }> {
   const objectTokenDef = createObjectBearerTokenDefinition(containerId, operations, true)
   const result = await createAndSignBearerToken(neoline, ownerId, [objectTokenDef], lifetime, false, 'object')
-  
+
   return {
     token: result.token,
     signature: result.signature,
@@ -604,25 +642,24 @@ async function uploadFileToNeoFSViaNeoLine(
       ['PUT'],
       100
     )
-    
-    return await uploadFileToNeoFS(
-      file,
-      containerId,
-      fileName,
-      undefined,
-      signature,
-      signatureKey,
-      attributes
-    )
+
+    return await uploadFileToNeoFS(file, containerId, fileName, undefined, signature, signatureKey, attributes)
   } catch (error: any) {
-    if (error.message?.includes('signature') || error.message?.includes('key header') || error.message?.includes('session token') || error.message?.includes('verb')) {
-      throw new Error('Failed to authenticate file upload. Please ensure you have signed the transaction with the correct token type (object token, not container token).')
+    if (
+      error.message?.includes('signature') ||
+      error.message?.includes('key header') ||
+      error.message?.includes('session token') ||
+      error.message?.includes('verb')
+    ) {
+      throw new Error(
+        'Failed to authenticate file upload. Please ensure you have signed the transaction with the correct token type (object token, not container token).'
+      )
     } else if (error.message?.includes('cancel') || error.message?.includes('Cancel')) {
       throw new Error('File upload was cancelled. Please try again.')
     } else if (error.message?.includes('balance') || error.message?.includes('insufficient')) {
       throw new Error('Insufficient balance. Please deposit GAS to your NeoFS account first.')
     }
-    
+
     throw error
   }
 }
@@ -631,20 +668,22 @@ async function listFilesInContainerViaNeoLine(
   neoline: any,
   account: string,
   containerId: string
-): Promise<Array<{
-  id: string
-  name: string
-  size: number
-  uploadedAt: string
-  url: string
-}>> {
+): Promise<
+  Array<{
+    id: string
+    name: string
+    size: number
+    uploadedAt: string
+    url: string
+  }>
+> {
   if (!neoline || !account) {
     throw new Error('NeoLine wallet and account are required')
   }
 
   try {
     const tokenDef = createObjectBearerTokenDefinition(containerId, ['SEARCH'], true)
-    
+
     const { token, signature, signatureKey } = await createAndSignBearerToken(
       neoline,
       account,
@@ -654,12 +693,7 @@ async function listFilesInContainerViaNeoLine(
       'object'
     )
 
-    const binaryToken = await formBinaryBearerToken(
-      token,
-      signature,
-      signatureKey,
-      false
-    )
+    const binaryToken = await formBinaryBearerToken(token, signature, signatureKey, false)
 
     return await listFilesInContainer(containerId, binaryToken)
   } catch (error: any) {
@@ -668,7 +702,7 @@ async function listFilesInContainerViaNeoLine(
     } else if (error?.message?.includes('signature') || error?.message?.includes('key')) {
       throw new Error('Failed to authenticate. Please ensure your wallet is connected and try again.')
     }
-    
+
     throw error
   }
 }
@@ -688,7 +722,7 @@ interface Step {
 
 export default function TestNeoFSPage() {
   const { neoline, isInitialized, account, error, connect, disconnect } = useNeoLineN3()
-  
+
   const {
     currentStep,
     loading,
@@ -778,13 +812,18 @@ export default function TestNeoFSPage() {
       if (!step1Result.containerToken || !step1Result.containerSignature || !step1Result.containerSignatureKey) {
         throw new Error('[Step 2] Missing required token or signature data from Step 1')
       }
-      
+
+      if (!account) {
+        throw new Error('[Step 2] Account address is required')
+      }
+
       const newContainerId = await createContainer(
         containerInfo,
+        account,
         step1Result.containerSignature,
         step1Result.containerSignatureKey,
-        step1Result.containerToken, 
-        false,
+        step1Result.containerToken,
+        true,
         false
       )
 
@@ -808,13 +847,7 @@ export default function TestNeoFSPage() {
     clearStepError(3)
 
     try {
-      const result = await uploadFileToNeoFSViaNeoLine(
-        neoline,
-        account,
-        file,
-        containerId,
-        fileName || undefined
-      )
+      const result = await uploadFileToNeoFSViaNeoLine(neoline, account, file, containerId, fileName || undefined)
 
       setObjectId(result.objectId)
       setStepResult(3, { ...result, message: 'File uploaded successfully' })
@@ -867,7 +900,6 @@ export default function TestNeoFSPage() {
       setLoading(false)
     }
   }
-
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -927,24 +959,25 @@ export default function TestNeoFSPage() {
             </>
           )}
         </div>
-        {error && (
-          <div className="mt-4 p-4 rounded text-xs bg-red-50 border border-red-500">
-            ⚠️ {error}
-          </div>
-        )}
+        {error && <div className="mt-4 p-4 rounded text-xs bg-red-50 border border-red-500">⚠️ {error}</div>}
       </div>
 
       <div className="flex flex-col gap-5">
-        <div className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
-          steps[0].status === 'active' ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]' :
-          steps[0].status === 'completed' ? 'border-green-500 bg-green-50' :
-          'border-gray-300'
-        }`}>
+        <div
+          className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
+            steps[0].status === 'active'
+              ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]'
+              : steps[0].status === 'completed'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-300'
+          }`}
+        >
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-              steps[0].status === 'pending' ? 'bg-gray-300 text-gray-500' :
-              'bg-green-500 text-white'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                steps[0].status === 'pending' ? 'bg-gray-300 text-gray-500' : 'bg-green-500 text-white'
+              }`}
+            >
               1
             </div>
             <div className="flex-1">
@@ -991,16 +1024,21 @@ export default function TestNeoFSPage() {
           )}
         </div>
 
-        <div className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
-          steps[1].status === 'active' ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]' :
-          steps[1].status === 'completed' ? 'border-green-500 bg-green-50' :
-          'border-gray-300'
-        }`}>
+        <div
+          className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
+            steps[1].status === 'active'
+              ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]'
+              : steps[1].status === 'completed'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-300'
+          }`}
+        >
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-              steps[1].status === 'pending' ? 'bg-gray-300 text-gray-500' :
-              'bg-green-500 text-white'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                steps[1].status === 'pending' ? 'bg-gray-300 text-gray-500' : 'bg-green-500 text-white'
+              }`}
+            >
               2
             </div>
             <div className="flex-1">
@@ -1084,16 +1122,21 @@ export default function TestNeoFSPage() {
           )}
         </div>
 
-        <div className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
-          steps[2].status === 'active' ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]' :
-          steps[2].status === 'completed' ? 'border-green-500 bg-green-50' :
-          'border-gray-300'
-        }`}>
+        <div
+          className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
+            steps[2].status === 'active'
+              ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]'
+              : steps[2].status === 'completed'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-300'
+          }`}
+        >
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-              steps[2].status === 'pending' ? 'bg-gray-300 text-gray-500' :
-              'bg-green-500 text-white'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                steps[2].status === 'pending' ? 'bg-gray-300 text-gray-500' : 'bg-green-500 text-white'
+              }`}
+            >
               3
             </div>
             <div className="flex-1">
@@ -1160,16 +1203,21 @@ export default function TestNeoFSPage() {
           )}
         </div>
 
-        <div className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
-          steps[3].status === 'active' ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]' :
-          steps[3].status === 'completed' ? 'border-green-500 bg-green-50' :
-          'border-gray-300'
-        }`}>
+        <div
+          className={`border-2 rounded-lg p-5 bg-white transition-all duration-300 ${
+            steps[3].status === 'active'
+              ? 'border-green-500 shadow-[0_0_0_3px_rgba(76,175,80,0.1)]'
+              : steps[3].status === 'completed'
+                ? 'border-green-500 bg-green-50'
+                : 'border-gray-300'
+          }`}
+        >
           <div className="flex items-center gap-4 mb-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
-              steps[3].status === 'pending' ? 'bg-gray-300 text-gray-500' :
-              'bg-green-500 text-white'
-            }`}>
+            <div
+              className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                steps[3].status === 'pending' ? 'bg-gray-300 text-gray-500' : 'bg-green-500 text-white'
+              }`}
+            >
               4
             </div>
             <div className="flex-1">
@@ -1239,7 +1287,6 @@ export default function TestNeoFSPage() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   )
