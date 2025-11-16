@@ -28,6 +28,12 @@ export const meta: MetaFunction = () => {
 
 const NEOFS_REST_GATEWAY = 'https://rest.t5.fs.neo.org'
 
+// NeoFS Testnet Contract Address
+// Latest address can be found at: https://status.fs.neo.org/testnet
+// Script hash: 0x3c3f4b84773ef0141576e48c3ff60e5078235891
+// Address: NZAUkYbJ1Cb2HrNmwZ1pg9xYHBhm2FgtKV
+const NEOFS_CONTRACT_SCRIPT_HASH = '0x3c3f4b84773ef0141576e48c3ff60e5078235891'
+
 interface ErrorResponse {
   code: number
   message: string
@@ -225,7 +231,7 @@ async function createContainer(
   try {
     console.log('🪲 Making request to', endpoint, 'with headers', headers, 'and body', containerInfo)
     const result = await neofsRequest<PostContainerOK>(endpoint, {
-      method: 'PUT',
+      method: 'POST',
       headers,
       body: JSON.stringify(containerInfo)
     })
@@ -927,6 +933,93 @@ export default function TestNeoFSPage() {
     }
   }
 
+  const handleDepositGAS = async () => {
+    if (!neoline || !account) {
+      alert('Please connect your wallet first')
+      return
+    }
+
+    try {
+      const contractHash = NEOFS_CONTRACT_SCRIPT_HASH
+      const amountInSmallestUnit = 1_000_000_000_000 // 1 GAS (8 decimals)
+
+      // Convert address to scriptHash for signers and args
+      let signerAccount = account
+      let fromScriptHash = account
+
+      if (account.startsWith('N')) {
+        // Convert address to scriptHash
+        try {
+          const scriptHashResult = await neoline.AddressToScriptHash({ address: account })
+          const scriptHash = scriptHashResult.scriptHash
+          signerAccount = scriptHash
+          fromScriptHash = scriptHash
+        } catch (error) {
+          console.warn('Failed to convert address to scriptHash:', error)
+          alert('Error: Failed to convert address to scriptHash')
+          return
+        }
+      }
+
+      // Format contract hash (ensure it's lowercase without 0x prefix for Hash160)
+      let formattedContractHash = contractHash
+      if (formattedContractHash.startsWith('0x')) {
+        formattedContractHash = formattedContractHash.slice(2)
+      }
+      formattedContractHash = formattedContractHash.toLowerCase()
+
+      // Transfer GAS to the NeoFS contract using invoke
+      const result = await neoline.invoke({
+        scriptHash: '0xd2a4cff31913016155e38e474a2c06d08be276cf', // GAS Token
+        operation: 'transfer',
+        args: [
+          {
+            type: 'Hash160',
+            value: fromScriptHash
+          },
+          {
+            type: 'Hash160',
+            value: formattedContractHash
+          },
+          {
+            type: 'Integer',
+            value: amountInSmallestUnit.toString()
+          },
+          {
+            type: 'Array',
+            value: []
+          }
+        ],
+        signers: [
+          {
+            account: signerAccount,
+            scopes: 1
+          }
+        ],
+        fee: '0.0001'
+      })
+
+      alert(`GAS deposit transaction sent successfully!\nTransaction ID: ${result.txid}`)
+    } catch (error: any) {
+      const errorMsg = error?.description || error?.message || 'Failed to deposit GAS'
+      if (errorMsg.includes('cancel') || errorMsg.includes('Cancel')) {
+        alert('Deposit transaction was cancelled.')
+      } else {
+        alert(`Failed to deposit GAS: ${errorMsg}`)
+      }
+    }
+  }
+
+  const isDepositError = (errorMessage: string): boolean => {
+    if (!errorMessage) return false
+    const lowerError = errorMessage.toLowerCase()
+    return (
+      lowerError.includes('deposit') ||
+      lowerError.includes('insufficient balance') ||
+      (lowerError.includes('balance') && lowerError.includes('neofs'))
+    )
+  }
+
   return (
     <div className="max-w-[1000px] mx-auto p-5 font-sans">
       <div className="text-center mb-10">
@@ -1008,6 +1101,17 @@ export default function TestNeoFSPage() {
                   {stepErrors[1] && (
                     <div className="mt-5 p-4 rounded text-xs bg-red-50 border border-red-500">
                       ✗ Error: {stepErrors[1]}
+                      {isDepositError(stepErrors[1]) && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                          <button
+                            onClick={handleDepositGAS}
+                            disabled={!neoline || !account}
+                            className="px-4 py-2 border-none rounded bg-blue-500 text-white text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          >
+                            Deposit GAS to NeoFS Contract
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                   {stepResults[1] && (
@@ -1102,6 +1206,17 @@ export default function TestNeoFSPage() {
                   {stepErrors[2] && (
                     <div className="mt-5 p-4 rounded text-xs bg-red-50 border border-red-500">
                       ✗ Error: {stepErrors[2]}
+                      {isDepositError(stepErrors[2]) && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                          <button
+                            onClick={handleDepositGAS}
+                            disabled={!neoline || !account}
+                            className="px-4 py-2 border-none rounded bg-blue-500 text-white text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          >
+                            Deposit GAS to NeoFS Contract
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -1182,6 +1297,17 @@ export default function TestNeoFSPage() {
                   {stepErrors[3] && (
                     <div className="mt-5 p-4 rounded text-xs bg-red-50 border border-red-500">
                       ✗ Error: {stepErrors[3]}
+                      {isDepositError(stepErrors[3]) && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                          <button
+                            onClick={handleDepositGAS}
+                            disabled={!neoline || !account}
+                            className="px-4 py-2 border-none rounded bg-blue-500 text-white text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          >
+                            Deposit GAS to NeoFS Contract
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
@@ -1241,6 +1367,17 @@ export default function TestNeoFSPage() {
                   {stepErrors[4] && (
                     <div className="mt-5 p-4 rounded text-xs bg-red-50 border border-red-500">
                       ✗ Error: {stepErrors[4]}
+                      {isDepositError(stepErrors[4]) && (
+                        <div className="mt-3 pt-3 border-t border-red-200">
+                          <button
+                            onClick={handleDepositGAS}
+                            disabled={!neoline || !account}
+                            className="px-4 py-2 border-none rounded bg-blue-500 text-white text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          >
+                            Deposit GAS to NeoFS Contract
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </>
