@@ -2,71 +2,49 @@ import { useStore } from '@nanostores/react'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { IconButton } from '~/components/ui/IconButton'
 import { workbenchStore } from '~/lib/stores/workbench'
-import { PortDropdown } from './PortDropdown'
 
 export const Preview = memo(() => {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const previewPageRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const [activePreviewIndex, setActivePreviewIndex] = useState(0)
-  const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  const hasSelectedPreview = useRef(false)
-  const previews = useStore(workbenchStore.previews)
-  const activePreview = previews[activePreviewIndex]
+  const previewUrl = useStore(workbenchStore.previewUrl)
 
   const [url, setUrl] = useState('')
   const [iframeUrl, setIframeUrl] = useState<string | undefined>()
 
   useEffect(() => {
-    if (!activePreview) {
+    if (!previewUrl) {
       setUrl('')
       setIframeUrl(undefined)
-
       return
     }
 
-    const { baseUrl } = activePreview
+    setUrl(previewUrl)
+    setIframeUrl(previewUrl)
+  }, [previewUrl])
 
-    setUrl(baseUrl)
-    setIframeUrl(baseUrl)
-  }, [activePreview])
+  useEffect(() => {
+    console.log('🌐 Preview iframe URL:', iframeUrl)
+  }, [iframeUrl])
 
   const validateUrl = useCallback(
     (value: string) => {
-      if (!activePreview) {
+      if (!previewUrl) {
         return false
       }
 
-      const { baseUrl } = activePreview
-
-      if (value === baseUrl) {
+      if (value === previewUrl) {
         return true
-      } else if (value.startsWith(baseUrl)) {
-        return ['/', '?', '#'].includes(value.charAt(baseUrl.length))
+      } else if (value.startsWith(previewUrl)) {
+        return ['/', '?', '#'].includes(value.charAt(previewUrl.length))
       }
 
       return false
     },
-    [activePreview]
+    [previewUrl]
   )
-
-  const findMinPortIndex = useCallback(
-    (minIndex: number, preview: { port: number }, index: number, array: { port: number }[]) => {
-      return preview.port < array[minIndex].port ? index : minIndex
-    },
-    []
-  )
-
-  // when previews change, display the lowest port if user hasn't selected a preview
-  useEffect(() => {
-    if (previews.length > 1 && !hasSelectedPreview.current) {
-      const minPortIndex = previews.reduce(findMinPortIndex, 0)
-
-      setActivePreviewIndex(minPortIndex)
-    }
-  }, [previews, findMinPortIndex])
 
   const reloadPreview = () => {
     if (iframeRef.current) {
@@ -97,10 +75,8 @@ export const Preview = memo(() => {
   }, [])
 
   const openInNewTab = () => {
-    if (activePreview?.baseUrl) {
-      const id = activePreview.baseUrl.split('.')[0].split('https://')[1]
-
-      const newTab = window.open(`/preview/${id}`, '_blank', 'noopener,noreferrer')
+    if (previewUrl) {
+      const newTab = window.open(previewUrl, '_blank', 'noopener,noreferrer')
       if (newTab) {
         newTab.focus()
       }
@@ -109,9 +85,6 @@ export const Preview = memo(() => {
 
   return (
     <div ref={previewPageRef} className="w-full h-full flex flex-col">
-      {isPortDropdownOpen && (
-        <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
-      )}
       <div className="bg-neozero-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
         <div
@@ -138,19 +111,6 @@ export const Preview = memo(() => {
           />
         </div>
         <div className="flex items-center gap-1.5">
-          {previews.length > 1 && (
-            <PortDropdown
-              activePreviewIndex={activePreviewIndex}
-              setActivePreviewIndex={setActivePreviewIndex}
-              isDropdownOpen={isPortDropdownOpen}
-              setHasSelectedPreview={value => {
-                hasSelectedPreview.current = value
-              }}
-              setIsDropdownOpen={setIsPortDropdownOpen}
-              previews={previews}
-            />
-          )}
-
           <IconButton icon="i-ph:arrow-square-out" title="Open in new tab" onClick={openInNewTab} />
 
           <IconButton
@@ -161,8 +121,18 @@ export const Preview = memo(() => {
         </div>
       </div>
       <div className="flex-1 border-t border-neozero-elements-borderColor">
-        {activePreview ? (
-          <iframe ref={iframeRef} className="border-none w-full h-full bg-white" src={iframeUrl} />
+        {previewUrl && iframeUrl ? (
+          <iframe
+            ref={iframeRef}
+            className="border-none w-full h-full bg-white"
+            src={iframeUrl}
+            onError={() => {
+              console.error('❌ Iframe failed to load:', iframeUrl)
+            }}
+            onLoad={() => {
+              console.log('✅ Iframe loaded successfully:', iframeUrl)
+            }}
+          />
         ) : (
           <div className="flex w-full h-full justify-center items-center bg-white">No preview available</div>
         )}

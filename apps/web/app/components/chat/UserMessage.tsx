@@ -14,6 +14,5 @@ export function UserMessage({ content }: UserMessageProps) {
 }
 
 function sanitizeUserMessage(content: string) {
-  console.log('⚡️ [UserMessage] sanitizeUserMessage', content)
   return content.replace(modificationsRegex, '').trim()
 }

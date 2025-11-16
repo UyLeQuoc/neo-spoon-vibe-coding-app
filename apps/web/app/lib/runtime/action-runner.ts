@@ -1,6 +1,7 @@
 import * as nodePath from 'node:path'
 import { atom, type MapStore, map } from 'nanostores'
 import { fs, initializeZenFS } from '~/lib/zenfs'
+import { workbenchStore } from '~/lib/stores/workbench'
 import type { BoltAction } from '~/types/actions'
 import { createScopedLogger } from '~/utils/logger'
 import { unreachable } from '~/utils/unreachable'
@@ -156,6 +157,17 @@ export class ActionRunner {
     try {
       await fs.promises.writeFile(action.filePath, action.content, 'utf8')
       logger.debug(`File written ${action.filePath}`)
+
+      // Auto-detect site HTML files and add preview
+      // Pattern: /sites/{site_id}/index.html (handles both absolute and relative paths)
+      const siteHtmlPattern = /(?:^|\/)sites\/([^/]+)\/index\.html$/
+      const match = action.filePath.match(siteHtmlPattern)
+      if (match) {
+        const siteId = match[1]
+        const previewUrl = `/preview/${siteId}`
+        workbenchStore.previewUrl.set(previewUrl)
+        logger.debug(`Added preview for site ${siteId}: ${previewUrl}`)
+      }
     } catch (error) {
       logger.error('Failed to write file\n\n', error)
     }

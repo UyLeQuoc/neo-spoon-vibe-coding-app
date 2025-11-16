@@ -5,7 +5,9 @@
   "scripts": {
     "deploy": "npm run build && wrangler pages deploy",
     "build": "remix vite:build",
+    "build:sw": "tsdown --config tsdown.sw.config.mjs --minify",
     "dev": "remix vite:dev",
+    "dev:sw": "tsdown --config tsdown.sw.config.mjs --watch ./web-workers",
     "test": "vitest --run",
     "test:watch": "vitest",
     "start": "bindings=$(./bindings.sh) && wrangler pages dev ./build/client $bindings",
@@ -93,8 +95,10 @@
     "remix-utils": "^7.6.0",
     "shared": "workspace:",
     "shiki": "^1.9.1",
+    "tsdown": "catalog:",
     "unist-util-visit": "^5.0.0",
-    "usehooks-ts": "^3.1.1"
+    "usehooks-ts": "^3.1.1",
+    "workbox-routing": "^7.3.0"
   },
   "devDependencies": {
     "@cityofzion/neon-dappkit-types": "^1.0.0",

@@ -1,8 +1,6 @@
-import { Buffer } from 'node:buffer'
-import * as nodePath from 'node:path'
 import { getEncoding } from 'istextorbinary'
-import { type MapStore, map } from 'nanostores'
-import { fs, initializeZenFS } from '~/lib/zenfs'
+import { map, type MapStore } from 'nanostores'
+import { fs, initializeZenFS, path } from '~/lib/zenfs'
 import { WORK_DIR } from '~/utils/constants'
 import { computeFileModifications, type FileModifications } from '~/utils/diff'
 import { createScopedLogger } from '~/utils/logger'
@@ -80,7 +78,7 @@ export class FilesStore {
 
     try {
       // Ensure path is absolute and within work directory
-      const normalizedPath = filePath.startsWith(WORK_DIR) ? filePath : nodePath.join(WORK_DIR, filePath)
+      const normalizedPath = filePath.startsWith(WORK_DIR) ? filePath : path.join(WORK_DIR, filePath)
 
       const oldContent = this.getFile(filePath)?.content
 
@@ -89,7 +87,7 @@ export class FilesStore {
       }
 
       // Ensure directory exists
-      const dir = nodePath.dirname(normalizedPath)
+      const dir = path.dirname(normalizedPath)
       try {
         await fs.promises.mkdir(dir, { recursive: true })
       } catch {
@@ -132,8 +130,8 @@ export class FilesStore {
       const entries = await fs.promises.readdir(dirPath, { withFileTypes: true })
 
       for (const entry of entries) {
-        const fullPath = nodePath.join(dirPath, entry.name)
-        const relativePath = fullPath.startsWith(WORK_DIR) ? fullPath : nodePath.join(WORK_DIR, fullPath)
+        const fullPath = path.join(dirPath, entry.name)
+        const relativePath = fullPath.startsWith(WORK_DIR) ? fullPath : path.join(WORK_DIR, fullPath)
 
         if (entry.isDirectory()) {
           // Skip node_modules and .git
