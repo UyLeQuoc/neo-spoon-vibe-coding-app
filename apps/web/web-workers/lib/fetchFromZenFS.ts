@@ -1,35 +1,31 @@
-import { ZenFsFileManager } from './file-manager'
-import { extractSessionId } from './extractSessionId'
+import { fs, path, initializeZenFS } from '~/lib/zenfs'
+import { WORK_DIR } from '~/utils/constants'
+import { extractSiteId } from './extractSiteId'
 import { getContentType } from './getContentType'
 import { getFallbackHTML } from './getFallbackHTML'
-
-/**
- * Get the file manager for a session
- * @param sessionId - The session ID to get the file manager for
- * @returns A new file manager for the session
- */
-const getFileManager = (sessionId: string) => new ZenFsFileManager(`/sessions/${sessionId}`)
 
 // Custom fetch handler for ZenFS files
 export async function fetchFromZenFS(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const pathname = url.pathname
 
+  console.log('[SW] Initializing ZenFS...')
+  await initializeZenFS()
   console.log('[SW] Fetching from ZenFS:', pathname)
 
   try {
     // Extract session ID from path
-    const sessionId = extractSessionId(pathname)
-    if (!sessionId) {
-      console.error('[SW] No session ID found in path:', pathname)
-      return new Response(getFallbackHTML('', 'Invalid preview URL - session ID required'), {
+    const siteId = extractSiteId(pathname)
+    if (!siteId) {
+      console.error('[SW] No site ID found in path:', pathname)
+      return new Response(getFallbackHTML('', 'Invalid preview URL - site ID required'), {
         status: 400,
         headers: { 'Content-Type': 'text/html' }
       })
     }
 
     // Remove /preview/{sessionId} prefix to get the file path
-    let filePath = pathname.replace(`/preview/${sessionId}`, '')
+    let filePath = pathname.replace(`/preview/${siteId}`, '')
 
     // Default to index.html for root requests
     if (filePath === '' || filePath === '/') {
@@ -39,25 +35,26 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
     // Ensure leading slash
     if (!filePath.startsWith('/')) filePath = `/${filePath}`
 
-    console.log('[SW] Session ID:', sessionId, 'File path:', filePath)
+    console.log('[SW] Site ID:', siteId, 'File path:', filePath)
 
-    // Initialize ZenFS file manager for this session
-    const fm = getFileManager(sessionId)
-    await fm.mount()
+    // Construct full path within WORK_DIR
+    const fullPath = path.join(`/sites/${siteId}`, filePath)
+    console.log('[SW] Full path:', fullPath)
 
-    console.log('[SW] Getting file from ZenFS...')
     // Debug: list files in the session (optional)
-    const files = await fm.listFiles()
-    console.log('[SW] Files in session:', files)
-
-    // // Mount the file system (reads from IndexedDB)
-    // await fm.mount({ backend: 'indexeddb' }).catch(() => {
-    //   // File system might already be mounted, ignore error
-    // })
+    try {
+      const files = await fs.promises.readdir(WORK_DIR, {
+        withFileTypes: true,
+        recursive: true
+      })
+      console.log('[SW] Files in workspace:', files.length)
+    } catch (error) {
+      console.log('[SW] Could not list files:', error)
+    }
 
     // Read the file
-    const content = await fm.readFile(filePath)
-    console.log('[SW] Read file:', filePath, 'size:', content.byteLength)
+    const content = await fs.promises.readFile(fullPath)
+    console.log('[SW] Read file:', fullPath, 'size:', content.byteLength)
 
     // Determine content type
     const contentType = getContentType(filePath)
@@ -76,14 +73,14 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
   } catch (err) {
     console.error('[SW] Fetch error:', err)
 
-    const sessionId = extractSessionId(pathname)
+    const siteId = extractSiteId(pathname)
 
     // Return appropriate error response
     if (err instanceof Error && err.message.includes('ENOENT')) {
       // For navigation requests to HTML, show a friendly fallback page
       if (request.mode === 'navigate') {
         return new Response(
-          getFallbackHTML(sessionId || 'unknown', 'File not found. Make sure files are uploaded to this session.'),
+          getFallbackHTML(siteId || 'unknown', 'File not found. Make sure files are uploaded to this site.'),
           {
             status: 404,
             headers: { 'Content-Type': 'text/html' }
@@ -100,7 +97,7 @@ export async function fetchFromZenFS(request: Request): Promise<Response> {
     // For navigation requests, show error page
     if (request.mode === 'navigate') {
       return new Response(
-        getFallbackHTML(sessionId || 'unknown', err instanceof Error ? err.message : 'Internal Server Error'),
+        getFallbackHTML(siteId || 'unknown', err instanceof Error ? err.message : 'Internal Server Error'),
         {
           status: 500,
           headers: { 'Content-Type': 'text/html' }

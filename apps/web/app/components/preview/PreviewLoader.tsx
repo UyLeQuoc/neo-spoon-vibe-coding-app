@@ -10,7 +10,7 @@ export function PreviewLoader() {
   // Setup service worker
   const { isLoading, error, isReady } = useSitePreviewServiceWorker({
     scope: '/preview/',
-    swPath: '/site-preview-sw.mjs',
+    swPath: '/site-preview-sw.js',
     timeout: 15000
   })
 
