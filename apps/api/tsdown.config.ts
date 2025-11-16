@@ -1,5 +1,5 @@
 import { defineConfig } from 'tsdown'
 
 export default defineConfig({
-  loader: { '*.md': 'asset' }
+  loader: { '.md': 'asset' }
 })
