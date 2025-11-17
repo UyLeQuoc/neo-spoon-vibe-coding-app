@@ -43,11 +43,7 @@ export function PreviewLoader() {
       <div className="spinner" />
       <h2>Loading Preview</h2>
       <p className="status">
-        {isLoading
-          ? 'Setting up service worker...'
-          : isReady
-            ? 'Ready! Refreshing...'
-            : 'Initializing...'}
+        {isLoading ? 'Setting up service worker...' : isReady ? 'Ready! Refreshing...' : 'Initializing...'}
       </p>
     </div>
   )

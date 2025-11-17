@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react'
-import { Link } from 'react-router'
 import { Sparkles } from 'lucide-react'
+import { Link } from 'react-router'
 import { ChatDescription } from '~/lib/persistence/ChatDescription'
 import { chatStore } from '~/lib/stores/chat'
 import { classNames } from '~/utils/classNames'

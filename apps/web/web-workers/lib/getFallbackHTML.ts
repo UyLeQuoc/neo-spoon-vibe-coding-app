@@ -1,4 +1,3 @@
-
 // Simple fallback HTML for direct navigation
 export function getFallbackHTML(sessionId: string, error?: string): string {
   if (error) {

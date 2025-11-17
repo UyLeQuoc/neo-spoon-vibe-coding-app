@@ -2,11 +2,6 @@ import { useQuery } from '@tanstack/react-query'
 import { queryKeys } from '~/hooks/keys'
 import { checkIsAvailable } from '~/lib/neons/rpc'
 
-interface IsAvailableResponse {
-  available: boolean
-  error?: string
-}
-
 export function useIsAvailableQuery(domain: string | null) {
   return useQuery({
     queryKey: queryKeys.neons.isAvailable(domain ?? ''),

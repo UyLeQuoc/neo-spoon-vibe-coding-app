@@ -1,5 +1,4 @@
 import { map } from 'nanostores'
-import { workbenchStore } from './workbench'
 
 export interface Shortcut {
   key: string
@@ -23,7 +22,7 @@ export const shortcutsStore = map<Shortcuts>({
   toggleTerminal: {
     key: 'j',
     ctrlOrMetaKey: true,
-    action: () => workbenchStore.toggleTerminal()
+    action: () => void 0
   }
 })
 

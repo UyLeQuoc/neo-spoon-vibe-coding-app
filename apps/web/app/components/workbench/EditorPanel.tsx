@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
 import { memo, useMemo } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import { ClientOnly } from '~/components/ui/ClientOnly'
 import {
   CodeMirrorEditor,
   type EditorDocument,
@@ -11,6 +10,7 @@ import {
   type OnSaveCallback as OnEditorSave,
   type OnScrollCallback as OnEditorScroll
 } from '~/components/editor/codemirror/CodeMirrorEditor'
+import { ClientOnly } from '~/components/ui/ClientOnly'
 import { PanelHeader } from '~/components/ui/PanelHeader'
 import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton'
 import type { FileMap } from '~/lib/stores/files'
@@ -123,7 +123,13 @@ export const EditorPanel = memo(
             )}
           </PanelHeader>
           <div className="h-full flex-1 overflow-hidden">
-            <ClientOnly fallback={<div className="h-full flex items-center justify-center text-neozero-elements-text-secondary">Loading editor...</div>}>
+            <ClientOnly
+              fallback={
+                <div className="h-full flex items-center justify-center text-neozero-elements-text-secondary">
+                  Loading editor...
+                </div>
+              }
+            >
               {() => (
                 <CodeMirrorEditor
                   theme={theme}

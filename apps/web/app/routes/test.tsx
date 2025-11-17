@@ -1,7 +1,7 @@
 import { NeonInvoker } from '@cityofzion/neon-dappkit'
 import WcSdk from '@cityofzion/wallet-connect-sdk-core'
-import type { MetaFunction } from 'react-router'
 import { useEffect, useState } from 'react'
+import type { MetaFunction } from 'react-router'
 import { NeoToken } from '~/contracts/neotoken'
 
 // Version enum for message signing

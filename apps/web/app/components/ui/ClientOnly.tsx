@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 
 interface ClientOnlyProps {
   children: ReactNode | (() => ReactNode)
@@ -8,7 +8,7 @@ interface ClientOnlyProps {
 /**
  * ClientOnly component ensures its children only render on the client side.
  * This is useful for components that use browser APIs like document, window, etc.
- * 
+ *
  * @example
  * ```tsx
  * <ClientOnly fallback={<div>Loading...</div>}>
@@ -29,4 +29,3 @@ export function ClientOnly({ children, fallback = null }: ClientOnlyProps) {
 
   return <>{typeof children === 'function' ? children() : children}</>
 }
-

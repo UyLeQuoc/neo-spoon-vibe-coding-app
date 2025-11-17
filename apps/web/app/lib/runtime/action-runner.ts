@@ -1,6 +1,6 @@
 import { atom, type MapStore, map } from 'nanostores'
-import { fs, path as nodePath, initializeZenFS } from '~/lib/zenfs'
 import { workbenchStore } from '~/lib/stores/workbench'
+import { fs, initializeZenFS, path as nodePath } from '~/lib/zenfs'
 import type { BoltAction } from '~/types/actions'
 import { createScopedLogger } from '~/utils/logger'
 import { unreachable } from '~/utils/unreachable'
@@ -38,10 +38,6 @@ export class ActionRunner {
   #currentExecutionPromise: Promise<void> = Promise.resolve()
 
   actions: ActionsMap = map({})
-
-  constructor() {
-    // Terminal functionality removed
-  }
 
   addAction(data: ActionCallbackData) {
     const { actionId } = data

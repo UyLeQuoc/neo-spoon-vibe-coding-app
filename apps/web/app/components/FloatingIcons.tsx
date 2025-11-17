@@ -11,12 +11,10 @@ function FloatingIcon({ emoji, position, delay }: FloatingIconProps) {
     <div
       className={`absolute ${position} text-4xl md:text-5xl animate-float`}
       style={{
-        animationDelay: `${delay}s`,
+        animationDelay: `${delay}s`
       }}
     >
-      <div className="filter drop-shadow-lg">
-        {emoji}
-      </div>
+      <div className="filter drop-shadow-lg">{emoji}</div>
     </div>
   )
 }
@@ -38,4 +36,3 @@ export function FloatingIcons() {
     </>
   )
 }
-

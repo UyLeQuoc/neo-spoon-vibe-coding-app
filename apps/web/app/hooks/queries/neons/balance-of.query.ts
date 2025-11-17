@@ -6,11 +6,6 @@ import { getBalanceOf } from '~/lib/neons/rpc'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 
-interface BalanceOfResponse {
-  balance: number
-  error?: string
-}
-
 export function useBalanceOfQuery() {
   const { isWalletAuthenticated } = useWalletAuth()
   const authenticatedAddress = useStore(walletAuthStore.authenticatedAddress)

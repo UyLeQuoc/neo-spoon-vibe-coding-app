@@ -1,7 +1,7 @@
 import type { MetaFunction } from 'react-router'
-import { ClientOnly } from '~/components/ui/ClientOnly'
 import { Header } from '~/components/header/Header'
 import { ViewPaymentContent } from '~/components/payment/ViewPaymentContent.client'
+import { ClientOnly } from '~/components/ui/ClientOnly'
 import { WalletAuthProvider } from '~/lib/providers/WalletAuthProvider'
 
 export const meta: MetaFunction = () => {
