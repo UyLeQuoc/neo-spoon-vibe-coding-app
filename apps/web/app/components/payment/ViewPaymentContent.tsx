@@ -1,5 +1,3 @@
-'use client'
-
 import { useStore } from '@nanostores/react'
 import { useCallback, useEffect, useState } from 'react'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
@@ -7,7 +5,7 @@ import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
 import { paymentDialogActions } from '~/lib/stores/payment-dialog.store'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
-import { PaymentDialog } from './PaymentDialog.client'
+import { PaymentDialog } from './PaymentDialog'
 
 interface PendingPayment {
   id: string
