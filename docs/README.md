@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the NEO blockchain integration documentation for Bolt.new Extended.
+Welcome to the NEO blockchain integration documentation for NeoZero
 
 ## 📚 Documentation Files
 
@@ -101,7 +101,7 @@ Navigate to **`/test`** in your running app to see:
 ## 📦 Project Structure
 
 ```
-bolt.new-extended/
+neo-spoon-vibe-coding-app/
 ├── app/
 │   ├── contracts/          # Generated SDKs
 │   │   └── neotoken/       # NEO Token SDK

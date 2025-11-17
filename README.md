@@ -130,7 +130,7 @@ Generated Site → Search Domain → Register Domain → Set DNS Record → Site
 ## 📁 Project Structure
 
 ```
-bolt.new-extended/
+neo-spoon-vibe-coding-app/
 ├── apps/
 │   ├── web/                    # Frontend application (Remix)
 │   │   ├── app/
@@ -185,7 +185,7 @@ bolt.new-extended/
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd bolt.new-extended
+   cd neo-spoon-vibe-coding-app
    ```
 
 2. **Install dependencies**:
@@ -447,7 +447,6 @@ await neoline.invoke({
 
 ## 🙏 Acknowledgments
 
-- [Bolt.new](https://bolt.new) - Original project inspiration
 - [NEO Blockchain](https://neo.org) - Blockchain platform
 - [SpoonOS](https://github.com/spoon-ai/spoon-os) - AI agent framework
 - [City of Zion](https://cityofzion.io) - NEO development tools

@@ -16,7 +16,7 @@ my-neo-dapp/
 │   │   └── MyToken.manifest.json
 │   └── package.json
 │
-└── dapp/                       # Frontend (bolt.new-extended)
+└── dapp/                       # Frontend (neo-spoon-vibe-coding-app)
     ├── app/
     │   ├── contracts/          # Generated SDK từ smart contract
     │   │   └── mytoken/
@@ -305,7 +305,7 @@ neoxp contract deploy samples/mycontract/build/mycontract.nef \
 
 Sau khi deploy, bạn sẽ nhận được **Contract Hash** (ví dụ: `0x1234567890abcdef...`)
 
-## 🔗 Integrate Với Frontend (bolt.new-extended)
+## 🔗 Integrate Với Frontend (neo-spoon-vibe-coding-app)
 
 ### 1. Lấy Contract Hash Sau Khi Deploy
 
@@ -327,7 +327,7 @@ contracts:
 ### 3. Generate TypeScript SDK
 
 ```bash
-cd /home/uydev/code/bolt.new-extended
+cd /home/uydev/code/neo-spoon-vibe-coding-app
 
 # Download manifest from deployed contract
 cpm download manifest \

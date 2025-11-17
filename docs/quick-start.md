@@ -25,7 +25,7 @@ choco install cpm
 ### 2. Install Dependencies
 
 ```bash
-cd /home/uydev/code/bolt.new-extended
+cd /home/uydev/code/neo-spoon-vibe-coding-app
 pnpm add @cityofzion/wallet-connect-sdk-core @cityofzion/neon-dappkit @cityofzion/neon-dappkit-types
 ```
 

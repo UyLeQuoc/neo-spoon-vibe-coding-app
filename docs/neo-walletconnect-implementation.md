@@ -12,7 +12,7 @@ This documentation covers the implementation of NEO blockchain integration using
 ### 1. Project Structure
 
 ```
-bolt.new-extended/
+neo-spoon-vibe-coding-app/
 ├── app/
 │   ├── contracts/
 │   │   └── neotoken/           # Generated SDK
@@ -422,7 +422,7 @@ const wcSdk = await WcSdk.init({
   projectId: 'a9ff54e3d56a52230ed8767db4d4a810',
   relayUrl: 'wss://relay.walletconnect.com',
   metadata: {
-    name: 'Bolt.new Extended',
+    name: 'NeoZero',
     description: 'NEO Token Test Application',
     url: window.location.origin,
     icons: ['https://avatars.githubusercontent.com/u/37784886'],

@@ -10,7 +10,7 @@ echo "========================================================"
 
 # Check if we're in the right directory
 if [ ! -f "package.json" ]; then
-  echo "❌ Error: Run this script from the project root (bolt.new-extended)"
+  echo "❌ Error: Run this script from the project root (neo-spoon-vibe-coding-app)"
   exit 1
 fi
 

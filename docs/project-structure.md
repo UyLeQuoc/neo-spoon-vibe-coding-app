@@ -3,7 +3,7 @@
 ## 📁 Recommended Structure
 
 ```
-bolt.new-extended/
+neo-spoon-vibe-coding-app/
 │
 ├── contracts/                      # 🔨 Smart Contract Development
 │   ├── neo-devpack-ts/            # TypeScript contract compiler
@@ -99,7 +99,7 @@ bolt.new-extended/
 ### Step 1: Clone neo-devpack-ts
 
 ```bash
-cd /home/uydev/code/bolt.new-extended
+cd /home/uydev/code/neo-spoon-vibe-coding-app
 
 # Create contracts directory
 mkdir -p contracts
@@ -118,7 +118,7 @@ npm run build
 ### Step 2: Verify Structure
 
 ```bash
-cd /home/uydev/code/bolt.new-extended
+cd /home/uydev/code/neo-spoon-vibe-coding-app
 
 # Check contract compiler
 ls -la contracts/neo-devpack-ts/samples/
@@ -151,7 +151,7 @@ export class MyToken extends SmartContract {
 ### 2. Compile Contract
 
 ```bash
-cd /home/uydev/code/bolt.new-extended/contracts/neo-devpack-ts
+cd /home/uydev/code/neo-spoon-vibe-coding-app/contracts/neo-devpack-ts
 npx foy mytoken
 
 # Output:
@@ -173,7 +173,7 @@ neoxp contract deploy samples/mytoken/build/mytoken.nef \
 ### 4. Generate SDK
 
 ```bash
-cd /home/uydev/code/bolt.new-extended
+cd /home/uydev/code/neo-spoon-vibe-coding-app
 
 # Generate TypeScript SDK
 cpm download manifest -c 0x1234...abcd -N https://testnet1.neo.coz.io:443
