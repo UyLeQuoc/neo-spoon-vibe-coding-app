@@ -1,11 +1,6 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
 import { useState } from 'react'
 import type { Argument } from '~/lib/neolineN3TS'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
-
-export const meta: MetaFunction = () => {
-  return [{ title: 'NeoLine N3 SDK Playground - Test All Features' }]
-}
 
 interface TestResult {
   success: boolean
@@ -15,7 +10,7 @@ interface TestResult {
 }
 
 export default function TestSDKPage() {
-  const { neoline, isInitialized, account, balance, error, connect, disconnect } = useNeoLineN3()
+  const { neoline, isInitialized, account, error, connect, disconnect } = useNeoLineN3()
   const [activeTab, setActiveTab] = useState<string>('read')
   const [results, setResults] = useState<Record<string, TestResult>>({})
   const [loading, setLoading] = useState<Record<string, boolean>>({})
@@ -62,7 +57,7 @@ export default function TestSDKPage() {
           Returns information about the dAPI provider, including name, website, version, and compatibility.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getProvider())}
+          onClick={() => neoline && executeTest(testId, () => neoline.getProvider())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -116,7 +111,9 @@ export default function TestSDKPage() {
         </div>
         <button
           onClick={() =>
-            executeTest(testId, () => neoline?.getBalance([{ address: address || account!, contracts: [] }]))
+            neoline &&
+            account &&
+            executeTest(testId, () => neoline?.getBalance([{ address: address || account, contracts: [] }]))
           }
           disabled={!neoline || !address || loading[testId]}
           style={{
@@ -181,7 +178,7 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getStorage({ scriptHash, key }))}
+          onClick={() => neoline && executeTest(testId, () => neoline.getStorage({ scriptHash, key }))}
           disabled={!neoline || !scriptHash || !key || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -266,6 +263,7 @@ export default function TestSDKPage() {
                 alert('Please connect wallet first')
                 return
               }
+              if (!neoline) return
               const scriptHashResult = await neoline?.AddressToScriptHash({ address: account })
               executeTest(testId, () =>
                 neoline?.invokeRead({
@@ -330,7 +328,9 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getBlock({ blockHeight: parseInt(blockHeight, 10) }))}
+          onClick={() =>
+            neoline && executeTest(testId, () => neoline.getBlock({ blockHeight: parseInt(blockHeight, 10) }))
+          }
           disabled={!neoline || !blockHeight || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -383,7 +383,7 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getTransaction({ txid }))}
+          onClick={() => neoline && executeTest(testId, () => neoline.getTransaction({ txid }))}
           disabled={!neoline || !txid || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -436,7 +436,7 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getApplicationLog({ txid }))}
+          onClick={() => neoline && executeTest(testId, () => neoline.getApplicationLog({ txid }))}
           disabled={!neoline || !txid || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -489,7 +489,7 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.AddressToScriptHash({ address }))}
+          onClick={() => neoline && executeTest(testId, () => neoline.AddressToScriptHash({ address }))}
           disabled={!neoline || !address || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -567,9 +567,11 @@ export default function TestSDKPage() {
         </div>
         <button
           onClick={() =>
+            neoline &&
+            account &&
             executeTest(testId, () =>
-              neoline?.send({
-                fromAddress: account!,
+              neoline.send({
+                fromAddress: account,
                 toAddress,
                 asset,
                 amount,
@@ -659,7 +661,8 @@ export default function TestSDKPage() {
           onClick={async () => {
             try {
               const args = JSON.parse(argsJson) as Argument[]
-              const scriptHashResult = await neoline?.AddressToScriptHash({ address: account! })
+              if (!account || !neoline) return
+              const scriptHashResult = await neoline.AddressToScriptHash({ address: account })
               executeTest(testId, () =>
                 neoline?.invoke({
                   scriptHash,
@@ -724,7 +727,7 @@ export default function TestSDKPage() {
           />
         </div>
         <button
-          onClick={() => executeTest(testId, () => neoline?.signMessage({ message }))}
+          onClick={() => neoline && executeTest(testId, () => neoline.signMessage({ message }))}
           disabled={!neoline || !message || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -768,7 +771,7 @@ export default function TestSDKPage() {
           Returns the Account that is currently connected to the dApp.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getAccount())}
+          onClick={() => neoline && executeTest(testId, () => neoline.getAccount())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -810,7 +813,7 @@ export default function TestSDKPage() {
           Returns the networks available and the default network the wallet is currently set to.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getNetworks())}
+          onClick={() => neoline && executeTest(testId, () => neoline.getNetworks())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',
@@ -852,7 +855,7 @@ export default function TestSDKPage() {
           Returns the public key of the Account that is currently connected to the dApp.
         </p>
         <button
-          onClick={() => executeTest(testId, () => neoline?.getPublicKey())}
+          onClick={() => neoline && executeTest(testId, () => neoline.getPublicKey())}
           disabled={!neoline || loading[testId]}
           style={{
             padding: '8px 16px',

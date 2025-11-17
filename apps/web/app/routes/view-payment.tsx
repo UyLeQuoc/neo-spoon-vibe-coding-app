@@ -1,14 +1,12 @@
-import { json, type MetaFunction } from '@remix-run/cloudflare'
-import { ClientOnly } from 'remix-utils/client-only'
+import type { MetaFunction } from 'react-router'
 import { Header } from '~/components/header/Header'
-import { ViewPaymentContent } from '~/components/payment/ViewPaymentContent.client'
+import { ViewPaymentContent } from '~/components/payment/ViewPaymentContent'
+import { ClientOnly } from '~/components/ui/ClientOnly'
 import { WalletAuthProvider } from '~/lib/providers/WalletAuthProvider'
 
 export const meta: MetaFunction = () => {
   return [{ title: 'View Payment - NeoZero' }]
 }
-
-export const loader = () => json({})
 
 export default function ViewPaymentPage() {
   return (

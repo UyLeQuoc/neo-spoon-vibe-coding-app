@@ -7,7 +7,7 @@ import { cssTransition, ToastContainer, toast } from 'react-toastify'
 import { useLocalStorage } from 'usehooks-ts'
 import { createAuthenticatedChatTransport } from '~/lib/ai-transport'
 import { useMessageParser, usePromptEnhancer, useShortcuts, useSnapScroll } from '~/lib/hooks'
-import { chatId, useChatHistory } from '~/lib/persistence'
+import { chatId, useChatHistory } from '~/lib/persistence/useChatHistory'
 import { chatStore } from '~/lib/stores/chat'
 import { walletAuthStore } from '~/lib/stores/wallet-auth.store'
 import { workbenchStore } from '~/lib/stores/workbench'
@@ -380,3 +380,5 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
     />
   )
 })
+
+export default Chat

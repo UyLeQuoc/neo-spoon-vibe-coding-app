@@ -1,4 +1,4 @@
-import { fs, path, initializeZenFS } from '~/lib/zenfs'
+import { fs, initializeZenFS, path } from '~/lib/zenfs'
 import { WORK_DIR } from '~/utils/constants'
 import { extractSiteId } from './extractSiteId'
 import { getContentType } from './getContentType'

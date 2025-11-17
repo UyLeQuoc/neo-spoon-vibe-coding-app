@@ -1,5 +1,5 @@
 import { getEncoding } from 'istextorbinary'
-import { map, type MapStore } from 'nanostores'
+import { type MapStore, map } from 'nanostores'
 import { fs, initializeZenFS, path } from '~/lib/zenfs'
 import { WORK_DIR } from '~/utils/constants'
 import { computeFileModifications, type FileModifications } from '~/utils/diff'
@@ -52,7 +52,8 @@ export class FilesStore {
       import.meta.hot.data.modifiedFiles = this.#modifiedFiles
     }
 
-    this.#init()
+    // Initialize ZenFS only in browser environment
+    if (typeof window !== 'undefined') void this.#init()
   }
 
   getFile(filePath: string) {

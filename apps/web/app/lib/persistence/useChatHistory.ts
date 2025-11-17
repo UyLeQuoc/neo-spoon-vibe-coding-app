@@ -1,7 +1,7 @@
-import { useLoaderData, useNavigate } from '@remix-run/react'
-import type { Message } from 'ai'
+import type { UIMessage } from 'ai'
 import { atom } from 'nanostores'
 import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { toast } from 'react-toastify'
 import { workbenchStore } from '~/lib/stores/workbench'
 import { getMessages, getNextId, getUrlId, openDatabase, setMessages } from './db'
@@ -10,40 +10,32 @@ export interface ChatHistoryItem {
   id: string
   urlId?: string
   description?: string
-  messages: Message[]
+  messages: UIMessage[]
   timestamp: string
 }
 
-const persistenceEnabled = !import.meta.env.VITE_DISABLE_PERSISTENCE
-
-export const db = persistenceEnabled ? await openDatabase() : undefined
+// export const db = persistenceEnabled ? await openDatabase() : undefined
 
 export const chatId = atom<string | undefined>(undefined)
 export const description = atom<string | undefined>(undefined)
 
 export function useChatHistory() {
   const navigate = useNavigate()
-  const { id: mixedId } = useLoaderData<{ id?: string }>()
+  const location = useLocation()
 
-  const [initialMessages, setInitialMessages] = useState<Message[]>([])
+  // Extract id from path /chat/{id}
+  const pathMatch = location.pathname.match(/^\/chat\/(.+)$/)
+  const mixedId = pathMatch ? pathMatch[1] : undefined
+
+  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([])
   const [ready, setReady] = useState<boolean>(false)
   const [urlId, setUrlId] = useState<string | undefined>()
 
   useEffect(() => {
-    if (!db) {
-      setReady(true)
-
-      if (persistenceEnabled) {
-        toast.error(`Chat persistence is unavailable`)
-      }
-
-      return
-    }
-
+    console.log('[useChatHistory] 🪲🪲🪲 mixedId', mixedId)
     if (mixedId) {
       //if mixedid starts with github.com, get project and add workbench artifacts
       if (mixedId.startsWith('github.com')) {
-        console.log('mixedId', mixedId)
         const url = new URL(`https://${mixedId}`)
         const path = url.pathname.split('/')
         const owner = path[1]
@@ -53,7 +45,7 @@ export function useChatHistory() {
           setInitialMessages([
             {
               id: '1',
-              content: 'I see you have a project from GitHub. How can I help you?',
+              parts: [{ type: 'text', text: 'I see you have a project from GitHub. How can I help you?' }],
               role: 'assistant'
             }
           ])
@@ -63,22 +55,26 @@ export function useChatHistory() {
           setReady(true)
         })
       } else {
-        getMessages(db, mixedId)
-          .then(storedMessages => {
-            if (storedMessages && storedMessages.messages.length > 0) {
-              setInitialMessages(storedMessages.messages)
-              setUrlId(storedMessages.urlId)
-              description.set(storedMessages.description)
-              chatId.set(storedMessages.id)
-            } else {
-              navigate(`/`, { replace: true })
-            }
+        openDatabase().then(db => {
+          if (!db) return
 
-            setReady(true)
-          })
-          .catch(error => {
-            toast.error(error.message)
-          })
+          getMessages(db, mixedId)
+            .then(storedMessages => {
+              if (storedMessages && storedMessages.messages.length > 0) {
+                setInitialMessages(storedMessages.messages)
+                setUrlId(storedMessages.urlId)
+                description.set(storedMessages.description)
+                chatId.set(storedMessages.id)
+              } else {
+                navigate(`/`, { replace: true })
+              }
+
+              setReady(true)
+            })
+            .catch(error => {
+              toast.error(error.message)
+            })
+        })
       }
     }
   }, [mixedId, navigate])
@@ -86,10 +82,9 @@ export function useChatHistory() {
   return {
     ready: !mixedId || ready,
     initialMessages,
-    storeMessageHistory: async (messages: Message[]) => {
-      if (!db || messages.length === 0) {
-        return
-      }
+    storeMessageHistory: async (messages: UIMessage[]) => {
+      const db = await openDatabase()
+      if (!db || messages.length === 0) return
 
       const { firstArtifact } = workbenchStore
 

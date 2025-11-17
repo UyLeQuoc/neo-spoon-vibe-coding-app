@@ -1,26 +1,21 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
 import { useStore } from '@nanostores/react'
-import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import type { NeoLineN3 } from '~/lib/neolineN3TS'
+import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import {
-  testNeoFSStore,
-  setCurrentStep,
-  setLoading,
-  setStepResult,
-  setStepError,
   clearStepError,
-  setContainerName,
-  setPlacementPolicy,
   setBasicAcl,
+  setContainerId,
+  setContainerName,
+  setCurrentStep,
   setFile,
   setFileName,
-  setContainerId,
-  setObjectId
+  setLoading,
+  setObjectId,
+  setPlacementPolicy,
+  setStepError,
+  setStepResult,
+  testNeoFSStore
 } from '~/lib/stores/test-neofs.store'
-
-export const meta: MetaFunction = () => {
-  return [{ title: 'NeoFS Test Page - Step by Step Flow' }]
-}
 
 // ============================================================================
 // NeoFS Client Functions (merged from client.ts)
@@ -153,7 +148,7 @@ async function neofsRequest<T>(endpoint: string, options: RequestInit = {}, bear
   }
 
   if (bearerToken) {
-    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>).Authorization = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, {
@@ -274,7 +269,7 @@ async function uploadFileToNeoFS(
       headerRecord['X-Bearer-Signature-Key'] = signatureKey
     } else if (bearerToken) {
       const headerRecord = headers as Record<string, string>
-      headerRecord['Authorization'] = bearerToken.startsWith('Bearer ') ? bearerToken : `Bearer ${bearerToken}`
+      headerRecord.Authorization = bearerToken.startsWith('Bearer ') ? bearerToken : `Bearer ${bearerToken}`
     }
 
     const fileAttributes: Record<string, string> = {
@@ -365,8 +360,8 @@ async function listFilesInContainer(
 
     return result.objects.map(obj => {
       const attributes = obj.attributes as Record<string, string>
-      const fileName = attributes.FileName || attributes['FileName'] || 'unnamed'
-      const timestamp = attributes.Timestamp || attributes['Timestamp'] || Date.now().toString()
+      const fileName = attributes.FileName || attributes.FileName || 'unnamed'
+      const timestamp = attributes.Timestamp || attributes.Timestamp || Date.now().toString()
       const contentLength = attributes['Content-Length'] || attributes['Content-Length'] || '0'
 
       return {
@@ -406,7 +401,7 @@ async function getObject(
 
   const headers: HeadersInit = {}
   if (bearerToken) {
-    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>).Authorization = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, { headers })
@@ -423,7 +418,7 @@ async function getObjectHead(containerId: string, objectId: string, bearerToken?
 
   const headers: HeadersInit = {}
   if (bearerToken) {
-    ;(headers as Record<string, string>)['Authorization'] = `Bearer ${bearerToken}`
+    ;(headers as Record<string, string>).Authorization = `Bearer ${bearerToken}`
   }
 
   const response = await fetch(url, {
@@ -603,29 +598,6 @@ async function createAndSignContainerBearerToken(
   }
   console.log('⚡️ result', result)
   return result
-}
-
-async function createAndSignObjectBearerToken(
-  neoline: any,
-  ownerId: string,
-  containerId?: string,
-  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = [
-    'GET',
-    'HEAD',
-    'PUT',
-    'DELETE',
-    'SEARCH'
-  ],
-  lifetime: number = 100
-): Promise<{ token: string; signature: string; signatureKey: string }> {
-  const objectTokenDef = createObjectBearerTokenDefinition(containerId, operations, true)
-  const result = await createAndSignBearerToken(neoline, ownerId, [objectTokenDef], lifetime, false, 'object')
-
-  return {
-    token: result.token,
-    signature: result.signature,
-    signatureKey: result.signatureKey
-  }
 }
 
 async function uploadFileToNeoFSViaNeoLine(

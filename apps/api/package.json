@@ -31,9 +31,9 @@
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
     "@types/node": "catalog:",
-    "@vitest/ui": "^3.2.4",
+    "@vitest/ui": "^4.0.9",
     "drizzle-kit": "^0.31.7",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.9",
     "wrangler": "catalog:"
   }
 }

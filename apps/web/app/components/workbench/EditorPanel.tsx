@@ -1,6 +1,6 @@
 import { useStore } from '@nanostores/react'
 import * as ScrollArea from '@radix-ui/react-scroll-area'
-import React, { memo, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import {
   CodeMirrorEditor,
@@ -10,11 +10,11 @@ import {
   type OnSaveCallback as OnEditorSave,
   type OnScrollCallback as OnEditorScroll
 } from '~/components/editor/codemirror/CodeMirrorEditor'
+import { ClientOnly } from '~/components/ui/ClientOnly'
 import { PanelHeader } from '~/components/ui/PanelHeader'
 import { PanelHeaderButton } from '~/components/ui/PanelHeaderButton'
 import type { FileMap } from '~/lib/stores/files'
 import { themeStore } from '~/lib/stores/theme'
-import { classNames } from '~/utils/classNames'
 import { WORK_DIR } from '~/utils/constants'
 import { renderLogger } from '~/utils/logger'
 import { isMobile } from '~/utils/mobile'
@@ -123,16 +123,26 @@ export const EditorPanel = memo(
             )}
           </PanelHeader>
           <div className="h-full flex-1 overflow-hidden">
-            <CodeMirrorEditor
-              theme={theme}
-              editable={!isStreaming && editorDocument !== undefined}
-              settings={editorSettings}
-              doc={editorDocument}
-              autoFocusOnDocumentChange={!isMobile()}
-              onScroll={onEditorScroll}
-              onChange={onEditorChange}
-              onSave={onFileSave}
-            />
+            <ClientOnly
+              fallback={
+                <div className="h-full flex items-center justify-center text-neozero-elements-text-secondary">
+                  Loading editor...
+                </div>
+              }
+            >
+              {() => (
+                <CodeMirrorEditor
+                  theme={theme}
+                  editable={!isStreaming && editorDocument !== undefined}
+                  settings={editorSettings}
+                  doc={editorDocument}
+                  autoFocusOnDocumentChange={!isMobile()}
+                  onScroll={onEditorScroll}
+                  onChange={onEditorChange}
+                  onSave={onFileSave}
+                />
+              )}
+            </ClientOnly>
           </div>
         </Panel>
       </PanelGroup>

@@ -1,14 +1,18 @@
 import * as Select from '@radix-ui/react-select'
 import { SelectPortal } from '@radix-ui/react-select'
-import { useLoaderData } from '@remix-run/react'
 import { memo, useEffect, useState } from 'react'
+import { useResolvedPath } from 'react-router'
 import { toast } from 'react-toastify'
 import { useLocalStorage } from 'usehooks-ts'
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog'
 import { deployTo, getDeployer, getDeployers } from '~/utils/deployOptions'
 
 export const DeployButton = memo(() => {
-  const { id: mixedId } = useLoaderData<{ id?: string }>()
+  const resolvedPath = useResolvedPath('.')
+
+  // Extract id from path /chat/{id}
+  const pathMatch = resolvedPath.pathname.match(/^\/chat\/(.+)$/)
+  const mixedId = pathMatch ? pathMatch[1] : undefined
 
   const [isModalOpen, setModalOpen] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<string>('github')

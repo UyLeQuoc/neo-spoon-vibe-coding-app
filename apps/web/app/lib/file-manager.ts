@@ -1,12 +1,12 @@
 import { configure, fs } from '@zenfs/core'
 import * as path from '@zenfs/core/path'
-import { IndexedDB } from '@zenfs/dom'
 
 export class ZenFsFileManager {
   constructor(protected workspaceDir = '/workspace') {}
 
   async mount(): Promise<void> {
     console.log('⚡️ Mounting workspace at', this.workspaceDir)
+    const { IndexedDB } = await import('@zenfs/dom')
     await configure({ mounts: { [this.workspaceDir]: { backend: IndexedDB } } })
     console.log('✅ Filesystem configured')
   }

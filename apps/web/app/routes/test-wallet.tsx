@@ -1,5 +1,5 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
 import { useState } from 'react'
+import type { MetaFunction } from 'react-router'
 import { VibeCodingAppPaymentContract } from '~/contracts/vibecodingapppaymentcontract'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 

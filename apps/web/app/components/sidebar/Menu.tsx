@@ -5,7 +5,8 @@ import { SettingsDialog } from '~/components/settings/SettingsDialog'
 import { Dialog, DialogButton, DialogDescription, DialogRoot, DialogTitle } from '~/components/ui/Dialog'
 import { SettingsButton } from '~/components/ui/SettingsButton'
 import { ThemeSwitch } from '~/components/ui/ThemeSwitch'
-import { type ChatHistoryItem, chatId, db, deleteById, getAll } from '~/lib/persistence'
+import { deleteById, getAll, openDatabase } from '~/lib/persistence/db'
+import { type ChatHistoryItem, chatId } from '~/lib/persistence/useChatHistory'
 import { cubicEasingFn } from '~/utils/easings'
 import { logger } from '~/utils/logger'
 import { binDates } from './date-binning'
@@ -42,41 +43,42 @@ export function Menu() {
 
   const [settingsOpen, setSettingsOpen] = useState(false)
 
-  const loadEntries = useCallback(() => {
-    if (db) {
-      getAll(db)
-        .then(list => list.filter(item => item.urlId && item.description))
-        .then(setList)
-        .catch(error => toast.error(error.message))
-    }
+  const loadEntries = useCallback(async () => {
+    const db = await openDatabase()
+    if (!db) return
+
+    return getAll(db)
+      .then(list => list.filter(item => item.urlId && item.description))
+      .then(setList)
+      .catch(error => toast.error(error.message))
   }, [])
 
   const deleteItem = useCallback(
-    (event: React.UIEvent, item: ChatHistoryItem) => {
+    async (event: React.UIEvent, item: ChatHistoryItem) => {
       event.preventDefault()
 
-      if (db) {
-        deleteById(db, item.id)
-          .then(() => {
-            loadEntries()
+      const db = await openDatabase()
+      if (!db) return
+      try {
+        await deleteById(db, item.id)
 
-            if (chatId.get() === item.id) {
-              // hard page navigation to clear the stores
-              window.location.pathname = '/'
-            }
-          })
-          .catch(error => {
-            toast.error('Failed to delete conversation')
-            logger.error(error)
-          })
+        await loadEntries()
+
+        if (chatId.get() === item.id) {
+          // hard page navigation to clear the stores
+          window.location.pathname = '/'
+        }
+      } catch (error) {
+        toast.error('Failed to delete conversation')
+        logger.error(error)
       }
     },
     [loadEntries]
   )
 
-  const closeDialog = () => {
+  const closeDialog = useCallback(() => {
     setDialogContent(null)
-  }
+  }, [])
 
   useEffect(() => {
     if (open) {

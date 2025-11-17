@@ -44,8 +44,7 @@ export function useSitePreviewServiceWorker({
           setIsLoading(false)
         }, timeout)
 
-        if (!('serviceWorker' in navigator))
-          throw new Error('Service Workers not supported')
+        if (!('serviceWorker' in navigator)) throw new Error('Service Workers not supported')
 
         const sw = navigator.serviceWorker
 

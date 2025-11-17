@@ -4,11 +4,6 @@ import { type DomainProperties, getProperties } from '~/lib/neons/rpc'
 
 export type { DomainProperties }
 
-interface PropertiesResponse {
-  properties: DomainProperties | null
-  error?: string
-}
-
 export function usePropertiesQuery(domain: string | null) {
   return useQuery({
     queryKey: queryKeys.neons.properties(domain ?? ''),
