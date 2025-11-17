@@ -1,6 +1,5 @@
-import * as nodePath from 'node:path'
 import { atom, type MapStore, map } from 'nanostores'
-import { fs, initializeZenFS } from '~/lib/zenfs'
+import { fs, path as nodePath, initializeZenFS } from '~/lib/zenfs'
 import { workbenchStore } from '~/lib/stores/workbench'
 import type { BoltAction } from '~/types/actions'
 import { createScopedLogger } from '~/utils/logger'

@@ -1,9 +1,9 @@
-'use client'
+
 
 import { useStore } from '@nanostores/react'
-import { useNavigate } from '@remix-run/react'
+import { useNavigate } from 'react-router'
 import { useCallback, useEffect, useState } from 'react'
-import { SignInDialog } from '~/components/auth/SignInDialog.client'
+import { SignInDialog } from '~/components/auth/SignInDialog'
 import { hClientWithAuth } from '~/lib/hono-authenticated-client'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import { useWalletAuth } from '~/lib/providers/WalletAuthProvider'
@@ -176,9 +176,7 @@ export function WalletButton() {
                             {formatAddress(account)}
                           </div>
                           {isWalletAuthenticated && balancePoints !== null && (
-                            <div className="text-green-500 font-medium mt-0.5">
-                              {balancePoints.toFixed(2)} Points
-                            </div>
+                            <div className="text-green-500 font-medium mt-0.5">{balancePoints.toFixed(2)} Points</div>
                           )}
                         </div>
                       </div>

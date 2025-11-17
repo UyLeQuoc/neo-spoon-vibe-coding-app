@@ -1,4 +1,3 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
 import { useStore } from '@nanostores/react'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
 import type { NeoLineN3 } from '~/lib/neolineN3TS'
@@ -17,10 +16,6 @@ import {
   setContainerId,
   setObjectId
 } from '~/lib/stores/test-neofs.store'
-
-export const meta: MetaFunction = () => {
-  return [{ title: 'NeoFS Test Page - Step by Step Flow' }]
-}
 
 // ============================================================================
 // NeoFS Client Functions (merged from client.ts)
@@ -603,29 +598,6 @@ async function createAndSignContainerBearerToken(
   }
   console.log('⚡️ result', result)
   return result
-}
-
-async function createAndSignObjectBearerToken(
-  neoline: any,
-  ownerId: string,
-  containerId?: string,
-  operations: Array<'GET' | 'HEAD' | 'PUT' | 'DELETE' | 'SEARCH' | 'RANGE' | 'RANGEHASH'> = [
-    'GET',
-    'HEAD',
-    'PUT',
-    'DELETE',
-    'SEARCH'
-  ],
-  lifetime: number = 100
-): Promise<{ token: string; signature: string; signatureKey: string }> {
-  const objectTokenDef = createObjectBearerTokenDefinition(containerId, operations, true)
-  const result = await createAndSignBearerToken(neoline, ownerId, [objectTokenDef], lifetime, false, 'object')
-
-  return {
-    token: result.token,
-    signature: result.signature,
-    signatureKey: result.signatureKey
-  }
 }
 
 async function uploadFileToNeoFSViaNeoLine(

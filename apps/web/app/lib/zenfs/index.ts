@@ -1,7 +1,5 @@
 import { configure, fs } from '@zenfs/core'
 import * as path from '@zenfs/core/path'
-import { IndexedDB } from '@zenfs/dom'
-import { WORK_DIR } from '~/utils/constants'
 
 interface ZenFSContext {
   initialized: boolean
@@ -16,14 +14,8 @@ export async function initializeZenFS(): Promise<void> {
   if (zenfsInitialized) return zenfsInitialized
 
   zenfsInitialized = Promise.resolve().then(async () => {
+    const { IndexedDB } = await import('@zenfs/dom')
     await configure({ mounts: { '/': { backend: IndexedDB } } })
-
-    // Ensure work directory exists
-    try {
-      await fs.promises.mkdir(WORK_DIR, { recursive: true })
-    } catch {
-      // Directory might already exist, ignore
-    }
 
     zenfsContext.initialized = true
   })

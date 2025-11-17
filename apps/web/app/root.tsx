@@ -1,19 +1,18 @@
-import type { LinksFunction } from '@remix-run/cloudflare'
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react'
+import type { LinksFunction } from 'react-router'
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url'
 import xtermStyles from '@xterm/xterm/css/xterm.css?url'
 import { useEffect, useId } from 'react'
 import { ToastContainer } from 'react-toastify'
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url'
 import { createHead } from 'remix-island'
-import { ClientOnly } from 'remix-utils/client-only'
-import { FloatingIcons } from './components/FloatingIcons.client'
+import { FloatingIcons } from './components/FloatingIcons'
 import { QueryProvider } from './lib/providers/QueryProvider'
 import globalStyles from './styles/index.scss?url'
 import { stripIndents } from './utils/stripIndent'
-
-import 'virtual:uno.css'
 import { cn } from './lib/utils'
+import { themeStore } from './lib/stores/theme'
+import 'virtual:uno.css'
 
 export const links: LinksFunction = () => [
   {
@@ -75,7 +74,7 @@ function GridPattern({
   height = 40,
   x = -1,
   y = -1,
-  strokeDasharray = "0",
+  strokeDasharray = '0',
   squares,
   className,
   ...props
@@ -86,25 +85,14 @@ function GridPattern({
     <svg
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30",
+        'pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30',
         className
       )}
       {...props}
     >
       <defs>
-        <pattern
-          id={id}
-          width={width}
-          height={height}
-          patternUnits="userSpaceOnUse"
-          x={x}
-          y={y}
-        >
-          <path
-            d={`M.5 ${height}V.5H${width}`}
-            fill="none"
-            strokeDasharray={strokeDasharray}
-          />
+        <pattern id={id} width={width} height={height} patternUnits="userSpaceOnUse" x={x} y={y}>
+          <path d={`M.5 ${height}V.5H${width}`} fill="none" strokeDasharray={strokeDasharray} />
         </pattern>
       </defs>
       <rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
@@ -132,39 +120,40 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <>
-      {children}
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      <ScrollRestoration />
-      <Scripts />
-    </>
+    <html lang="en" data-theme={themeStore.value}>
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {children}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
   )
 }
 
 export default function App() {
   return (
     <QueryProvider>
-      
-      <div className='w-screen h-screen overflow-hidden relative'>
-        <GridPattern
-         className='opacity-30'
-          width={40}
-          height={40}
-          x={0}
-          y={0}
-        />
-        <ClientOnly>{() => <FloatingIcons />}</ClientOnly>
+      <div className="w-screen h-screen overflow-hidden relative">
+        <GridPattern className="opacity-30" width={40} height={40} x={0} y={0} />
+        <FloatingIcons />
         <Outlet />
       </div>
     </QueryProvider>

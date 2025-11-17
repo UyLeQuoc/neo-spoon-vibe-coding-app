@@ -1,10 +1,9 @@
-import nodePath from 'node:path'
 import JSZip from 'jszip'
 import { atom, type MapStore, map, type ReadableAtom, type WritableAtom } from 'nanostores'
 import type { EditorDocument, ScrollPosition } from '~/components/editor/codemirror/CodeMirrorEditor'
 import { ActionRunner } from '~/lib/runtime/action-runner'
 import type { ActionCallbackData, ArtifactCallbackData } from '~/lib/runtime/message-parser'
-import { fs, initializeZenFS } from '~/lib/zenfs'
+import { fs, path as nodePath, initializeZenFS } from '~/lib/zenfs'
 import { importFromGitHub } from '~/utils/import'
 import { unreachable } from '~/utils/unreachable'
 import { EditorStore } from './editor'
@@ -134,7 +133,6 @@ export class WorkbenchStore {
     }
     this.showWorkbench.set(true)
   }
-
 
   get files() {
     return this.#filesStore.files
@@ -344,11 +342,3 @@ export class WorkbenchStore {
 }
 
 export const workbenchStore = new WorkbenchStore()
-
-declare global {
-  interface Window {
-    workbenchStore: WorkbenchStore
-  }
-}
-// Debugging
-window.workbenchStore = workbenchStore

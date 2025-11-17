@@ -1,6 +1,6 @@
 import * as Select from '@radix-ui/react-select'
 import { SelectPortal } from '@radix-ui/react-select'
-import { useLoaderData } from '@remix-run/react'
+import { useLoaderData } from 'react-router'
 import { memo, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import { useLocalStorage } from 'usehooks-ts'

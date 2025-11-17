@@ -4,13 +4,61 @@ import type { ChatHistoryItem } from './useChatHistory'
 
 const logger = createScopedLogger('ChatHistory')
 
+// Singleton database instance
+let dbInstance: IDBDatabase | undefined
+let dbPromise: Promise<IDBDatabase | undefined> | undefined
+const LOCK_NAME = 'boltHistory-db-init'
+
+// Check if we're in a browser environment (not SSR)
+function isBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof indexedDB !== 'undefined'
+}
+
 // this is used at the top level and never rejects
 export async function openDatabase(): Promise<IDBDatabase | undefined> {
+  // Return undefined immediately in SSR mode
+  if (!isBrowser()) return undefined
+
+  // If database is already initialized, return it immediately
+  if (dbInstance) return dbInstance
+
+  // If initialization is in progress, wait for it
+  if (dbPromise) return dbPromise
+
+  // Use navigator.locks to ensure thread-safe initialization
+  dbPromise = (async () => {
+    // Check if navigator.locks is available (may not be in all environments)
+    if (typeof navigator !== 'undefined' && navigator.locks) {
+      return navigator.locks.request(LOCK_NAME, async _lock => {
+        // Double-check pattern: another call might have initialized it while waiting for the lock
+        if (dbInstance) {
+          return dbInstance
+        }
+
+        // Initialize the database
+        return await initializeDatabase()
+      })
+    } else {
+      // Fallback if locks are not available
+      return await initializeDatabase()
+    }
+  })()
+
+  return dbPromise
+}
+
+function initializeDatabase(): Promise<IDBDatabase | undefined> {
   return new Promise(resolve => {
+    // Double-check browser environment before accessing indexedDB
+    if (!isBrowser() || typeof indexedDB === 'undefined') {
+      resolve(undefined)
+      return
+    }
+
     const request = indexedDB.open('boltHistory', 1)
 
-    request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-      const db = (event.target as IDBOpenDBRequest).result
+    request.onupgradeneeded = e => {
+      const db = (e.target as IDBOpenDBRequest).result
 
       if (!db.objectStoreNames.contains('chats')) {
         const store = db.createObjectStore('chats', { keyPath: 'id' })
@@ -19,13 +67,16 @@ export async function openDatabase(): Promise<IDBDatabase | undefined> {
       }
     }
 
-    request.onsuccess = (event: Event) => {
-      resolve((event.target as IDBOpenDBRequest).result)
+    request.onsuccess = e => {
+      dbInstance = (e.target as IDBOpenDBRequest).result
+      resolve(dbInstance)
     }
 
-    request.onerror = (event: Event) => {
+    request.onerror = e => {
+      logger.error((e.target as IDBOpenDBRequest).error)
+      dbInstance = undefined
+      dbPromise = undefined
       resolve(undefined)
-      logger.error((event.target as IDBOpenDBRequest).error)
     }
   })
 }

@@ -13,7 +13,7 @@ export const DEFAULT_THEME = 'light'
 export const themeStore = atom<Theme>(initStore())
 
 function initStore() {
-  return 'light'
+  return 'light' as Theme
 }
 
 export function toggleTheme() {

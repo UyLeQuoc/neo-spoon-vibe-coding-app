@@ -1,6 +1,6 @@
 import { RequestError } from '@octokit/request-error'
 import { Octokit } from '@octokit/rest'
-import { db, getMessages } from '~/lib/persistence'
+import { getMessages, openDatabase } from '~/lib/persistence/db'
 import { workbenchStore } from '~/lib/stores/workbench'
 
 export type DeployStatus = 'success' | 'error'
@@ -471,6 +471,7 @@ export const deployTo = async (
 
 const generateReadme = async (mixedId: string) => {
   if (!mixedId) return
+  const db = await openDatabase()
   if (!db) return
   const storedMessages = await getMessages(db, mixedId)
   let readmeContent = `This is a [NeoZero Extended](https://github.com/FurkannM/neozero.new-extended) project deployed to GitHub. 🚀 \n\n`

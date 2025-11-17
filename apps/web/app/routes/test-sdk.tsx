@@ -1,11 +1,6 @@
-import type { MetaFunction } from '@remix-run/cloudflare'
 import { useState } from 'react'
 import type { Argument } from '~/lib/neolineN3TS'
 import { useNeoLineN3 } from '~/lib/neolineN3TS'
-
-export const meta: MetaFunction = () => {
-  return [{ title: 'NeoLine N3 SDK Playground - Test All Features' }]
-}
 
 interface TestResult {
   success: boolean

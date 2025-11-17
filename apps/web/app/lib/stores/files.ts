@@ -52,7 +52,8 @@ export class FilesStore {
       import.meta.hot.data.modifiedFiles = this.#modifiedFiles
     }
 
-    this.#init()
+    // Initialize ZenFS only in browser environment
+    if (typeof window !== 'undefined') void this.#init()
   }
 
   getFile(filePath: string) {

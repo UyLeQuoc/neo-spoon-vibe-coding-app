@@ -1,6 +1,6 @@
 import { NeonInvoker } from '@cityofzion/neon-dappkit'
 import WcSdk from '@cityofzion/wallet-connect-sdk-core'
-import type { MetaFunction } from '@remix-run/cloudflare'
+import type { MetaFunction } from 'react-router'
 import { useEffect, useState } from 'react'
 import { NeoToken } from '~/contracts/neotoken'
 

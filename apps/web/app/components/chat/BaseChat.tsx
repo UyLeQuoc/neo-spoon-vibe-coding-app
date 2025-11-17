@@ -1,23 +1,22 @@
-import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
-import { DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
-import { Label } from '@radix-ui/react-label'
-import * as Select from '@radix-ui/react-select'
+// import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
+// import { DropdownMenuSeparator } from '@radix-ui/react-dropdown-menu'
+// import { Label } from '@radix-ui/react-label'
+// import * as Select from '@radix-ui/react-select'
 import type { UIMessage } from 'ai'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { type RefCallback } from 'react'
-import { ClientOnly } from 'remix-utils/client-only'
-import { Menu } from '~/components/sidebar/Menu.client'
-import { SubMenu } from '~/components/sidebar/SubMenu.client'
+import { Menu } from '~/components/sidebar/Menu'
+import { SubMenu } from '~/components/sidebar/SubMenu'
 import { IconButton } from '~/components/ui/IconButton'
 import { PopoverHover } from '~/components/ui/PopoverHover'
-import { Workbench } from '~/components/workbench/Workbench.client'
-import { useModelsQuery } from '~/hooks/queries/models.query'
+import { Workbench } from '~/components/workbench/Workbench'
+// import { useModelsQuery } from '~/hooks/queries/models.query'
 import { classNames } from '~/utils/classNames'
-import { debounce } from '~/utils/debounce'
-import type { ModelConfig, ModelInfo } from '~/utils/modelConstants'
+// import { debounce } from '~/utils/debounce'
+import type { ModelConfig } from '~/utils/modelConstants'
 import styles from './BaseChat.module.scss'
-import { Messages } from './Messages.client'
-import { SendButton } from './SendButton.client'
+import { Messages } from './Messages'
+import { SendButton } from './SendButton'
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined
@@ -57,245 +56,245 @@ const EXAMPLE_PROMPTS = [
   { text: 'Build a todo app in React using Tailwind' },
   { text: 'Create a simple landing page for a SaaS product' },
   { text: 'Create a simple portfolio website' },
-  { text: 'Create a simple blog website' },
+  { text: 'Create a simple blog website' }
 ]
 
 const TEXTAREA_MIN_HEIGHT = 76
 
-interface ModelSelectProps {
-  chatStarted: boolean
-  model?: string
-  provider?: string
-  setProviderModel?: (provider: string, model: string) => void
-}
-const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) => {
-  const [search, setSearch] = React.useState('')
-  const [debouncedSearch, setDebouncedSearch] = React.useState('')
+// interface ModelSelectProps {
+//   chatStarted: boolean
+//   model?: string
+//   provider?: string
+//   setProviderModel?: (provider: string, model: string) => void
+// }
+// const ModelSelect = ({ model, provider, setProviderModel }: ModelSelectProps) => {
+//   const [search, setSearch] = React.useState('')
+//   const [debouncedSearch, setDebouncedSearch] = React.useState('')
 
-  const debouncedSetSearch = React.useCallback(
-    debounce((searchTerm: string) => {
-      setDebouncedSearch(searchTerm)
-    }, 300),
-    []
-  )
+//   const debouncedSetSearch = React.useCallback(
+//     debounce((searchTerm: string) => {
+//       setDebouncedSearch(searchTerm)
+//     }, 300),
+//     []
+//   )
 
-  React.useEffect(() => {
-    debouncedSetSearch(search)
-  }, [search, debouncedSetSearch])
+//   React.useEffect(() => {
+//     debouncedSetSearch(search)
+//   }, [search, debouncedSetSearch])
 
-  const { data: filteredModels = [], isLoading } = useModelsQuery(debouncedSearch)
+//   const { data: filteredModels = [], isLoading } = useModelsQuery(debouncedSearch)
 
-  const providers = Array.from(new Set(filteredModels.map((model: any) => model.provider)))
-  const currentModel: ModelInfo | undefined = filteredModels.find(
-    (m: any) => m.name === model && m.provider === provider
-  )
+//   const providers = Array.from(new Set(filteredModels.map((model: any) => model.provider)))
+//   const currentModel: ModelInfo | undefined = filteredModels.find(
+//     (m: any) => m.name === model && m.provider === provider
+//   )
 
-  return (
-    <Select.Root
-      value={model ? `${provider}-${model}` : undefined}
-      onValueChange={value => {
-        const [provider, ...rest] = value.split('-')
-        const model = rest.join('-')
-        setProviderModel?.(provider, model)
-      }}
-    >
-      <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-transparent hover:bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary">
-        <Select.Value>
-          {isLoading && (
-            <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
-          )}
-          {!isLoading && currentModel && (
-            <div className="flex items-center gap-1">
-              <div className="i-ph:gear text-sm" />
-              <span className="truncate">
-                {currentModel.label} (In: ${currentModel.inputPrice}, Out: ${currentModel.outputPrice})
-              </span>
-            </div>
-          )}
-          {!isLoading && !currentModel && <span>Select model</span>}
-        </Select.Value>
-        <div className="i-ph:caret-down text-sm opacity-50" />
-      </Select.Trigger>
-      <Select.Portal>
-        <Select.Content
-          position={'popper'}
-          side={'top'}
-          sideOffset={5}
-          className="overflow-hidden bg-neozero-elements-background-depth-1 rounded-md border border-neozero-elements-borderColor shadow-md z-50 w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
-        >
-          <div className="p-2 border-b border-neozero-elements-borderColor" onClick={e => e.stopPropagation()}>
-            <div className="relative">
-              <input
-                className="w-full px-2 py-1 text-sm bg-neozero-elements-background-depth-2 rounded border border-neozero-elements-borderColor focus:outline-none"
-                placeholder="Search models..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                onKeyDown={e => e.stopPropagation()}
-              />
-              {isLoading && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
-                </div>
-              )}
-            </div>
-          </div>
-          <Select.ScrollUpButton />
-          <Select.Viewport className="p-2">
-            {providers.map(providerName => {
-              const providerModels = filteredModels.filter((model: any) => model.provider === providerName)
+//   return (
+//     <Select.Root
+//       value={model ? `${provider}-${model}` : undefined}
+//       onValueChange={value => {
+//         const [provider, ...rest] = value.split('-')
+//         const model = rest.join('-')
+//         setProviderModel?.(provider, model)
+//       }}
+//     >
+//       <Select.Trigger className="inline-flex items-center justify-center gap-1 px-2 py-1 text-sm rounded bg-transparent hover:bg-neozero-elements-background-depth-1 text-neozero-elements-textPrimary">
+//         <Select.Value>
+//           {isLoading && (
+//             <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
+//           )}
+//           {!isLoading && currentModel && (
+//             <div className="flex items-center gap-1">
+//               <div className="i-ph:gear text-sm" />
+//               <span className="truncate">
+//                 {currentModel.label} (In: ${currentModel.inputPrice}, Out: ${currentModel.outputPrice})
+//               </span>
+//             </div>
+//           )}
+//           {!isLoading && !currentModel && <span>Select model</span>}
+//         </Select.Value>
+//         <div className="i-ph:caret-down text-sm opacity-50" />
+//       </Select.Trigger>
+//       <Select.Portal>
+//         <Select.Content
+//           position={'popper'}
+//           side={'top'}
+//           sideOffset={5}
+//           className="overflow-hidden bg-neozero-elements-background-depth-1 rounded-md border border-neozero-elements-borderColor shadow-md z-50 w-[var(--radix-select-trigger-width)] min-w-[220px] max-h-50vh"
+//         >
+//           <div className="p-2 border-b border-neozero-elements-borderColor" onClick={e => e.stopPropagation()}>
+//             <div className="relative">
+//               <input
+//                 className="w-full px-2 py-1 text-sm bg-neozero-elements-background-depth-2 rounded border border-neozero-elements-borderColor focus:outline-none"
+//                 placeholder="Search models..."
+//                 value={search}
+//                 onChange={e => setSearch(e.target.value)}
+//                 onKeyDown={e => e.stopPropagation()}
+//               />
+//               {isLoading && (
+//                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
+//                   <div className="i-svg-spinners:90-ring-with-bg text-neozero-elements-loader-progress text-sm" />
+//                 </div>
+//               )}
+//             </div>
+//           </div>
+//           <Select.ScrollUpButton />
+//           <Select.Viewport className="p-2">
+//             {providers.map(providerName => {
+//               const providerModels = filteredModels.filter((model: any) => model.provider === providerName)
 
-              if (providerModels.length === 0) return null
+//               if (providerModels.length === 0) return null
 
-              return (
-                <Select.Group key={providerName}>
-                  <Select.Label className="px-6 py-2 text-xs font-medium text-neozero-elements-textTertiary">
-                    {providerName}
-                  </Select.Label>
-                  {providerModels.map((modelItem: any) => (
-                    <Select.Item
-                      key={`${modelItem.provider}-${modelItem.name}`}
-                      value={`${modelItem.provider}-${modelItem.name}`}
-                      className="relative flex items-center px-6 py-2 text-sm text-neozero-elements-textPrimary rounded select-none
-                        hover:bg-neozero-elements-item-backgroundAccent
-                        data-[disabled]:opacity-50
-                        data-[disabled]:pointer-events-none
-                        data-[highlighted]:bg-neozero-elements-item-backgroundAccent
-                        data-[highlighted]:outline-none
-                        cursor-default
-                        focus:outline-none"
-                    >
-                      <Select.ItemText>
-                        {modelItem.label} (In: ${modelItem.inputPrice}, Out: ${modelItem.outputPrice})
-                      </Select.ItemText>
-                      <Select.ItemIndicator className="absolute left-2">
-                        <div className="i-ph:check text-sm" />
-                      </Select.ItemIndicator>
-                    </Select.Item>
-                  ))}
-                </Select.Group>
-              )
-            })}
-          </Select.Viewport>
-        </Select.Content>
-      </Select.Portal>
-    </Select.Root>
-  )
-}
+//               return (
+//                 <Select.Group key={providerName}>
+//                   <Select.Label className="px-6 py-2 text-xs font-medium text-neozero-elements-textTertiary">
+//                     {providerName}
+//                   </Select.Label>
+//                   {providerModels.map((modelItem: any) => (
+//                     <Select.Item
+//                       key={`${modelItem.provider}-${modelItem.name}`}
+//                       value={`${modelItem.provider}-${modelItem.name}`}
+//                       className="relative flex items-center px-6 py-2 text-sm text-neozero-elements-textPrimary rounded select-none
+//                         hover:bg-neozero-elements-item-backgroundAccent
+//                         data-[disabled]:opacity-50
+//                         data-[disabled]:pointer-events-none
+//                         data-[highlighted]:bg-neozero-elements-item-backgroundAccent
+//                         data-[highlighted]:outline-none
+//                         cursor-default
+//                         focus:outline-none"
+//                     >
+//                       <Select.ItemText>
+//                         {modelItem.label} (In: ${modelItem.inputPrice}, Out: ${modelItem.outputPrice})
+//                       </Select.ItemText>
+//                       <Select.ItemIndicator className="absolute left-2">
+//                         <div className="i-ph:check text-sm" />
+//                       </Select.ItemIndicator>
+//                     </Select.Item>
+//                   ))}
+//                 </Select.Group>
+//               )
+//             })}
+//           </Select.Viewport>
+//         </Select.Content>
+//       </Select.Portal>
+//     </Select.Root>
+//   )
+// }
 
-const ModelConfigDropdown = ({
-  modelConfig,
-  setModelConfig
-}: {
-  modelConfig: ModelConfig
-  setModelConfig: (config: ModelConfig) => void
-}) => {
-  if (!modelConfig) {
-    return (
-      <button
-        className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
-        disabled
-      >
-        <div className="i-mdi:settings text-sm text-red"></div>
-      </button>
-    )
-  }
-  return (
-    <DropdownMenuPrimitive.Root>
-      <DropdownMenuPrimitive.Trigger asChild>
-        <button
-          title="Model configuration"
-          className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
-        >
-          <div className="i-mdi:settings text-sm"></div>
-        </button>
-      </DropdownMenuPrimitive.Trigger>
-      <DropdownMenuPrimitive.Portal>
-        <DropdownMenuPrimitive.Content
-          side={'right'}
-          align={'start'}
-          alignOffset={5}
-          className="z-max min-w-[8rem] p-2 overflow-hidden color-white rounded-md border border-neozero-elements-borderColor shadow-md bg-neozero-elements-background-depth-1"
-        >
-          <div className="flex flex-col gap-2 px-2 py-2">
-            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              API Key
-            </Label>
-            <input
-              name="apiKey"
-              type="password"
-              placeholder="API Key"
-              required={true}
-              defaultValue={modelConfig.apiKey}
-              onChange={(e: any) =>
-                setModelConfig({
-                  apiKey: e.target.value.length > 0 ? e.target.value : undefined
-                })
-              }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
-            />
+// const ModelConfigDropdown = ({
+//   modelConfig,
+//   setModelConfig
+// }: {
+//   modelConfig: ModelConfig
+//   setModelConfig: (config: ModelConfig) => void
+// }) => {
+//   if (!modelConfig) {
+//     return (
+//       <button
+//         className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
+//         disabled
+//       >
+//         <div className="i-mdi:settings text-sm text-red"></div>
+//       </button>
+//     )
+//   }
+//   return (
+//     <DropdownMenuPrimitive.Root>
+//       <DropdownMenuPrimitive.Trigger asChild>
+//         <button
+//           title="Model configuration"
+//           className="flex items-center text-neozero-elements-item-contentDefault bg-transparent enabled:hover:text-neozero-elements-item-contentActive rounded-md p-1 enabled:hover:bg-neozero-elements-item-backgroundActive disabled:cursor-not-allowed"
+//         >
+//           <div className="i-mdi:settings text-sm"></div>
+//         </button>
+//       </DropdownMenuPrimitive.Trigger>
+//       <DropdownMenuPrimitive.Portal>
+//         <DropdownMenuPrimitive.Content
+//           side={'right'}
+//           align={'start'}
+//           alignOffset={5}
+//           className="z-max min-w-[8rem] p-2 overflow-hidden color-white rounded-md border border-neozero-elements-borderColor shadow-md bg-neozero-elements-background-depth-1"
+//         >
+//           <div className="flex flex-col gap-2 px-2 py-2">
+//             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+//               API Key
+//             </Label>
+//             <input
+//               name="apiKey"
+//               type="password"
+//               placeholder="API Key"
+//               required={true}
+//               defaultValue={modelConfig.apiKey}
+//               onChange={(e: any) =>
+//                 setModelConfig({
+//                   apiKey: e.target.value.length > 0 ? e.target.value : undefined
+//                 })
+//               }
+//               className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
+//             />
 
-            <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-neozero-elements-borderColor" />
+//             <DropdownMenuSeparator className="-mx-1 my-1 h-px bg-neozero-elements-borderColor" />
 
-            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Temperature
-            </Label>
-            <input
-              name="temperature"
-              type="number"
-              placeholder="Auto"
-              required={true}
-              defaultValue={modelConfig.temperature}
-              min={0}
-              max={2}
-              onChange={(e: any) =>
-                setModelConfig({
-                  temperature: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
-                })
-              }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
-            />
+//             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+//               Temperature
+//             </Label>
+//             <input
+//               name="temperature"
+//               type="number"
+//               placeholder="Auto"
+//               required={true}
+//               defaultValue={modelConfig.temperature}
+//               min={0}
+//               max={2}
+//               onChange={(e: any) =>
+//                 setModelConfig({
+//                   temperature: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
+//                 })
+//               }
+//               className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
+//             />
 
-            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Top P
-            </Label>
-            <input
-              name="topP"
-              type="number"
-              placeholder="Auto"
-              required={true}
-              defaultValue={modelConfig.topP}
-              min={0}
-              max={1}
-              onChange={(e: any) =>
-                setModelConfig({
-                  topP: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
-                })
-              }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
-            />
+//             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+//               Top P
+//             </Label>
+//             <input
+//               name="topP"
+//               type="number"
+//               placeholder="Auto"
+//               required={true}
+//               defaultValue={modelConfig.topP}
+//               min={0}
+//               max={1}
+//               onChange={(e: any) =>
+//                 setModelConfig({
+//                   topP: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
+//                 })
+//               }
+//               className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
+//             />
 
-            <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Top K
-            </Label>
-            <input
-              name="topK"
-              type="number"
-              placeholder="Auto"
-              required={true}
-              defaultValue={modelConfig.topK}
-              onChange={(e: any) =>
-                setModelConfig({
-                  topK: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
-                })
-              }
-              className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
-            />
-          </div>
-        </DropdownMenuPrimitive.Content>
-      </DropdownMenuPrimitive.Portal>
-    </DropdownMenuPrimitive.Root>
-  )
-}
+//             <Label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+//               Top K
+//             </Label>
+//             <input
+//               name="topK"
+//               type="number"
+//               placeholder="Auto"
+//               required={true}
+//               defaultValue={modelConfig.topK}
+//               onChange={(e: any) =>
+//                 setModelConfig({
+//                   topK: e.target.value.length > 0 ? parseFloat(e.target.value) : undefined
+//                 })
+//               }
+//               className="flex h-9 w-full px-3 py-1 rounded-md border border-neozero-elements-borderColor bg-transparent text-neozero-elements-textPrimary placeholder-neozero-elements-textTertiary focus:outline-none focus:border-neozero-elements-item-backgroundAccent"
+//             />
+//           </div>
+//         </DropdownMenuPrimitive.Content>
+//       </DropdownMenuPrimitive.Portal>
+//     </DropdownMenuPrimitive.Root>
+//   )
+// }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   (
@@ -312,11 +311,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       removeFile,
       handleFileInputChange,
 
-      model,
-      provider,
-      setProviderModel,
-      modelConfig = {},
-      setModelConfig = () => {},
+      // model,
+      // provider,
+      // setProviderModel,
+      // modelConfig = {},
+      // setModelConfig = () => {},
 
       messageRef,
       scrollRef,
@@ -339,10 +338,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     return (
       <div
         ref={ref}
-        className={classNames(
-          styles.BaseChat,
-          'relative flex h-full w-full overflow-hidden'
-        )}
+        className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -361,8 +357,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             </motion.div>
           )}
         </AnimatePresence>
-        <ClientOnly>{() => <SubMenu />}</ClientOnly>
-        <ClientOnly>{() => <Menu />}</ClientOnly>
+        <SubMenu />
+        <Menu />
         <div ref={scrollRef} className="flex overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
@@ -386,18 +382,14 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 'h-full flex flex-col': chatStarted
               })}
             >
-              <ClientOnly>
-                {() => {
-                  return chatStarted ? (
-                    <Messages
-                      ref={messageRef}
-                      className="flex flex-col w-full flex-1 max-w-chat px-4 pb-6 mx-auto z-1"
-                      messages={messages}
-                      isStreaming={isStreaming}
-                    />
-                  ) : null
-                }}
-              </ClientOnly>
+              {chatStarted ? (
+                <Messages
+                  ref={messageRef}
+                  className="flex flex-col w-full flex-1 max-w-chat px-4 pb-6 mx-auto z-1"
+                  messages={messages}
+                  isStreaming={isStreaming}
+                />
+              ) : null}
               <div
                 className={classNames('relative w-full max-w-chat mx-auto z-prompt', {
                   'sticky bottom-0': chatStarted
@@ -473,22 +465,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     placeholder="How can NeoZero help you today?"
                     translate="no"
                   />
-                  <ClientOnly>
-                    {() => (
-                      <SendButton
-                        show={input.length > 0 || isStreaming}
-                        isStreaming={isStreaming}
-                        onClick={event => {
-                          if (isStreaming) {
-                            handleStop?.()
-                            return
-                          }
-
-                          sendMessage?.(event)
-                        }}
-                      />
-                    )}
-                  </ClientOnly>
+                  <SendButton
+                    show={input.length > 0 || isStreaming}
+                    isStreaming={isStreaming}
+                    onClick={event => {
+                      if (isStreaming) {
+                        handleStop?.()
+                        return
+                      }
+                      sendMessage?.(event)
+                    }}
+                  />
                   <div className="flex justify-between text-sm p-4 pt-2">
                     <div className="flex gap-1 items-center">
                       <input
@@ -561,7 +548,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
               </div>
             )}
           </div>
-          <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
+          <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />
         </div>
       </div>
     )

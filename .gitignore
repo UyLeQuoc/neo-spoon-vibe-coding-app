@@ -76,6 +76,9 @@ apps/web/.vercel
 apps/web/*.tsbuildinfo
 apps/web/next-env.d.ts
 
+# React Router generated types
+apps/web/.react-router/
+
 # Service Worker
 apps/web/public/site-preview-sw.js
 apps/web/public/site-preview-sw.js.map
