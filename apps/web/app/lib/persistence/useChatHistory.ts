@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import type { UIMessage } from 'ai'
 import { atom } from 'nanostores'
 import { useEffect, useState } from 'react'
@@ -21,17 +21,21 @@ export const description = atom<string | undefined>(undefined)
 
 export function useChatHistory() {
   const navigate = useNavigate()
-  const { id: mixedId } = useLoaderData<{ id?: string }>()
+  const location = useLocation()
+
+  // Extract id from path /chat/{id}
+  const pathMatch = location.pathname.match(/^\/chat\/(.+)$/)
+  const mixedId = pathMatch ? pathMatch[1] : undefined
 
   const [initialMessages, setInitialMessages] = useState<UIMessage[]>([])
   const [ready, setReady] = useState<boolean>(false)
   const [urlId, setUrlId] = useState<string | undefined>()
 
   useEffect(() => {
+    console.log('[useChatHistory] 🪲🪲🪲 mixedId', mixedId)
     if (mixedId) {
       //if mixedid starts with github.com, get project and add workbench artifacts
       if (mixedId.startsWith('github.com')) {
-        console.log('mixedId', mixedId)
         const url = new URL(`https://${mixedId}`)
         const path = url.pathname.split('/')
         const owner = path[1]
