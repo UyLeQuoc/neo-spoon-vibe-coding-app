@@ -5,7 +5,6 @@ import type { LinksFunction } from 'react-router'
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from 'react-router'
 import { ToastContainer } from 'react-toastify'
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url'
-import { createHead } from 'remix-island'
 import { FloatingIcons } from './components/FloatingIcons'
 import { QueryProvider } from './lib/providers/QueryProvider'
 import { themeStore } from './lib/stores/theme'
@@ -46,17 +45,6 @@ const inlineThemeCode = stripIndents`
     document.querySelector('html')?.setAttribute('data-theme', 'light');
   }
 `
-
-export const Head = createHead(() => (
-  <>
-    <meta charSet="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Meta />
-    <Links />
-    {/** biome-ignore lint/security/noDangerouslySetInnerHtml: trusted content */}
-    <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
-  </>
-))
 
 interface GridPatternProps extends React.SVGProps<SVGSVGElement> {
   width?: number
@@ -126,6 +114,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        {/** biome-ignore lint/security/noDangerouslySetInnerHtml: trusted content */}
+        <script dangerouslySetInnerHTML={{ __html: inlineThemeCode }} />
       </head>
       <body>
         {children}

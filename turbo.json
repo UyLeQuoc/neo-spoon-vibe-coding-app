@@ -4,12 +4,12 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "build:sw"],
       "outputs": ["build/**", "dist/**", "out/**"]
     },
     "build:sw": {
       "inputs": ["web-workers/**"],
-      "outputs": ["public/site-preview-sw.mjs"]
+      "outputs": ["public/site-preview-sw.*", "public/site-preview-sw-chunk.*"]
     },
     "build:watch": { "persistent": true, "cache": false },
     "dev": { "persistent": true, "cache": false, "with": ["build:watch", "dev:sw"] },

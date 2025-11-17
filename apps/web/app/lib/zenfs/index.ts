@@ -1,5 +1,5 @@
 import { configure, fs } from '@zenfs/core'
-import * as path from '@zenfs/core/path'
+export * as path from '@zenfs/core/path'
 
 interface ZenFSContext {
   initialized: boolean
@@ -23,5 +23,5 @@ export async function initializeZenFS(): Promise<void> {
   return zenfsInitialized
 }
 
-export { fs, path }
+export { fs }
 export { fs as zenfs }
