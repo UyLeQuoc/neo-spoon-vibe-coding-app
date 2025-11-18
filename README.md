@@ -26,29 +26,30 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      NeoZero Platform                        │
+│                      NeoZero Platform                       │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
+│                                                             │
 │  ┌──────────────┐      ┌──────────────┐      ┌────────────┐ │
 │  │   Web App    │──────│  API Server  │──────│   Agent    │ │
-│  │  (Remix)     │      │   (Hono)     │      │ (SpoonOS)   │ │
+│  │  (Remix)     │      │   (Hono)     │      │ (SpoonOS)  │ │
 │  └──────┬───────┘      └──────┬───────┘      └─────┬──────┘ │
-│         │                      │                     │        │
-│         │                      │                     │        │
-│  ┌──────▼──────────────────────▼─────────────────────▼──────┐ │
-│  │              NEO Blockchain (TestNet)                     │ │
-│  │  ┌──────────────────┐      ┌──────────────────┐          │ │
-│  │  │ Payment Contract │      │   NeoNS Contract │          │ │
-│  │  │  (GAS Deposits)  │      │  (Domain Names)  │          │ │
-│  │  └──────────────────┘      └──────────────────┘          │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│                                                              │
+│         │                     │                    │        │
+│         │                     │                    │        │
+│  ┌──────▼─────────────────────▼────────────────────▼──────┐ │
+│  │              NEO Blockchain (TestNet)                  │ │
+│  │  ┌──────────────────┐      ┌──────────────────┐        │ │
+│  │  │ Payment Contract │      │   NeoNS Contract │        │ │
+│  │  │  (GAS Deposits)  │      │  (Domain Names)  │        │ │
+│  │  └──────────────────┘      └──────────────────┘        │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Components
 
 #### 1. **Web Application** (`apps/web`)
+
 - **Framework**: Remix (React-based)
 - **Features**:
   - Wallet connection (NeoLine integration)
@@ -58,6 +59,7 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
   - Balance and transaction history
 
 #### 2. **API Server** (`apps/api`)
+
 - **Framework**: Hono (Cloudflare Workers)
 - **Endpoints**:
   - `/api/auth/*` - Authentication endpoints (sign in, refresh token)
@@ -73,6 +75,7 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
   - `/api/avatar/:seed` - Avatar proxy for DiceBear API
 
 #### 3. **AI Agent** (`apps/agent`)
+
 - **Framework**: SpoonOS (Python) with MCP (Model Context Protocol)
 - **Capabilities**:
   - Website generation using Claude Sonnet 4.5 (via OpenRouter)
@@ -83,6 +86,7 @@ NeoZero combines the power of AI website generation with blockchain-based paymen
   - Tools: `generate_site`, `manage_site_files`
 
 #### 4. **Shared** (`apps/shared`)
+
 - Common types and utilities shared across apps
 
 ## 🔄 Main Flow
@@ -183,12 +187,14 @@ neo-spoon-vibe-coding-app/
 ### Installation
 
 1. **Clone the repository**:
+
    ```bash
    git clone <repository-url>
    cd neo-spoon-vibe-coding-app
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pnpm install
    ```
@@ -196,12 +202,14 @@ neo-spoon-vibe-coding-app/
 3. **Set up environment variables**:
 
    **Web App** (`apps/web/.env`):
+
    ```env
    # API base URL
    VITE_API_BASE_URL=http://localhost:8787
    ```
 
    **API Server** (`apps/api/.dev.vars`):
+
    ```env
    JWT_SECRET=your-jwt-secret
    REFRESH_TOKEN_SECRET=your-refresh-token-secret
@@ -209,6 +217,7 @@ neo-spoon-vibe-coding-app/
    ```
 
    **Agent** (`apps/agent/.env`):
+
    ```env
    OPENROUTER_API_KEY=your-openrouter-api-key
    ```
@@ -230,9 +239,9 @@ neo-spoon-vibe-coding-app/
    ```
 
 5. **Access the application**:
-   - Web App: http://localhost:3000
-   - API Server: http://localhost:8787
-   - AI Agent: http://localhost:8000
+   - Web App: <http://localhost:3000>
+   - API Server: <http://localhost:8787>
+   - AI Agent: <http://localhost:8000>
 
 ## 💻 Development
 
@@ -240,7 +249,7 @@ neo-spoon-vibe-coding-app/
 
 The project uses **CPM (Contract Package Manager)** to generate type-safe TypeScript SDKs from deployed smart contracts.
 
-#### Generate SDK for NEO Token:
+#### Generate SDK for NEO Token
 
 ```bash
 # Install CPM (macOS/Linux)
@@ -252,7 +261,7 @@ cpm generate ts -m contract.manifest.json -c 0xef4073a0f2b305a38ec4050e4d3d28bc4
 rm contract.manifest.json
 ```
 
-#### Use Generated SDK:
+#### Use Generated SDK
 
 ```typescript
 import { NeoToken } from '~/contracts/neotoken';
@@ -273,6 +282,7 @@ const symbol = await neo.symbol();
 ### Payment Flow Implementation
 
 1. **Create Pending Payment**:
+
    ```typescript
    const response = await hClientWithAuth.api['create-pending-payment'].$post({
      json: { amount: 10.5 }
@@ -280,6 +290,7 @@ const symbol = await neo.symbol();
    ```
 
 2. **User Signs Transaction**:
+
    ```typescript
    await neoline.invoke({
      scriptHash: GAS_TOKEN_HASH,
@@ -289,6 +300,7 @@ const symbol = await neo.symbol();
    ```
 
 3. **Verify Transaction**:
+
    ```typescript
    await hClientWithAuth.api['verify-payment-transaction'].$post({
      json: { txDigest, pendingPaymentId }
@@ -298,6 +310,7 @@ const symbol = await neo.symbol();
 ### Website Generation
 
 **Chat API with MCP Integration**:
+
 ```typescript
 // The chat endpoint automatically uses MCP tools
 const response = await fetch('/api/chat', {
@@ -325,6 +338,7 @@ const reader = response.body.getReader();
 ```
 
 **Direct MCP Client** (for advanced use):
+
 ```typescript
 import { experimental_createMCPClient } from '@ai-sdk/mcp'
 
@@ -346,11 +360,13 @@ const result = await tools.generate_site.execute({
 ### NeoNS Domain Management
 
 **Search Domain**:
+
 ```typescript
 const isAvailable = await getIsAvailable(domainName);
 ```
 
 **Register Domain**:
+
 ```typescript
 await neoline.invoke({
   scriptHash: NEO_NS_CONTRACT_HASH,
@@ -360,6 +376,7 @@ await neoline.invoke({
 ```
 
 **Set DNS Record**:
+
 ```typescript
 await neoline.invoke({
   scriptHash: NEO_NS_CONTRACT_HASH,
@@ -401,6 +418,7 @@ await neoline.invoke({
 ## 🔧 Tech Stack
 
 ### Frontend
+
 - **Remix** - React framework with SSR
 - **TypeScript** - Type safety
 - **UnoCSS** - Atomic CSS engine
@@ -408,18 +426,21 @@ await neoline.invoke({
 - **Nanostores** - State management
 
 ### Backend
+
 - **Hono** - Fast web framework for Cloudflare Workers
 - **Drizzle ORM** - Type-safe database queries
 - **Cloudflare D1** - SQLite database
 - **JWT** - Authentication
 
 ### Blockchain
+
 - **NEO N3** - Blockchain platform
 - **CPM** - Contract Package Manager
 - **Neon DappKit** - Blockchain interactions
 - **WalletConnect** - Wallet connections
 
 ### AI
+
 - **SpoonOS** - AI agent framework
 - **MCP (Model Context Protocol)** - Protocol for AI tool integration
 - **Claude Sonnet 4.5** - Language model (via OpenRouter)
@@ -431,12 +452,13 @@ await neoline.invoke({
 ## 🌐 Networks
 
 ### TestNet
+
 - **RPC**: `https://testnet1.neo.coz.io:443` or `http://seed3t5.neo.org:20332`
 - **Payment Contract**: `0x3b548112507aad8ab8a1a2d7da62b163d97c27d7` (VibeCodingAppPaymentContract)
 - **NeoNS Contract**: `0xd4dbd72c8965b8f12c14d37ad57ddd91ee1d98cb`
 - **GAS Token**: `0xd2a4cff31913016155e38e474a2c06d08be276cf`
 - **NEO Token**: `0xef4073a0f2b305a38ec4050e4d3d28bc40ea63f5`
-- **Explorer**: https://testnet.neotube.io/
+- **Explorer**: <https://testnet.neotube.io/>
 
 ## 🤝 Contributing
 
@@ -454,6 +476,7 @@ await neoline.invoke({
 ## 📞 Support
 
 For issues or questions:
+
 - Check the [documentation](./docs/)
 - Open an issue on GitHub
 - Join the NEO developer community
