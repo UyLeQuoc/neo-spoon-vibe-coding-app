@@ -8,3 +8,7 @@ main = "./app/cloudflare-worker.ts"
 directory = "./build/client"
 not_found_handling = "single-page-application"
 run_worker_first = ["/api/*"]
+
+[[services]]
+service = 'neo-0-api'
+binding = 'API'
