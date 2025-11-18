@@ -15,7 +15,7 @@
     "dev": { "persistent": true, "cache": false, "with": ["build:watch", "dev:sw"] },
     "dev:sw": { "persistent": true, "cache": false },
     "test": { "cache": false },
-    "deploy": { "dependsOn": ["build"] },
+    "deploy": { "cache": false, "dependsOn": ["build"] },
     "check:types": { "dependsOn": ["^check:types"] },
     "gen": {},
     "migrate": { "cache": false },

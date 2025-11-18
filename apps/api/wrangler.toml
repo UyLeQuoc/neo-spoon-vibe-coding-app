@@ -6,6 +6,7 @@ name = "neo-0-api"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-08-15"
 main = "./src/index.ts"
+keep_vars = true
 
 [observability]
 enabled = true
